@@ -1,0 +1,39 @@
+{
+  "sprintNumber": 1,
+  "sprintName": "Authentication, Academic Honor Gate & Role Architecture",
+  "status": "completed",
+  "startDate": "2026-10-22",
+  "endDate": "2026-10-29",
+  "completedAt": "2026-10-22",
+  "goals": [
+    "Deliver dual-role authentication system (Faculty & Student)",
+    "Implement Academic Honor Code & Terms Acceptance Gate before account creation",
+    "Provide default seeded demo accounts for rapid testing"
+  ],
+  "issues": [
+    {
+      "id": "QUIKZ-1",
+      "title": "[Auth] Student & Faculty Registration with Mandatory Terms & Privacy Compliance Acceptance Modal",
+      "description": "Implement registration UI and API enforcing acceptance of Academic Honor Code and Terms & Conditions before user creation proceeds. Support role selection ('faculty' vs 'student') and capture student year level and section.",
+      "labels": ["sprint-1", "auth", "frontend", "backend"],
+      "status": "closed",
+      "githubIssueNumber": 1
+    },
+    {
+      "id": "QUIKZ-2",
+      "title": "[Auth] Secure JWT Authentication & Role-Based Access Control",
+      "description": "Implement secure password hashing via bcrypt, JWT token signing/verification, login endpoint, and current authenticated user retrieval endpoint (/api/auth/me) with role guard middleware.",
+      "labels": ["sprint-1", "auth", "backend"],
+      "status": "closed",
+      "githubIssueNumber": 2
+    },
+    {
+      "id": "QUIKZ-3",
+      "title": "[Auth] Database Seeding for Default Faculty & Student Demo Accounts",
+      "description": "Implement database seeder creating default demo faculty (faculty@quikz.edu) and student (student@quikz.edu) accounts with pre-configured credentials for immediate evaluation and test coverage.",
+      "labels": ["sprint-1", "auth", "backend"],
+      "status": "closed",
+      "githubIssueNumber": 3
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "sprintNumber": 3,
+  "sprintName": "Kahoot-Hybrid Quiz Maker Studio & Execution Engine",
+  "status": "planned",
+  "startDate": "2026-11-06",
+  "endDate": "2026-11-20",
+  "goals": [
+    "Build quiz studio with 10–20 minute timer constraint",
+    "Support manual quiz creation, JSON/CSV upload, and automated question extraction from lecture documents",
+    "Student interactive quiz taking experience with 75% passing mark and immediate MongoDB persistence"
+  ],
+  "issues": [
+    {
+      "id": "QUIKZ-8",
+      "title": "[Quiz Maker] Quiz Studio with 10–20 Minute Configurable Countdown Timer",
+      "description": "Enforce quiz time limits strictly between 10 minutes minimum and 20 minutes maximum in both quiz creation studio and runtime countdown timer.",
+      "labels": [
+        "sprint-3",
+        "quiz",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 8
+    },
+    {
+      "id": "QUIKZ-9",
+      "title": "[Quiz Maker] Multi-Mode Quiz Creation (Manual, JSON/CSV Upload, and Text/File Extraction)",
+      "description": "Support interactive question builder, bulk JSON/CSV quiz file uploads, and auto-generation of quiz questions from uploaded lecture materials/text.",
+      "labels": [
+        "sprint-3",
+        "quiz",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 9
+    },
+    {
+      "id": "QUIKZ-10",
+      "title": "[Quiz Engine] Student Interactive Quiz Taker with 75% Passing Threshold Enforcement & Database Upload",
+      "description": "Deliver interactive quiz taker inspired by Kahoot-style interface, enforcing the mandatory 75% passing mark to mark module completion, and instantly saving submissions to MongoDB Atlas.",
+      "labels": [
+        "sprint-3",
+        "quiz",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 10
+    }
+  ]
+}

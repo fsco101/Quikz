@@ -1,0 +1,53 @@
+{
+  "sprintNumber": 4,
+  "sprintName": "Master Gradebook, Multi-Dimensional Analytics & Export Engine",
+  "status": "planned",
+  "startDate": "2026-11-21",
+  "endDate": "2026-12-05",
+  "goals": [
+    "Deliver student personal quiz performance overview sorted by surname or score",
+    "Build Faculty Master Gradebook with mandatory separation of records by year level and section",
+    "Support PDF and Excel export generation"
+  ],
+  "issues": [
+    {
+      "id": "QUIKZ-11",
+      "title": "[Gradebook] Student Personal Quiz Results Summary",
+      "description": "Student dashboard displaying personal quiz scores, passing status, breakdown of attempts, filterable and sortable by surname or score.",
+      "labels": [
+        "sprint-4",
+        "gradebook",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 11
+    },
+    {
+      "id": "QUIKZ-12",
+      "title": "[Gradebook] Faculty Master Gradebook with Mandatory Separated Records by Year Level & Section",
+      "description": "Faculty analytics matrix showing all student scores categorized into distinct, mandatory separated datasets/tabs for each Year Level and Section, with multi-column sorting (Surname, Score).",
+      "labels": [
+        "sprint-4",
+        "gradebook",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 12
+    },
+    {
+      "id": "QUIKZ-13",
+      "title": "[Export] PDF and Excel Spreadsheet Export Engine",
+      "description": "Generate clean, downloadable PDF reports and formatted Excel (.xlsx) spreadsheets for both student summary reports and faculty master gradebook tables.",
+      "labels": [
+        "sprint-4",
+        "export",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 13
+    }
+  ]
+}
