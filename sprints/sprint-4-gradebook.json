@@ -15,78 +15,78 @@
       "title": "[Gradebook] Student Personal Quiz Results Summary",
       "description": "Student dashboard displaying personal quiz scores, passing status, breakdown of attempts, filterable and sortable by surname or score.",
       "labels": [
-        "sprint-4",
-        "gradebook",
-        "frontend",
-        "backend"
+        "sprint:4",
+        "cat:gradebook",
+        "sev:high"
       ],
       "status": "open",
-      "githubIssueNumber": 11
+      "githubIssueNumber": 11,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nPersonal student performance dashboard displaying all completed quizzes, scores, attempts, and pass/fail statuses.\n\n#### 2. Features\n- Sortable by date, surname, and score (Requirement 7 & 7a).\n- Visual 75% benchmark indicator (Passed in green, Needs Review in amber).\n- Export personal results to individual PDF or spreadsheet report."
     },
     {
       "id": "QUIKZ-12",
       "title": "[Gradebook] Faculty Master Gradebook with Mandatory Separated Records by Year Level & Section",
       "description": "Faculty analytics matrix showing all student scores categorized into distinct, mandatory separated datasets/tabs for each Year Level and Section, with multi-column sorting (Surname, Score).",
       "labels": [
-        "sprint-4",
-        "gradebook",
-        "frontend",
-        "backend"
+        "sprint:4",
+        "cat:gradebook",
+        "sev:critical"
       ],
       "status": "open",
-      "githubIssueNumber": 12
+      "githubIssueNumber": 12,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nFaculty Master Gradebook with mandatory separation of student records by Year Level and Section (Requirement 8).\n\n#### 2. Data Segregation Architecture\n- Dedicated separate datasets and tabs for each unique combination (e.g. \"3rd Year · Section A\", \"3rd Year · Section B\").\n- Filterable by year level, section, student surname, and score ranges."
     },
     {
       "id": "QUIKZ-13",
       "title": "[Export] PDF and Excel Spreadsheet Export Engine",
       "description": "Generate clean, downloadable PDF reports and formatted Excel (.xlsx) spreadsheets for both student summary reports and faculty master gradebook tables.",
       "labels": [
-        "sprint-4",
-        "export",
-        "frontend",
-        "backend"
+        "sprint:4",
+        "cat:export",
+        "sev:high"
       ],
       "status": "open",
-      "githubIssueNumber": 13
+      "githubIssueNumber": 13,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nAutomated document export pipeline for formatted PDF documents and Excel (.xlsx) spreadsheets for students and professors.\n\n#### 2. Implementation Stack\n- **Excel Export**: `xlsx` generating styled tabular worksheets.\n- **PDF Export**: `jspdf` + `jspdf-autotable` with academic institutional styling."
     },
     {
       "id": "QUIKZ-18",
       "title": "[Gradebook] Faculty Multi-Dimensional Filter Engine with Mandatory Segregated Tabs by Year Level & Section",
       "description": "Build high-performance table view segregating student records strictly by Year Level and Section into distinct tabs, with real-time multi-criteria filtering by surname search, score brackets, and completion status.",
       "labels": [
-        "sprint-4",
-        "gradebook",
-        "frontend",
-        "backend"
+        "sprint:4",
+        "cat:gradebook",
+        "sev:critical"
       ],
       "status": "open",
-      "githubIssueNumber": 18
+      "githubIssueNumber": 18,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nInteractive multi-dimensional gradebook filtering engine strictly maintaining separate records per Year Level & Section.\n\n#### 2. Capabilities\n- Filter chips: Year Level (`1st Year` to `4th Year`), Section (`Section A` to `Section D`).\n- Multi-column sort: Alphabetical by student surname, numerical by score percentage.\n- Real-time search query matching student name, ID, or quiz title."
     },
     {
       "id": "QUIKZ-19",
       "title": "[Export] Institutional Multi-Sheet Excel (.xlsx) Report Generator with Separate Sheets per Year Level & Section",
       "description": "Implement automated workbook generation creating separate spreadsheet tabs/sheets for each Year Level and Section with formatted grade summary headers, average scores, and pass/fail indicators.",
       "labels": [
-        "sprint-4",
-        "export",
-        "backend",
-        "frontend"
+        "sprint:4",
+        "cat:export",
+        "sev:high"
       ],
       "status": "open",
-      "githubIssueNumber": 19
+      "githubIssueNumber": 19,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nMulti-sheet Excel workbook export generating distinct spreadsheet tabs for each Year Level and Section combination.\n\n#### 2. Workbook Structure\n- **Sheet 1**: \"3rd Year - Section A\"\n- **Sheet 2**: \"3rd Year - Section B\"\n- **Summary Sheet**: Overall cohort metrics, pass rates (>= 75%), score distributions, and averages."
     },
     {
       "id": "QUIKZ-20",
       "title": "[Export] Formal PDF Gradebook & Student Report Card Exporter with Institutional Branding & Verification Signatures",
       "description": "Implement publication-grade PDF generation with institutional Quikz academic header, student alphabetical indexing by surname, score breakdowns, 75% benchmark badges, and certified faculty sign-off sections.",
       "labels": [
-        "sprint-4",
-        "export",
-        "frontend",
-        "backend"
+        "sprint:4",
+        "cat:export",
+        "sev:high"
       ],
       "status": "open",
-      "githubIssueNumber": 20
+      "githubIssueNumber": 20,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nFormal PDF report card and faculty master gradebook exporter formatted with academic styling and instructor signature lines.\n\n#### 2. Layout Specifications\n- Institutional Quikz header banner with course code, term, and date.\n- Alphabetical student table sorted by surname with individual quiz scores and pass/fail badges.\n- Formal academic certification block with faculty signature underline."
     }
   ]
 }

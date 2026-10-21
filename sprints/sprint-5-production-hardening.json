@@ -14,25 +14,26 @@
       "title": "[Curriculum] Global Topic & Lesson Repository with Full-Text Search, Category Filters, and Syllabus Overview",
       "description": "Provide a centralized, public directory of all faculty-authored lessons and topics (visible to all students and guests). Include full-text keyword search, year level and term filters, and syllabus overviews.",
       "labels": [
-        "sprint-5",
-        "curriculum",
-        "frontend",
-        "backend"
+        "sprint:5",
+        "cat:curriculum",
+        "sev:medium"
       ],
       "status": "open",
-      "githubIssueNumber": 21
+      "githubIssueNumber": 21,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nCentralized global repository of all faculty-authored topics and lessons, accessible and visible to all (Requirement 9).\n\n#### 2. Capabilities\n- Global keyword search across all subject topics, lesson summaries, and lecture notes.\n- Filtering by semester, academic year level, and faculty instructor.\n- Syllabus overview cards allowing prospective students to explore curriculum outlines."
     },
     {
       "id": "QUIKZ-22",
       "title": "[System] Audit Logging, Telemetry Health Dashboard & MongoDB Atlas Live Synchronization Engine",
       "description": "Implement persistent audit logging for assessment attempts, credential events, and curriculum publication. Provide administrative connection health monitoring and MongoDB Atlas database synchronization checks.",
       "labels": [
-        "sprint-5",
-        "system",
-        "backend"
+        "sprint:5",
+        "cat:system",
+        "sev:high"
       ],
       "status": "open",
-      "githubIssueNumber": 22
+      "githubIssueNumber": 22,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nComprehensive audit logging, telemetry health monitor, and MongoDB Atlas database connection synchronization engine.\n\n#### 2. Monitoring Metrics\n- Assessment submission latency and transaction logs.\n- MongoDB Atlas cluster connection pool health and failover metrics.\n- Security event logging for authentication attempts and honor code compliance."
     }
   ]
 }

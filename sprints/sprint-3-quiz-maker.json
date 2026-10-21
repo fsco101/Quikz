@@ -16,92 +16,91 @@
       "title": "[Quiz Maker] Quiz Studio with 10–20 Minute Configurable Countdown Timer",
       "description": "Enforce quiz time limits strictly between 10 minutes minimum and 20 minutes maximum in both quiz creation studio and runtime countdown timer.",
       "labels": [
-        "sprint-3",
-        "quiz",
-        "frontend",
-        "backend"
+        "sprint:3",
+        "cat:quiz",
+        "sev:high"
       ],
       "status": "open",
-      "githubIssueNumber": 8
+      "githubIssueNumber": 8,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nConfigurable active countdown timer strictly constrained between 10 minutes minimum and 20 minutes maximum (Requirement 6).\n\n#### 2. Technical Specifications\n- **Validation**: Quiz creation form rejects values < 10 or > 20 minutes.\n- **Runtime Timer**: High-precision interval timer with visual circular progress bar and pulse warnings during final 2 minutes.\n- **Auto-Submission**: Automated submission payload dispatch when timer reaches 00:00."
     },
     {
       "id": "QUIKZ-9",
       "title": "[Quiz Maker] Multi-Mode Quiz Creation (Manual, JSON/CSV Upload, and Text/File Extraction)",
       "description": "Support interactive question builder, bulk JSON/CSV quiz file uploads, and auto-generation of quiz questions from uploaded lecture materials/text.",
       "labels": [
-        "sprint-3",
-        "quiz",
-        "frontend",
-        "backend"
+        "sprint:3",
+        "cat:quiz",
+        "sev:high"
       ],
       "status": "open",
-      "githubIssueNumber": 9
+      "githubIssueNumber": 9,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nMulti-mode quiz builder enabling manual interactive question entry, bulk file uploads, and lecture-based quiz synthesis.\n\n#### 2. Supported Formats\n- **Manual Mode**: Question text, 4 options, radio select correct answer, explanation field.\n- **File Mode**: JSON / CSV quiz templates with automatic parsing and preview.\n- **Lecture Data Extraction**: Extraction from uploaded notes/presentations."
     },
     {
       "id": "QUIKZ-10",
       "title": "[Quiz Engine] Student Interactive Quiz Taker with 75% Passing Threshold Enforcement & Database Upload",
       "description": "Deliver interactive quiz taker inspired by Kahoot-style interface, enforcing the mandatory 75% passing mark to mark module completion, and instantly saving submissions to MongoDB Atlas.",
       "labels": [
-        "sprint-3",
-        "quiz",
-        "frontend",
-        "backend"
+        "sprint:3",
+        "cat:quiz",
+        "sev:critical"
       ],
       "status": "open",
-      "githubIssueNumber": 10
+      "githubIssueNumber": 10,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nStudent interactive quiz taking interface inspired by Kahoot-hybrid aesthetics with 75% passing mark enforcement and MongoDB upload.\n\n#### 2. Key Components\n- **Model**: `QuizSubmission.ts` (`quizId`, `studentId`, `score`, `totalQuestions`, `percentage`, `passed`, `answers`).\n- **Scoring**: `percentage = (score / totalQuestions) * 100`. `passed = percentage >= 75`.\n- **Instant Persistence**: Immediate database write to MongoDB Atlas."
     },
     {
       "id": "QUIKZ-14",
       "title": "[Quiz Maker] Automated Question Generator & NLP Extractor from Uploaded Lecture Notes, Slides, and Text",
       "description": "Implement heuristic parser and question generator that analyzes uploaded lecture documents (PDF/presentation/text) to automatically extract core definitions and concepts into multiple-choice quiz questions with distractors and explanations.",
       "labels": [
-        "sprint-3",
-        "quiz",
-        "ai",
-        "backend"
+        "sprint:3",
+        "cat:quiz",
+        "sev:high"
       ],
       "status": "open",
-      "githubIssueNumber": 14
+      "githubIssueNumber": 14,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nAutomated question generation engine analyzing uploaded lecture slides, PDF documents, and lecture text to generate quiz questions.\n\n#### 2. Algorithm & Mechanics\n- Extracts key terminology, definitions, and conceptual sentences.\n- Synthesizes question stems, identifies correct answers, and generates plausible distractor options.\n- Previews questions in the Quiz Studio for faculty review and customization before publishing."
     },
     {
       "id": "QUIKZ-15",
       "title": "[Quiz Maker] Question Bank Import Validator (JSON/CSV/Aiken formats) with Format Linting & Schema Enforcement",
       "description": "Provide a robust file import pipeline for question banks supporting JSON and CSV formats with schema validation, answer key verification, question randomization, and inline error highlighting.",
       "labels": [
-        "sprint-3",
-        "quiz",
-        "frontend",
-        "backend"
+        "sprint:3",
+        "cat:quiz",
+        "sev:medium"
       ],
       "status": "open",
-      "githubIssueNumber": 15
+      "githubIssueNumber": 15,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nFormat linter and schema validator for bulk uploaded question banks in JSON and CSV formats.\n\n#### 2. Validation Checks\n- Minimum question count verification (ensuring enough items for statistically sound 75% threshold).\n- Valid correct option index bounds check.\n- Inline highlighting for missing fields or malformed syntax."
     },
     {
       "id": "QUIKZ-16",
       "title": "[Quiz Engine] Anti-Tampering & Academic Integrity Monitor (Tab Blur Detection & Single-Session Timer)",
       "description": "Implement academic integrity safeguards during active quiz sessions: browser tab-switch/window blur detection warning counter, single-session token locks to prevent concurrent attempts, and automatic submission upon timer expiry.",
       "labels": [
-        "sprint-3",
-        "quiz",
-        "integrity",
-        "frontend",
-        "backend"
+        "sprint:3",
+        "cat:quiz",
+        "sev:high"
       ],
       "status": "open",
-      "githubIssueNumber": 16
+      "githubIssueNumber": 16,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nAnti-tampering and academic integrity safeguards conforming to the institutional Academic Honor Code.\n\n#### 2. Technical Safeguards\n- **Tab-Switching / Blur Monitor**: Tracks `window.onblur` and warns candidate on focus loss.\n- **Single Active Session**: Prevents duplicate concurrent quiz sessions under same student account.\n- **Timestamp Integrity**: Server-side expiration checks preventing client clock manipulation."
     },
     {
       "id": "QUIKZ-17",
       "title": "[Curriculum] Module-to-Quiz Direct Binding, Retake Practice Intervals & Dynamic Prerequisite Unlock Trigger",
       "description": "Create explicit database relationships binding topics/modules to designated end quizzes. Automatically trigger sequential module unlocks when student scores >= 75%, and enforce mandatory review intervals if student fails to reach passing mark.",
       "labels": [
-        "sprint-3",
-        "curriculum",
-        "quiz",
-        "backend"
+        "sprint:3",
+        "cat:curriculum",
+        "sev:critical"
       ],
       "status": "open",
-      "githubIssueNumber": 17
+      "githubIssueNumber": 17,
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nDirect linkage between topic modules and end quizzes with automated milestone progression triggers.\n\n#### 2. Trigger Mechanics\n- Upon quiz submission scoring >= 75%, an automated progression trigger marks the module completed in `StudentProgress`.\n- Subsequent module in course sequence immediately transitions from locked to unlocked.\n- Failed attempts (< 75%) retain locked status and recommend retrieval study review."
     }
   ]
 }
