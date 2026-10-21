@@ -1,0 +1,38 @@
+{
+  "sprintNumber": 5,
+  "sprintName": "Global Lesson Directory, Production Hardening & System Telemetry",
+  "status": "planned",
+  "startDate": "2026-12-06",
+  "endDate": "2026-12-20",
+  "goals": [
+    "Deliver public global topic & lesson catalog visible to all (Requirement 9)",
+    "Implement real-time audit logging and MongoDB Atlas telemetry synchronization"
+  ],
+  "issues": [
+    {
+      "id": "QUIKZ-21",
+      "title": "[Curriculum] Global Topic & Lesson Repository with Full-Text Search, Category Filters, and Syllabus Overview",
+      "description": "Provide a centralized, public directory of all faculty-authored lessons and topics (visible to all students and guests). Include full-text keyword search, year level and term filters, and syllabus overviews.",
+      "labels": [
+        "sprint-5",
+        "curriculum",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 21
+    },
+    {
+      "id": "QUIKZ-22",
+      "title": "[System] Audit Logging, Telemetry Health Dashboard & MongoDB Atlas Live Synchronization Engine",
+      "description": "Implement persistent audit logging for assessment attempts, credential events, and curriculum publication. Provide administrative connection health monitoring and MongoDB Atlas database synchronization checks.",
+      "labels": [
+        "sprint-5",
+        "system",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 22
+    }
+  ]
+}

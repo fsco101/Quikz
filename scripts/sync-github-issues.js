@@ -12,7 +12,8 @@ const sprintFiles = [
   'sprint-1-auth.json',
   'sprint-2-curriculum.json',
   'sprint-3-quiz-maker.json',
-  'sprint-4-gradebook.json'
+  'sprint-4-gradebook.json',
+  'sprint-5-production-hardening.json'
 ];
 
 async function syncIssues() {

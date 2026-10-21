@@ -16,7 +16,12 @@
       "id": "QUIKZ-4",
       "title": "[Curriculum] Subject Management (Subject Name, Code, Term/Semester, Year Level)",
       "description": "Faculty can create and administer subjects with subject code, term/semester, and year level. Provide public and student-accessible subject catalogs.",
-      "labels": ["sprint-2", "curriculum", "frontend", "backend"],
+      "labels": [
+        "sprint-2",
+        "curriculum",
+        "frontend",
+        "backend"
+      ],
       "status": "closed",
       "githubIssueNumber": 4
     },
@@ -24,7 +29,12 @@
       "id": "QUIKZ-5",
       "title": "[Curriculum] Topic & Lesson Management with Text Insert & File/Presentation Uploads",
       "description": "Faculty can create topics/modules within subjects, inserting lecture text, uploading files (PDF/documents), or presentations. Lessons uploaded by faculty are visible to all students.",
-      "labels": ["sprint-2", "curriculum", "frontend", "backend"],
+      "labels": [
+        "sprint-2",
+        "curriculum",
+        "frontend",
+        "backend"
+      ],
       "status": "closed",
       "githubIssueNumber": 5
     },
@@ -32,7 +42,12 @@
       "id": "QUIKZ-6",
       "title": "[Curriculum] Sequential Module Progression & Prerequisite Locking Engine",
       "description": "Implement linear curriculum gating logic where students are restricted from accessing subsequent module materials until they complete and pass the end quiz of the previous module. Visual padlocks and status indicators on UI.",
-      "labels": ["sprint-2", "curriculum", "frontend", "backend"],
+      "labels": [
+        "sprint-2",
+        "curriculum",
+        "frontend",
+        "backend"
+      ],
       "status": "closed",
       "githubIssueNumber": 6
     },
@@ -40,7 +55,12 @@
       "id": "QUIKZ-7",
       "title": "[Curriculum] Topic & Module Executive Summary Generator/View",
       "description": "Display a high-level executive summary and core objectives for each topic/lesson inside the Scribd-style reader view for rapid student comprehension.",
-      "labels": ["sprint-2", "curriculum", "frontend", "backend"],
+      "labels": [
+        "sprint-2",
+        "curriculum",
+        "frontend",
+        "backend"
+      ],
       "status": "closed",
       "githubIssueNumber": 7
     }

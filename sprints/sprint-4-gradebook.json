@@ -7,7 +7,7 @@
   "goals": [
     "Deliver student personal quiz performance overview sorted by surname or score",
     "Build Faculty Master Gradebook with mandatory separation of records by year level and section",
-    "Support PDF and Excel export generation"
+    "Support PDF and Excel export generation with dedicated multi-sheet layouts"
   ],
   "issues": [
     {
@@ -48,6 +48,45 @@
       ],
       "status": "open",
       "githubIssueNumber": 13
+    },
+    {
+      "id": "QUIKZ-18",
+      "title": "[Gradebook] Faculty Multi-Dimensional Filter Engine with Mandatory Segregated Tabs by Year Level & Section",
+      "description": "Build high-performance table view segregating student records strictly by Year Level and Section into distinct tabs, with real-time multi-criteria filtering by surname search, score brackets, and completion status.",
+      "labels": [
+        "sprint-4",
+        "gradebook",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 18
+    },
+    {
+      "id": "QUIKZ-19",
+      "title": "[Export] Institutional Multi-Sheet Excel (.xlsx) Report Generator with Separate Sheets per Year Level & Section",
+      "description": "Implement automated workbook generation creating separate spreadsheet tabs/sheets for each Year Level and Section with formatted grade summary headers, average scores, and pass/fail indicators.",
+      "labels": [
+        "sprint-4",
+        "export",
+        "backend",
+        "frontend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 19
+    },
+    {
+      "id": "QUIKZ-20",
+      "title": "[Export] Formal PDF Gradebook & Student Report Card Exporter with Institutional Branding & Verification Signatures",
+      "description": "Implement publication-grade PDF generation with institutional Quikz academic header, student alphabetical indexing by surname, score breakdowns, 75% benchmark badges, and certified faculty sign-off sections.",
+      "labels": [
+        "sprint-4",
+        "export",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 20
     }
   ]
 }

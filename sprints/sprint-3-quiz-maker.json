@@ -7,7 +7,8 @@
   "goals": [
     "Build quiz studio with 10–20 minute timer constraint",
     "Support manual quiz creation, JSON/CSV upload, and automated question extraction from lecture documents",
-    "Student interactive quiz taking experience with 75% passing mark and immediate MongoDB persistence"
+    "Student interactive quiz taking experience with 75% passing mark and immediate MongoDB persistence",
+    "Integrate anti-tampering integrity monitoring and direct module-to-quiz prerequisite unlocking"
   ],
   "issues": [
     {
@@ -48,6 +49,59 @@
       ],
       "status": "open",
       "githubIssueNumber": 10
+    },
+    {
+      "id": "QUIKZ-14",
+      "title": "[Quiz Maker] Automated Question Generator & NLP Extractor from Uploaded Lecture Notes, Slides, and Text",
+      "description": "Implement heuristic parser and question generator that analyzes uploaded lecture documents (PDF/presentation/text) to automatically extract core definitions and concepts into multiple-choice quiz questions with distractors and explanations.",
+      "labels": [
+        "sprint-3",
+        "quiz",
+        "ai",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 14
+    },
+    {
+      "id": "QUIKZ-15",
+      "title": "[Quiz Maker] Question Bank Import Validator (JSON/CSV/Aiken formats) with Format Linting & Schema Enforcement",
+      "description": "Provide a robust file import pipeline for question banks supporting JSON and CSV formats with schema validation, answer key verification, question randomization, and inline error highlighting.",
+      "labels": [
+        "sprint-3",
+        "quiz",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 15
+    },
+    {
+      "id": "QUIKZ-16",
+      "title": "[Quiz Engine] Anti-Tampering & Academic Integrity Monitor (Tab Blur Detection & Single-Session Timer)",
+      "description": "Implement academic integrity safeguards during active quiz sessions: browser tab-switch/window blur detection warning counter, single-session token locks to prevent concurrent attempts, and automatic submission upon timer expiry.",
+      "labels": [
+        "sprint-3",
+        "quiz",
+        "integrity",
+        "frontend",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 16
+    },
+    {
+      "id": "QUIKZ-17",
+      "title": "[Curriculum] Module-to-Quiz Direct Binding, Retake Practice Intervals & Dynamic Prerequisite Unlock Trigger",
+      "description": "Create explicit database relationships binding topics/modules to designated end quizzes. Automatically trigger sequential module unlocks when student scores >= 75%, and enforce mandatory review intervals if student fails to reach passing mark.",
+      "labels": [
+        "sprint-3",
+        "curriculum",
+        "quiz",
+        "backend"
+      ],
+      "status": "open",
+      "githubIssueNumber": 17
     }
   ]
 }

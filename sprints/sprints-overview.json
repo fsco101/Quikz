@@ -2,9 +2,10 @@
   "project": "Quikz",
   "repository": "fsco101/Quikz",
   "updatedAt": "2026-10-22",
-  "totalSprints": 4,
-  "totalIssues": 13,
+  "totalSprints": 5,
+  "totalIssues": 22,
   "completedIssues": 7,
+  "plannedIssues": 15,
   "sprints": [
     {
       "sprint": 1,
@@ -24,14 +25,21 @@
       "sprint": 3,
       "name": "Kahoot-Hybrid Quiz Maker Studio & Execution Engine",
       "file": "sprints/sprint-3-quiz-maker.json",
-      "totalIssues": 3,
+      "totalIssues": 7,
       "status": "planned"
     },
     {
       "sprint": 4,
       "name": "Master Gradebook, Multi-Dimensional Analytics & Export Engine",
       "file": "sprints/sprint-4-gradebook.json",
-      "totalIssues": 3,
+      "totalIssues": 6,
+      "status": "planned"
+    },
+    {
+      "sprint": 5,
+      "name": "Global Lesson Directory, Production Hardening & System Telemetry",
+      "file": "sprints/sprint-5-production-hardening.json",
+      "totalIssues": 2,
       "status": "planned"
     }
   ]
