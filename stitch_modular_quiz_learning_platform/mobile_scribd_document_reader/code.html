@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>ScribLearn - CS-204 Reader</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&family=Fira+Code:wght@400;500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-variant": "#d3e4fe",
+            "inverse-surface": "#213145",
+            "error": "#ba1a1a",
+            "on-secondary-fixed-variant": "#2f2ebe",
+            "on-secondary-fixed": "#07006c",
+            "on-primary-fixed": "#181445",
+            "on-error-container": "#93000a",
+            "tertiary-fixed": "#6ffbbe",
+            "on-background": "#0b1c30",
+            "on-tertiary-fixed-variant": "#005236",
+            "error-container": "#ffdad6",
+            "on-secondary": "#ffffff",
+            "primary-fixed": "#e3dfff",
+            "secondary-fixed": "#e1e0ff",
+            "tertiary-container": "#002819",
+            "primary-fixed-dim": "#c4c1fb",
+            "outline": "#787680",
+            "on-tertiary-fixed": "#002113",
+            "surface-container": "#e5eeff",
+            "on-tertiary-container": "#009d6c",
+            "on-error": "#ffffff",
+            "surface": "#f8f9ff",
+            "surface-container-high": "#dce9ff",
+            "secondary-fixed-dim": "#c0c1ff",
+            "inverse-on-surface": "#eaf1ff",
+            "surface-dim": "#cbdbf5",
+            "tertiary-fixed-dim": "#4edea3",
+            "on-secondary-container": "#fffbff",
+            "surface-container-low": "#eff4ff",
+            "on-surface-variant": "#47464f",
+            "on-primary": "#ffffff",
+            "on-surface": "#0b1c30",
+            "surface-tint": "#5b598c",
+            "on-primary-fixed-variant": "#444173",
+            "primary-container": "#1e1b4b",
+            "surface-container-highest": "#d3e4fe",
+            "outline-variant": "#c8c5d0",
+            "background": "#f8f9ff",
+            "surface-bright": "#f8f9ff",
+            "tertiary": "#000f07",
+            "on-tertiary": "#ffffff",
+            "primary": "#070235",
+            "surface-container-lowest": "#ffffff",
+            "secondary-container": "#6063ee",
+            "on-primary-container": "#8683ba",
+            "inverse-primary": "#c4c1fb",
+            "secondary": "#4648d4"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "margin-sm": "1rem",
+            "space-xl": "2.5rem",
+            "margin": "2rem",
+            "gutter-sm": "1rem",
+            "space-xs": "0.25rem",
+            "space-lg": "1.5rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Plus Jakarta Sans"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "title-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "code": ["Fira Code", "monospace"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["26px", {"lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "700"}],
+            "body-md": ["15px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "700"}],
+            "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+            "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+            "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+            "title-md": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+            "label-sm": ["11px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "700"}],
+            "body-sm": ["13px", {"lineHeight": "20px", "fontWeight": "400"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased flex justify-center min-h-screen">
+<!-- Mobile Simulator Frame (Max 430px for handheld reading preview) -->
+<div class="w-full max-w-[430px] min-h-screen bg-background relative flex flex-col pb-36">
+<!-- 1. TopAppBar (Shared Component) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-gutter-sm h-14 bg-surface dark:bg-inverse-surface shadow-sm dark:shadow-none">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary" data-icon="school">school</span>
+<span class="text-headline-sm font-headline-sm font-bold text-primary dark:text-inverse-primary tracking-tight">ScribLearn</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="bg-surface-container-high text-primary px-2 py-0.5 rounded-full text-label-sm font-label-sm font-bold tracking-wide">
+          CS-204
+        </span>
+<button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container active:scale-95 transition-transform duration-150 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container active:scale-95 transition-transform duration-150 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container active:scale-95 transition-transform duration-150 text-primary dark:text-inverse-primary">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Sub-header Meta Banner -->
+<div class="mt-14 px-gutter-sm py-2 bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary text-label-sm font-label-sm font-bold">
+          MV
+        </div>
+<div class="flex flex-col">
+<span class="text-label-sm font-label-sm text-on-surface font-bold">Prof. M. Vance</span>
+<span class="text-label-sm font-label-sm text-outline font-normal">Fall 2024 • Prerequisite Track</span>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-lowest px-2 py-1 rounded border border-outline-variant">
+<span class="material-symbols-outlined text-on-tertiary-container text-[16px]" data-icon="verified">verified</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Syllabus Sync</span>
+</div>
+</div>
+<!-- 2. Unit Progression Horizontal Drawer / Pill Tracker -->
+<section class="py-2.5 px-gutter-sm bg-surface">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Course Modules</span>
+<span class="text-label-sm font-label-sm text-secondary font-semibold">1/3 Completed</span>
+</div>
+<div class="flex items-center gap-2.5 overflow-x-auto hide-scrollbar pb-1">
+<!-- Mod 1: Trees (Completed 100%, Quiz: 85% Passed - no background pill, clean green text) -->
+<div class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest">
+<span class="material-symbols-outlined text-on-tertiary-container text-[16px]" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="flex flex-col leading-tight">
+<span class="text-label-sm font-label-sm text-on-surface font-bold">Mod 1: Trees</span>
+<span class="text-[10px] font-label-sm text-on-tertiary-container font-semibold">Quiz: 85% Passed</span>
+</div>
+</div>
+<!-- Mod 2: Dijkstra Shortest Path (Current Active - 72% Read) -->
+<div class="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-container text-on-secondary shadow-sm ring-1 ring-secondary">
+<div class="w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-on-secondary">
+            2
+          </div>
+<div class="flex flex-col leading-tight">
+<span class="text-label-sm font-label-sm text-on-secondary font-bold">Mod 2: Dijkstra Path</span>
+<div class="flex items-center gap-1 mt-0.5">
+<div class="w-12 h-1.5 bg-outline rounded-full overflow-hidden">
+<div class="bg-secondary-fixed w-[72%] h-full rounded-full"></div>
+</div>
+<span class="text-[10px] font-label-sm text-secondary-fixed font-bold">72%</span>
+</div>
+</div>
+</div>
+<!-- Mod 3: Dynamic Programming (Locked - Prerequisite required) -->
+<div class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low opacity-75">
+<span class="material-symbols-outlined text-outline text-[16px]" data-icon="lock">lock</span>
+<div class="flex flex-col leading-tight">
+<span class="text-label-sm font-label-sm text-outline font-bold">Mod 3: Dynamic Prog.</span>
+<span class="text-[10px] font-label-sm text-outline">Req. Mod 2 Quiz</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Scribd-style Mobile Reader Card -->
+<main class="px-gutter-sm flex-1 flex flex-col gap-3">
+<!-- Slide / Page Document Meta Bar -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-3 shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="picture_as_pdf">picture_as_pdf</span>
+<h2 class="text-label-md font-label-md text-on-surface truncate font-bold">
+              Lecture 4: Dijkstra Algorithm & Network Flow.pdf
+            </h2>
+</div>
+<span class="text-label-sm font-label-sm text-outline whitespace-nowrap bg-surface-container px-2 py-0.5 rounded">
+            Pg 14 / 32
+          </span>
+</div>
+<!-- Paginator Controls -->
+<div class="flex items-center justify-between pt-1 border-t border-surface-container-high">
+<div class="flex items-center gap-1 text-label-sm font-label-sm text-on-surface-variant">
+<button class="w-7 h-7 rounded flex items-center justify-center hover:bg-surface-container text-outline hover:text-on-surface active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[18px]" data-icon="zoom_in">zoom_in</span>
+</button>
+<button class="w-7 h-7 rounded flex items-center justify-center hover:bg-surface-container text-outline hover:text-on-surface active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[18px]" data-icon="zoom_out">zoom_out</span>
+</button>
+<button class="w-7 h-7 rounded flex items-center justify-center hover:bg-surface-container text-outline hover:text-on-surface active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[18px]" data-icon="format_size">format_size</span>
+</button>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-7 h-7 rounded flex items-center justify-center bg-surface-container hover:bg-surface-container-high text-primary active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[16px]" data-icon="arrow_back_ios_new">arrow_back_ios_new</span>
+</button>
+<span class="text-label-sm font-label-sm font-bold text-primary">14 of 32</span>
+<button class="w-7 h-7 rounded flex items-center justify-center bg-surface-container hover:bg-surface-container-high text-primary active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Document Content Body (Mobile-Optimized Paper Surface) -->
+<article class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-4">
+<!-- Header -->
+<div class="border-b border-surface-container-high pb-3">
+<div class="flex items-center gap-1.5 text-secondary text-label-sm font-label-sm font-bold mb-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="menu_book">menu_book</span>
+<span>CHAPTER IV • SECTION 2</span>
+</div>
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile text-primary tracking-tight">
+            4.2 Dijkstra's Greedy Relaxation Loop
+          </h1>
+</div>
+<!-- Academic Document Text -->
+<p class="text-body-md font-body-md text-on-surface leading-relaxed">
+          The core invariant of Dijkstra's algorithm states that whenever a vertex <code class="bg-surface-container px-1 py-0.5 rounded font-code text-[13px] text-primary">u</code> is extracted from the indexed priority queue <code class="bg-surface-container px-1 py-0.5 rounded font-code text-[13px] text-primary">Q</code>, its tentative distance <code class="bg-surface-container px-1 py-0.5 rounded font-code text-[13px] text-primary">d[u]</code> is definitively equal to the true shortest path distance <code class="bg-surface-container px-1 py-0.5 rounded font-code text-[13px] text-primary">δ(s, u)</code>.
+        </p>
+<!-- Mathematical & Algorithm Summary Card -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-3.5 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Triangle Inequality Criterion</span>
+<span class="material-symbols-outlined text-secondary text-[18px]" data-icon="functions">functions</span>
+</div>
+<div class="bg-surface-container-lowest py-2.5 px-3 rounded border border-outline-variant text-center">
+<span class="font-code text-title-md font-title-md font-bold text-primary tracking-wide">
+              d[v] ≤ d[u] + w(u, v)
+            </span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant">
+            If <code class="font-code text-on-surface text-[12px]">d[v] > d[u] + w(u, v)</code>, edge <code class="font-code text-on-surface text-[12px]">(u, v)</code> is relaxed, strictly decreasing tentative distance toward target node <code class="font-code text-on-surface text-[12px]">v</code>.
+          </p>
+</div>
+<!-- Code Snippet Block (Monospace syntax highlighted for mobile) -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between px-1">
+<span class="text-label-sm font-label-sm text-outline font-bold">RELAXATION LOGIC (PSEUDOCODE)</span>
+<span class="text-label-sm font-label-sm text-secondary font-code">O(log V)</span>
+</div>
+<div class="bg-primary-container text-inverse-on-surface rounded-lg p-3 font-code text-body-sm font-body-sm overflow-x-auto border border-primary leading-normal shadow-inner">
+<pre class="text-[12px]"><span class="text-tertiary-fixed-dim">def</span> <span class="text-secondary-fixed">relax_edge</span>(u, v, w):
+    <span class="text-secondary-fixed-dim">if</span> dist[v] > dist[u] + w(u, v):
+        dist[v] = dist[u] + w(u, v)
+        parent[v] = u
+        pq.<span class="text-secondary-fixed">decrease_key</span>(v, dist[v])
+        <span class="text-outline-variant"># Yield state for visual trace</span>
+        <span class="text-tertiary-fixed-dim">return</span> <span class="text-secondary-fixed-dim">True</span>
+    <span class="text-tertiary-fixed-dim">return</span> <span class="text-secondary-fixed-dim">False</span></pre>
+</div>
+</div>
+<!-- Faculty Note Alert Box from Prof. Vance -->
+<div class="bg-surface-container rounded-lg p-3.5 border-l-4 border-secondary flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px] flex-shrink-0 mt-0.5" data-icon="lightbulb" data-weight="fill" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5">
+<span class="text-label-md font-label-md text-primary font-bold">Faculty Focus: Prof. Vance</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold px-1.5 py-0.2 rounded">Midterm Alert</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface leading-snug">
+              "Pay special attention to why non-negative edge weights are required. If negative cycles or negative edges exist, the greedy invariant breaks and produces suboptimal paths. This will appear on Module 2 Quiz!"
+            </p>
+</div>
+</div>
+<p class="text-body-md font-body-md text-on-surface leading-relaxed">
+          Continuing forward in the implementation, the min-priority queue maintains the candidate frontier. In the next section, we analyze the performance difference when backing the priority queue with a Binary Heap versus a Fibonacci Heap.
+        </p>
+</article>
+</main>
+<!-- 4. Sticky Bottom Assessment Unlock Bar -->
+<div class="fixed bottom-16 left-0 w-full z-40 bg-surface-container-lowest border-t border-outline-variant px-gutter-sm py-2.5 shadow-lg">
+<div class="max-w-[430px] mx-auto flex flex-col gap-2">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-secondary text-[16px]" data-icon="auto_stories">auto_stories</span>
+<span class="font-bold">Reading Progress: 72%</span>
+<span class="text-outline">• 23/32 pages</span>
+</div>
+<span class="text-error font-bold text-[11px] flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]" data-icon="lock">lock</span> Locked
+          </span>
+</div>
+<!-- Progress Gauge -->
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full transition-all duration-300" style="width: 72%;"></div>
+</div>
+<!-- Action Button -->
+<button class="w-full h-11 bg-surface-container-high text-outline rounded-lg flex items-center justify-center gap-2 cursor-not-allowed text-label-md font-label-md font-bold transition-all" disabled="">
+<span class="material-symbols-outlined text-[18px]" data-icon="quiz">quiz</span>
+<span>Unlock End-of-Topic Quiz (Requires 100% Read)</span>
+</button>
+</div>
+</div>
+<!-- 5. BottomNavBar (Shared Component) -->
+<!-- Destination count: 4 | labels: Reader, Quiz, Gradebook, Profile -->
+<!-- Reader is active match according to intent -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center h-16 px-gutter-sm bg-surface dark:bg-inverse-surface shadow-md dark:shadow-none">
+<!-- Reader (Active) -->
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim font-bold active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[22px]" data-icon="menu_book" data-weight="fill" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="text-label-sm font-label-sm mt-0.5">Reader</span>
+</button>
+<!-- Quiz -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline font-normal hover:text-primary dark:hover:text-primary-fixed active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[22px]" data-icon="quiz">quiz</span>
+<span class="text-label-sm font-label-sm mt-0.5">Quiz</span>
+</button>
+<!-- Gradebook -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline font-normal hover:text-primary dark:hover:text-primary-fixed active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[22px]" data-icon="analytics">analytics</span>
+<span class="text-label-sm font-label-sm mt-0.5">Gradebook</span>
+</button>
+<!-- Profile -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline font-normal hover:text-primary dark:hover:text-primary-fixed active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[22px]" data-icon="person">person</span>
+<span class="text-label-sm font-label-sm mt-0.5">Profile</span>
+</button>
+</nav>
+</div>
+</body></html>

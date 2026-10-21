@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ScribLearn - CS-204: Advanced Data Structures &amp; Algorithms</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Plus Jakarta Sans & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary": "#070235",
+            "on-tertiary-container": "#009d6c",
+            "on-tertiary-fixed": "#002113",
+            "on-secondary-container": "#fffbff",
+            "secondary-container": "#6063ee",
+            "inverse-surface": "#213145",
+            "surface-tint": "#5b598c",
+            "on-secondary": "#ffffff",
+            "inverse-on-surface": "#eaf1ff",
+            "primary-fixed": "#e3dfff",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed-variant": "#2f2ebe",
+            "secondary-fixed-dim": "#c0c1ff",
+            "tertiary-fixed-dim": "#4edea3",
+            "surface-container-low": "#eff4ff",
+            "primary-fixed-dim": "#c4c1fb",
+            "on-primary-container": "#8683ba",
+            "primary-container": "#1e1b4b",
+            "surface-bright": "#f8f9ff",
+            "secondary-fixed": "#e1e0ff",
+            "on-surface-variant": "#47464f",
+            "tertiary-container": "#002819",
+            "error": "#ba1a1a",
+            "on-surface": "#0b1c30",
+            "outline-variant": "#c8c5d0",
+            "tertiary-fixed": "#6ffbbe",
+            "on-error": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "secondary": "#4648d4",
+            "on-primary-fixed-variant": "#444173",
+            "surface-variant": "#d3e4fe",
+            "inverse-primary": "#c4c1fb",
+            "background": "#f8f9ff",
+            "surface": "#f8f9ff",
+            "on-secondary-fixed": "#07006c",
+            "on-background": "#0b1c30",
+            "on-primary": "#ffffff",
+            "on-primary-fixed": "#181445",
+            "surface-container-highest": "#d3e4fe",
+            "surface-container-high": "#dce9ff",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed-variant": "#005236",
+            "surface-dim": "#cbdbf5",
+            "outline": "#787680",
+            "error-container": "#ffdad6",
+            "tertiary": "#000f07",
+            "surface-container": "#e5eeff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-sm": "1rem",
+            "margin-sm": "1rem",
+            "space-xs": "0.25rem",
+            "margin": "2rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem"
+          },
+          "fontFamily": {
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "body-sm": ["Inter"],
+            "label-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "headline-lg-mobile": ["Plus Jakarta Sans"],
+            "body-md": ["Inter"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "body-lg": ["Inter"],
+            "title-md": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "display-lg-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "body-sm": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "700" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col font-body-md selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- TopNavBar (Shared Component implementation) -->
+<header class="bg-surface dark:bg-inverse-surface docked full-width top-0 z-40 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none shrink-0 sticky">
+<div class="flex justify-between items-center w-full px-6 py-3 max-w-full">
+<!-- Brand & Search cluster -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-2xl" data-icon="auto_stories">auto_stories</span>
+<span class="text-headline-md font-headline-md font-extrabold text-primary dark:text-primary-fixed">ScribLearn</span>
+</div>
+<!-- Search Bar (on_left) -->
+<div class="relative w-72 hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-lg pl-9 pr-3 py-1.5 text-body-sm font-body-sm text-on-surface placeholder-outline focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition" placeholder="Search textbook slides, formulas, notes..." type="text"/>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface dark:hover:text-inverse-on-surface py-1 hover:bg-surface-container-low dark:hover:bg-surface-container transition-colors duration-150 active:scale-[0.98] transition-transform text-label-md font-label-md" href="#">Dashboard</a>
+<!-- Active link: Reader Library -->
+<a class="border-b-2 border-secondary text-secondary dark:text-secondary-fixed font-bold py-1 hover:bg-surface-container-low dark:hover:bg-surface-container transition-colors duration-150 active:scale-[0.98] transition-transform text-label-md font-label-md" href="#">Reader Library</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface dark:hover:text-inverse-on-surface py-1 hover:bg-surface-container-low dark:hover:bg-surface-container transition-colors duration-150 active:scale-[0.98] transition-transform text-label-md font-label-md" href="#">Quiz Studio</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface dark:hover:text-inverse-on-surface py-1 hover:bg-surface-container-low dark:hover:bg-surface-container transition-colors duration-150 active:scale-[0.98] transition-transform text-label-md font-label-md" href="#">Gradebook</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface dark:hover:text-inverse-on-surface py-1 hover:bg-surface-container-low dark:hover:bg-surface-container transition-colors duration-150 active:scale-[0.98] transition-transform text-label-md font-label-md" href="#">Curriculum</a>
+</nav>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center gap-3">
+<button class="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary text-primary hover:bg-surface-container-low font-label-md text-label-md transition active:scale-[0.98]">
+<span class="material-symbols-outlined text-base" data-icon="account_balance">account_balance</span>
+          Faculty Portal
+        </button>
+<button class="bg-secondary text-on-secondary px-3.5 py-1.5 rounded-lg font-label-md text-label-md flex items-center gap-1.5 shadow-sm hover:bg-secondary-container transition active:scale-[0.98]">
+<span class="material-symbols-outlined text-base" data-icon="add_circle">add_circle</span>
+          Create Quiz
+        </button>
+<!-- Trailing Icon Actions -->
+<div class="flex items-center border-l border-outline-variant pl-3 ml-1 gap-1 text-on-surface-variant">
+<button class="p-1.5 rounded-lg hover:bg-surface-container-low transition" title="Notifications">
+<span class="material-symbols-outlined text-xl" data-icon="notifications">notifications</span>
+</button>
+<button class="p-1.5 rounded-lg hover:bg-surface-container-low transition" title="School Hub">
+<span class="material-symbols-outlined text-xl" data-icon="school">school</span>
+</button>
+<button class="p-1.5 rounded-lg hover:bg-surface-container-low transition" title="Help">
+<span class="material-symbols-outlined text-xl" data-icon="help">help</span>
+</button>
+</div>
+<!-- Academic Profile Image -->
+<div class="flex items-center pl-2">
+<img class="w-8 h-8 rounded-full border border-outline-variant object-cover ring-2 ring-surface" data-alt="Academic portrait of Dr. Aris Vance, Faculty Chair, wearing formal navy academic regalia with distinguished silver hair and spectacles in a clean, sunlit high-end university library office setting, sharp focus and scholarly aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6zCk7rLEYKQ6EVcIazLJrMm4EAflTjrGm8g-4jGPYFsg_H47KYkDeO1YMssYQ2JUPUzegOkCy3AH-ZidTABH56if1tsaey6Hxj_poQBYBxbAwhAkhUEdW7BY_x-UPZ02gyXIpwsdJQrP4kXICHnWRoSa7AGA9f_00onz4hlLXQ0oo-6Jyi5re-aEuhjq4nTfOUZsu9BH0uI_uI-FdHtAUuaOzIgX9W0TJf3co7aEas9ZukwcWHfvSog"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Public Directory Transparency Notice Banner -->
+<div class="bg-surface-container-high border-b border-outline-variant px-6 py-2 flex items-center justify-between">
+<div class="flex items-center gap-2.5 text-on-surface">
+<span class="material-symbols-outlined text-secondary text-lg" data-icon="public">public</span>
+<span class="text-label-md font-label-md">Public Faculty Lesson Directory: Visible across university faculties</span>
+<span class="bg-surface-container-highest text-primary text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase">Open Access</span>
+</div>
+<div class="flex items-center gap-4 text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="verified">verified</span> Peer-Reviewed Syllabus
+      </span>
+<span class="hidden sm:inline">|</span>
+<span class="hidden sm:inline">Version: 2.4.1-FA24</span>
+</div>
+</div>
+<!-- Subject Header Strip -->
+<section class="bg-surface-container-lowest border-b border-outline-variant px-6 py-4">
+<div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-primary text-on-primary font-label-sm text-label-sm tracking-wider uppercase">CS-204</span>
+<h1 class="text-headline-md font-headline-md text-primary tracking-tight">CS-204: Advanced Data Structures &amp; Algorithms</h1>
+</div>
+<div class="flex flex-wrap items-center gap-y-1 gap-x-4 text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="calendar_month">calendar_month</span>
+            Term: <strong class="text-on-surface font-semibold">1st Semester 2024-2025</strong>
+</span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="school">school</span>
+            Year Level: <strong class="text-on-surface font-semibold">2nd Year</strong>
+</span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="person_celebrate">person_celebrate</span>
+            Faculty: <strong class="text-primary font-semibold">Prof. Marcus Vance</strong>
+</span>
+</div>
+</div>
+<!-- Quick Metrics Pill Clusters -->
+<div class="flex items-center gap-3">
+<div class="bg-surface-container-low border border-outline-variant rounded-lg px-3 py-1.5 flex items-center gap-3">
+<div class="flex flex-col">
+<span class="text-label-sm font-label-sm text-on-surface-variant">Module Completion</span>
+<span class="text-title-md font-title-md font-bold text-primary">1 of 3 Units</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-secondary font-bold text-xs">
+            33%
+          </div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant rounded-lg px-3.5 py-1.5 flex items-center gap-2.5">
+<span class="material-symbols-outlined text-amber-500 text-xl" data-icon="local_fire_department" data-weight="fill">local_fire_department</span>
+<div>
+<div class="text-label-sm font-label-sm text-on-surface-variant">Daily Streak</div>
+<div class="text-title-md font-title-md font-bold text-on-surface">6 Days</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Workstation Layout (Split Canvas View: Left Module Sequence + Right Scribd Reader) -->
+<main class="flex-1 flex max-w-[1600px] w-full mx-auto overflow-hidden relative">
+<!-- Left Sidebar: Sequential Topic Units & Prerequisite Lock Mechanism -->
+<aside class="w-80 lg:w-96 bg-surface-container-low border-r border-outline-variant flex flex-col shrink-0 overflow-y-auto">
+<div class="p-4 border-b border-outline-variant bg-surface flex items-center justify-between sticky top-0 z-10">
+<div>
+<h2 class="text-title-md font-title-md text-primary font-bold">Sequential Topic Units</h2>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Complete sequential prerequisites to unlock</p>
+</div>
+<span class="material-symbols-outlined text-outline text-lg" data-icon="account_tree">account_tree</span>
+</div>
+<!-- Modules Accordion/List -->
+<div class="p-3 space-y-3">
+<!-- Module 1: COMPLETED -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-3.5 shadow-sm transition hover:border-secondary">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center justify-center font-bold text-xs">
+<span class="material-symbols-outlined text-sm font-bold" data-icon="check">check</span>
+</span>
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-on-tertiary-container font-bold">Completed Unit</span>
+</div>
+<span class="bg-surface-container text-on-surface-variant text-[11px] font-semibold px-2 py-0.5 rounded">Mod 1</span>
+</div>
+<h3 class="text-title-md font-title-md font-bold text-primary mt-2">Binary Trees &amp; Balanced AVL Trees</h3>
+<!-- Metas & Scores -->
+<div class="mt-3 pt-2.5 border-t border-outline-variant/60 flex items-center justify-between text-body-sm font-body-sm">
+<div class="flex items-center gap-1 text-on-tertiary-container font-semibold">
+<span class="material-symbols-outlined text-base" data-icon="task_alt">task_alt</span>
+              100% doc read
+            </div>
+<div class="flex items-center gap-1.5 bg-surface-container-low px-2 py-0.5 rounded border border-outline-variant">
+<span class="material-symbols-outlined text-sm text-secondary" data-icon="military_tech">military_tech</span>
+<span class="text-label-sm font-label-sm text-on-surface">Quiz: <strong class="text-on-tertiary-container">85% Passed</strong></span>
+</div>
+</div>
+</div>
+<!-- Module 2: CURRENT ACTIVE -->
+<div class="bg-surface-container-lowest rounded-xl border-2 border-secondary p-3.5 shadow-md relative overflow-hidden">
+<div class="absolute top-0 right-0 w-2 h-full bg-secondary"></div>
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary animate-ping"></span>
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-secondary font-bold">Current Active</span>
+</div>
+<span class="bg-secondary-fixed text-on-secondary-fixed font-bold text-[11px] px-2 py-0.5 rounded">Mod 2</span>
+</div>
+<h3 class="text-title-md font-title-md font-bold text-primary mt-1.5">Graph Theory &amp; Dijkstra Shortest Path</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1 line-clamp-2">
+            Directed Acyclic Graphs, topological ordering, priority queues, and single-source shortest path execution.
+          </p>
+<!-- Current Unit Progress Bar -->
+<div class="mt-3 bg-surface-container-low rounded-lg p-2.5 border border-outline-variant">
+<div class="flex justify-between items-center text-label-sm font-label-sm mb-1.5">
+<span class="text-on-surface-variant font-medium">Reading Progress</span>
+<span class="text-secondary font-bold">72% Completed</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-2 overflow-hidden">
+<div class="bg-secondary h-2 rounded-full transition-all duration-500" style="width: 72%"></div>
+</div>
+<div class="mt-2 flex items-center justify-between text-[11px] text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-secondary" data-icon="description">description</span>
+                23 of 32 pages
+              </span>
+<span class="text-error font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="pending">pending</span>
+                Pending End-Quiz
+              </span>
+</div>
+</div>
+<!-- Quick Navigation to sections -->
+<div class="mt-3 space-y-1">
+<div class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Module Readings</div>
+<a class="flex items-center justify-between p-2 rounded bg-surface-container-high/60 text-secondary font-semibold text-body-sm" href="#">
+<span class="flex items-center gap-2 truncate">
+<span class="material-symbols-outlined text-base" data-icon="article">article</span>
+                Lecture 4: Dijkstra Algorithm &amp; Network Flow.pdf
+              </span>
+<span class="text-xs font-bold text-secondary">Active</span>
+</a>
+<a class="flex items-center justify-between p-2 rounded hover:bg-surface-container text-on-surface-variant text-body-sm transition" href="#">
+<span class="flex items-center gap-2 truncate">
+<span class="material-symbols-outlined text-base" data-icon="code_blocks">code_blocks</span>
+                Lab 4B: Min-Heap Implementation Guide
+              </span>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+</a>
+</div>
+</div>
+<!-- Module 3: LOCKED -->
+<div class="bg-surface-container-low/70 rounded-xl border border-outline-variant p-3.5 relative opacity-90">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-base text-primary" data-icon="lock" data-weight="fill">lock</span>
+<span class="text-label-sm font-label-sm uppercase tracking-wider font-bold">Locked Module</span>
+</div>
+<span class="bg-surface-container-highest text-on-surface-variant text-[11px] font-semibold px-2 py-0.5 rounded">Mod 3</span>
+</div>
+<h3 class="text-title-md font-title-md font-bold text-on-surface-variant mt-2">Dynamic Programming &amp; Memoization</h3>
+<p class="text-body-sm font-body-sm text-outline mt-1">
+            Optimal substructure, overlapping subproblems, Fibonacci sequences, 0/1 Knapsack problem.
+          </p>
+<!-- Prerequisite Condition Card -->
+<div class="mt-3 bg-surface-container border border-outline-variant rounded-lg p-2.5">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-base text-error mt-0.5" data-icon="info">info</span>
+<div>
+<span class="text-label-sm font-label-sm text-primary font-bold block">Prerequisite Requirement:</span>
+<p class="text-[12px] text-on-surface-variant mt-0.5 leading-snug">
+                  Complete Module 2 Document reading &amp; pass End-Quiz with ≥75% grade.
+                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Additional Curriculum Info Tile -->
+<div class="p-3 bg-surface-container-lowest rounded-xl border border-outline-variant text-body-sm text-on-surface-variant">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm font-bold text-primary">Department Schedule</span>
+<span class="text-label-sm font-label-sm text-secondary">View Syllabus</span>
+</div>
+<p class="text-xs mt-1 text-on-surface-variant">Final Algorithmic Assessment scheduled for Dec 18, 2024 at Turing Lecture Hall A.</p>
+</div>
+</div>
+</aside>
+<!-- Center/Right Canvas: Scribd-Style Immersive Document Viewer -->
+<section class="flex-1 flex flex-col bg-surface-container overflow-hidden pb-24">
+<!-- Reader Control Header Toolbar -->
+<div class="bg-surface-container-lowest border-b border-outline-variant px-5 py-2.5 flex items-center justify-between shrink-0 shadow-sm z-10">
+<!-- Document Title & Format Pill -->
+<div class="flex items-center gap-3">
+<span class="bg-primary text-on-primary text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="picture_as_pdf">picture_as_pdf</span> PDF
+          </span>
+<div>
+<h2 class="text-title-md font-title-md font-bold text-primary leading-tight">Lecture 4: Dijkstra Algorithm &amp; Network Flow.pdf</h2>
+<div class="text-label-sm font-label-sm text-on-surface-variant">Course Textbook: Algorithmic Foundations (4th Edition) • Prof. Vance</div>
+</div>
+</div>
+<!-- Controls: Page Indicator, Zoom, Fullscreen, Bookmark -->
+<div class="flex items-center gap-3">
+<!-- Page Jumper / Indicator -->
+<div class="flex items-center bg-surface-container-low border border-outline-variant rounded-lg px-2 py-1 gap-1.5 text-body-sm font-body-sm">
+<button class="p-0.5 hover:bg-surface-container rounded text-on-surface" title="Previous Page">
+<span class="material-symbols-outlined text-base" data-icon="arrow_back_ios">arrow_back_ios</span>
+</button>
+<span class="font-semibold text-primary px-1">Page 14</span>
+<span class="text-outline">of 32</span>
+<button class="p-0.5 hover:bg-surface-container rounded text-on-surface" title="Next Page">
+<span class="material-symbols-outlined text-base" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</button>
+</div>
+<div class="h-5 w-[1px] bg-outline-variant hidden sm:block"></div>
+<!-- Zoom Tools -->
+<div class="hidden sm:flex items-center bg-surface-container-low border border-outline-variant rounded-lg px-1 py-0.5 text-body-sm font-body-sm">
+<button class="p-1 hover:bg-surface-container rounded text-on-surface" title="Zoom Out">
+<span class="material-symbols-outlined text-base" data-icon="remove">remove</span>
+</button>
+<span class="text-xs font-semibold px-2 text-on-surface">125%</span>
+<button class="p-1 hover:bg-surface-container rounded text-on-surface" title="Zoom In">
+<span class="material-symbols-outlined text-base" data-icon="add">add</span>
+</button>
+</div>
+<!-- Utility Icons -->
+<div class="flex items-center gap-1 text-on-surface-variant">
+<button class="p-1.5 hover:bg-surface-container rounded-lg transition" title="Highlighting Tools">
+<span class="material-symbols-outlined text-xl" data-icon="edit_note">edit_note</span>
+</button>
+<button class="p-1.5 hover:bg-surface-container rounded-lg transition" title="Bookmarks">
+<span class="material-symbols-outlined text-xl" data-icon="bookmark">bookmark</span>
+</button>
+<button class="p-1.5 hover:bg-surface-container rounded-lg transition" title="Download Offline Copy">
+<span class="material-symbols-outlined text-xl" data-icon="download">download</span>
+</button>
+<button class="p-1.5 hover:bg-surface-container rounded-lg transition text-secondary" title="Fullscreen Document">
+<span class="material-symbols-outlined text-xl" data-icon="fullscreen">fullscreen</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Scrollable Document Presentation Stage -->
+<div class="flex-1 overflow-y-auto p-6 flex justify-center">
+<div class="w-full max-w-[860px] space-y-6">
+<!-- Document Summary Recap Callout (Key Insights & Formula Summary) -->
+<div class="bg-surface-container-lowest rounded-xl border border-secondary/30 p-5 shadow-sm relative overflow-hidden bg-gradient-to-r from-surface-container-low/80 to-surface-container-lowest">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-center gap-2 text-secondary font-bold text-title-md font-title-md">
+<span class="material-symbols-outlined text-2xl" data-icon="psychology">psychology</span>
+                Key Insights &amp; Formula Summary
+              </div>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="auto_awesome">auto_awesome</span> AI Faculty Digest
+              </span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-2 leading-relaxed">
+              Dijkstra’s algorithm solves the single-source shortest path problem for graphs with non-negative edge weights. 
+              By maintaining a set of visited vertices and greedily selecting the minimum distance vertex using a priority queue, optimal path substructure is preserved.
+            </p>
+<!-- Formula Box Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+<div class="bg-surface rounded-lg p-3 border border-outline-variant">
+<span class="text-label-sm font-label-sm text-on-surface-variant block uppercase">Time Complexity</span>
+<span class="font-mono font-bold text-primary text-body-md block mt-1">O((V + E) log V)</span>
+<span class="text-[11px] text-outline mt-0.5 block">Using Min-Binary Heap</span>
+</div>
+<div class="bg-surface rounded-lg p-3 border border-outline-variant">
+<span class="text-label-sm font-label-sm text-on-surface-variant block uppercase">Relaxation Invariant</span>
+<span class="font-mono font-bold text-primary text-body-md block mt-1">d[v] ≤ d[u] + w(u, v)</span>
+<span class="text-[11px] text-outline mt-0.5 block">Edge Weight Non-Negativity</span>
+</div>
+<div class="bg-surface rounded-lg p-3 border border-outline-variant">
+<span class="text-label-sm font-label-sm text-on-surface-variant block uppercase">Prerequisite Mastery</span>
+<div class="flex items-center gap-1.5 mt-1 text-on-tertiary-container font-bold text-body-sm">
+<span class="material-symbols-outlined text-base" data-icon="verified">verified</span>
+                  Greedy Paradigms
+                </div>
+<span class="text-[11px] text-outline mt-0.5 block">Module 1 Foundation</span>
+</div>
+</div>
+</div>
+<!-- Scribd-Style Digital White Page Sheet (Page 14) -->
+<article class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-md p-8 md:p-12 min-h-[920px] text-on-surface relative">
+<!-- Sheet Metadata Header -->
+<div class="border-b border-outline-variant pb-4 mb-8 flex justify-between items-center text-xs text-outline">
+<span>CS-204 Lecture 4 • Graph Algorithms &amp; Shortest Path</span>
+<span>Slide 14 / 32</span>
+</div>
+<!-- Page Title -->
+<h2 class="text-headline-lg font-headline-lg text-primary tracking-tight mb-4">
+              4.2 Dijkstra's Greedy Relaxation Loop
+            </h2>
+<p class="text-body-lg font-body-lg text-on-surface leading-relaxed mb-6">
+              Let $G = (V, E)$ be a directed weighted graph where each weight $w(u, v) \ge 0$. We maintain two disjoint sets of vertices: 
+              $S$, the set of vertices whose shortest distances from the source vertex $s$ have already been finalized, and $V \setminus S$, the remaining exploration fringe.
+            </p>
+<!-- Illustrated Concept Section: Academic Diagram Card -->
+<div class="my-6 rounded-xl border border-outline-variant bg-surface-container-low p-5">
+<div class="flex items-center justify-between mb-3">
+<span class="text-label-md font-label-md font-bold text-primary flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary" data-icon="schema">schema</span>
+                  Figure 4.4: Priority Queue Vertex Extraction &amp; Edge Relaxation
+                </span>
+<span class="text-xs text-on-surface-variant font-mono">Status: Step k=3</span>
+</div>
+<!-- Diagram Preview / Structural Representation -->
+<div class="bg-surface-container-lowest rounded-lg p-4 border border-outline-variant flex flex-col md:flex-row items-center justify-around gap-6 text-center">
+<div class="flex flex-col items-center">
+<div class="w-14 h-14 rounded-full bg-tertiary-container text-tertiary-fixed font-bold flex items-center justify-center text-title-md border-2 border-tertiary-fixed shadow-sm">
+                    Source: A
+                  </div>
+<span class="text-label-sm font-label-sm text-on-surface mt-1 font-semibold">dist[A] = 0</span>
+<span class="text-[10px] text-on-tertiary-container uppercase font-bold">Settled (S)</span>
+</div>
+<div class="flex items-center text-secondary font-bold text-body-sm">
+<div class="w-12 h-0.5 bg-secondary"></div>
+<span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded text-xs">w=4</span>
+<div class="w-12 h-0.5 bg-secondary"></div>
+<span class="material-symbols-outlined -ml-2 text-secondary" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-14 h-14 rounded-full bg-secondary text-on-secondary font-bold flex items-center justify-center text-title-md border-2 border-secondary-container shadow-md ring-4 ring-secondary-fixed">
+                    Node: B
+                  </div>
+<span class="text-label-sm font-label-sm text-secondary mt-1 font-bold">dist[B] = 4 (Min)</span>
+<span class="text-[10px] bg-secondary-container text-on-secondary px-1.5 py-0.2 rounded font-bold">Current Target</span>
+</div>
+<div class="flex items-center text-outline-variant font-bold text-body-sm">
+<div class="w-12 h-0.5 bg-outline-variant border-dashed"></div>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant rounded text-xs">w=8</span>
+<div class="w-12 h-0.5 bg-outline-variant"></div>
+<span class="material-symbols-outlined -ml-2 text-outline" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-14 h-14 rounded-full bg-surface-container-high text-on-surface-variant font-bold flex items-center justify-center text-title-md border border-outline">
+                    Node: C
+                  </div>
+<span class="text-label-sm font-label-sm text-outline mt-1">dist[C] = ∞</span>
+<span class="text-[10px] text-outline uppercase">Fringe</span>
+</div>
+</div>
+<p class="text-[12px] text-on-surface-variant text-center mt-3 italic">
+                Extraction order is governed by the heap extract-min primitive. Notice how negative edge weights violate the subpath greedy invariant.
+              </p>
+</div>
+<!-- Pseudo-Code Academic Block -->
+<div class="my-6">
+<h3 class="text-title-md font-title-md font-bold text-primary mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg text-secondary" data-icon="data_object">data_object</span>
+                Formal Algorithm Specification
+              </h3>
+<pre class="bg-primary text-primary-fixed p-4 rounded-xl font-mono text-xs overflow-x-auto leading-relaxed border border-outline-variant/40"><code>function Dijkstra(Graph, source):
+    create vertex set Q
+    for each vertex v in Graph.Vertices:
+        dist[v] ← INFINITY
+        prev[v] ← UNDEFINED
+        add v to Q
+    dist[source] ← 0
+    
+    while Q is not empty:
+        u ← vertex in Q with min dist[u]
+        remove u from Q
+        
+        for each neighbor v of u still in Q:
+            alt ← dist[u] + Graph.Edges(u, v)
+            if alt &lt; dist[v]:
+                dist[v] ← alt
+                prev[v] ← u
+                
+    return dist[], prev[]</code></pre>
+</div>
+<!-- Academic Marginal Note / Professor's Highlight -->
+<div class="bg-surface-container-high/60 border-l-4 border-secondary rounded-r-lg p-4 my-6">
+<div class="flex items-center gap-2 text-primary font-bold text-body-sm mb-1">
+<span class="material-symbols-outlined text-base text-secondary" data-icon="rate_review">rate_review</span>
+                Faculty Note • Prof. Vance
+              </div>
+<p class="text-body-sm font-body-sm text-on-surface">
+                “Pay close attention to question 4 in your upcoming End-of-Topic Quiz. You will be asked to compare the asymptotic cost difference when executing Dijkstra with a standard Array versus a Fibonacci Heap.”
+              </p>
+</div>
+<!-- Page Footer Pagination -->
+<div class="pt-8 mt-12 border-t border-outline-variant flex items-center justify-between text-body-sm text-outline">
+<span>Department of Computer Science &amp; Engineering</span>
+<span>14</span>
+</div>
+</article>
+<!-- Next Page Teaser -->
+<div class="text-center py-4">
+<span class="text-xs font-semibold uppercase tracking-wider text-outline">Page 15: Network Flow &amp; Ford-Fulkerson Formulation (Scroll Down)</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Floating Bar: Module Reading Status & End-of-Topic Quiz Trigger -->
+<aside class="fixed bottom-0 left-0 right-0 z-30 bg-surface/95 backdrop-blur-md border-t border-outline-variant px-6 py-3.5 shadow-lg">
+<div class="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+<!-- Progress Indicator Left -->
+<div class="flex items-center gap-4 w-full md:w-auto">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shrink-0">
+<span class="material-symbols-outlined text-2xl" data-icon="auto_stories">auto_stories</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-label-md font-label-md text-primary font-bold">Module Reading Status: 72%</span>
+<span class="text-xs text-on-surface-variant hidden sm:inline">(23 of 32 Pages Read)</span>
+</div>
+<div class="w-64 sm:w-80 bg-surface-container-highest rounded-full h-2 mt-1.5 overflow-hidden">
+<div class="bg-secondary h-2 rounded-full" style="width: 72%"></div>
+</div>
+</div>
+</div>
+<!-- Action Button & Unlock Condition Note -->
+<div class="flex items-center justify-end gap-4 w-full md:w-auto">
+<div class="text-right hidden lg:block">
+<span class="text-label-sm font-label-sm text-on-surface-variant block">Assessment Gateway</span>
+<span class="text-[12px] text-outline block">Passing Grade: 75% required to unlock next module</span>
+</div>
+<button class="w-full md:w-auto bg-secondary hover:bg-secondary-container text-on-secondary font-label-md text-label-md px-6 py-3 rounded-lg shadow-md flex items-center justify-center gap-2 transition-transform active:scale-[0.98] border-b-2 border-primary" id="quizBtn" onclick="toggleQuizModal()">
+<span class="material-symbols-outlined text-xl" data-icon="quiz">quiz</span>
+          Unlock End-of-Topic Quiz
+        </button>
+</div>
+</div>
+</aside>
+<!-- Interactive Quiz Trigger Preview Drawer / Modal -->
+<div class="hidden fixed inset-0 z-50 bg-primary/60 backdrop-blur-sm flex items-center justify-center p-4" id="quizModal">
+<div class="bg-surface-container-lowest max-w-lg w-full rounded-2xl border border-outline-variant shadow-2xl p-6 relative">
+<button class="absolute top-4 right-4 p-1 rounded-lg text-outline hover:bg-surface-container transition" onclick="toggleQuizModal()">
+<span class="material-symbols-outlined text-xl" data-icon="close">close</span>
+</button>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" data-icon="timer">timer</span>
+</div>
+<div>
+<h3 class="text-title-md font-title-md font-bold text-primary">Module 2 End-of-Topic Quiz</h3>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Prerequisite validation for Module 3 access</p>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-4 border border-outline-variant space-y-2 mb-4 text-body-sm font-body-sm">
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Total Questions:</span>
+<span class="font-bold text-primary">15 Algorithmic Multiple Choice</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Allocated Time:</span>
+<span class="font-bold text-primary">25 Minutes</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Unlock Threshold:</span>
+<span class="font-bold text-on-tertiary-container">≥ 75% Passing Score</span>
+</div>
+</div>
+<!-- Tactile Quiz Card Preview -->
+<div class="border border-outline-variant rounded-xl p-3 mb-6 bg-surface">
+<span class="text-label-sm font-label-sm text-on-surface-variant block uppercase mb-1">Sample Problem 1</span>
+<p class="text-body-sm font-body-sm font-semibold text-primary">
+          What happens when Dijkstra's algorithm is run on a graph containing a negative weight cycle?
+        </p>
+<div class="mt-2 space-y-1.5">
+<div class="flex items-center gap-2 p-2 rounded bg-surface-container-low border border-outline-variant text-xs text-on-surface">
+<span class="w-5 h-5 rounded bg-surface-container-highest flex items-center justify-center font-bold">A</span>
+<span>It correctly detects the cycle and terminates.</span>
+</div>
+<div class="flex items-center gap-2 p-2 rounded bg-surface-container-low border border-secondary text-xs text-secondary font-semibold">
+<span class="w-5 h-5 rounded bg-secondary text-on-secondary flex items-center justify-center font-bold">B</span>
+<span>It may produce incorrect shortest paths or enter an infinite loop.</span>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 px-4 py-2.5 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface hover:bg-surface-container transition" onclick="toggleQuizModal()">
+          Resume Reading
+        </button>
+<button class="flex-1 px-4 py-2.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md hover:bg-secondary-container transition font-bold shadow-sm">
+          Begin Assessment Now
+        </button>
+</div>
+</div>
+</div>
+<!-- Micro-interaction JS for Drawer / Modal -->
+<script>
+    function toggleQuizModal() {
+      const modal = document.getElementById('quizModal');
+      if (modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+  </script>
+</body></html>

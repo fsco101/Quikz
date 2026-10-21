@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ScribLearn - Master Gradebook &amp; Student Results Analytics</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Plus Jakarta Sans & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary": "#070235",
+            "on-tertiary-container": "#009d6c",
+            "on-tertiary-fixed": "#002113",
+            "on-secondary-container": "#fffbff",
+            "secondary-container": "#6063ee",
+            "inverse-surface": "#213145",
+            "surface-tint": "#5b598c",
+            "on-secondary": "#ffffff",
+            "inverse-on-surface": "#eaf1ff",
+            "primary-fixed": "#e3dfff",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed-variant": "#2f2ebe",
+            "secondary-fixed-dim": "#c0c1ff",
+            "tertiary-fixed-dim": "#4edea3",
+            "surface-container-low": "#eff4ff",
+            "primary-fixed-dim": "#c4c1fb",
+            "on-primary-container": "#8683ba",
+            "primary-container": "#1e1b4b",
+            "surface-bright": "#f8f9ff",
+            "secondary-fixed": "#e1e0ff",
+            "on-surface-variant": "#47464f",
+            "tertiary-container": "#002819",
+            "error": "#ba1a1a",
+            "on-surface": "#0b1c30",
+            "outline-variant": "#c8c5d0",
+            "tertiary-fixed": "#6ffbbe",
+            "on-error": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "secondary": "#4648d4",
+            "on-primary-fixed-variant": "#444173",
+            "surface-variant": "#d3e4fe",
+            "inverse-primary": "#c4c1fb",
+            "background": "#f8f9ff",
+            "surface": "#f8f9ff",
+            "on-secondary-fixed": "#07006c",
+            "on-background": "#0b1c30",
+            "on-primary": "#ffffff",
+            "on-primary-fixed": "#181445",
+            "surface-container-highest": "#d3e4fe",
+            "surface-container-high": "#dce9ff",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed-variant": "#005236",
+            "surface-dim": "#cbdbf5",
+            "outline": "#787680",
+            "error-container": "#ffdad6",
+            "tertiary": "#000f07",
+            "surface-container": "#e5eeff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-sm": "1rem",
+            "margin-sm": "1rem",
+            "space-xs": "0.25rem",
+            "margin": "2rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem"
+          },
+          "fontFamily": {
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "body-sm": ["Inter"],
+            "label-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "headline-lg-mobile": ["Plus Jakarta Sans"],
+            "body-md": ["Inter"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "body-lg": ["Inter"],
+            "title-md": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "display-lg-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "body-sm": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "700" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #eff4ff;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #c8c5d0;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased flex flex-col min-h-screen">
+<!-- ================= TOP APP BAR (Shared Component: TopNavBar) ================= -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none docked full-width top-0 z-40 sticky">
+<div class="flex justify-between items-center w-full px-6 py-3 max-w-full">
+<!-- Left side: Brand + Search -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-secondary-fixed">auto_stories</span>
+</div>
+<span class="text-headline-md font-headline-md font-extrabold text-primary dark:text-primary-fixed">ScribLearn</span>
+</div>
+<!-- Search Bar on Left -->
+<div class="relative w-72 hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full pl-9 pr-3 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant text-body-sm font-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-colors" placeholder="Search student name, ID, or module..." type="text"/>
+</div>
+</div>
+<!-- Center Desktop Navigation Links -->
+<nav class="hidden md:flex items-center gap-6 text-label-md font-label-md">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface dark:hover:text-inverse-on-surface py-1 hover:bg-surface-container-low dark:hover:bg-surface-container transition-colors duration-150 rounded px-2" href="#">Dashboard</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface dark:hover:text-inverse-on-surface py-1 hover:bg-surface-container-low dark:hover:bg-surface-container transition-colors duration-150 rounded px-2" href="#">Reader Library</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface dark:hover:text-inverse-on-surface py-1 hover:bg-surface-container-low dark:hover:bg-surface-container transition-colors duration-150 rounded px-2" href="#">Quiz Studio</a>
+<!-- Active Nav Tab: Gradebook -->
+<a class="border-b-2 border-secondary text-secondary dark:text-secondary-fixed font-bold py-1 px-2" href="#">Gradebook</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface dark:hover:text-inverse-on-surface py-1 hover:bg-surface-container-low dark:hover:bg-surface-container transition-colors duration-150 rounded px-2" href="#">Curriculum</a>
+</nav>
+<!-- Right Actions: Secondary Action, Primary Action, Trailing Icon Actions & Profile -->
+<div class="flex items-center gap-3">
+<button class="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline text-label-md font-label-md text-on-surface hover:bg-surface-container-low transition-colors duration-150 active:scale-[0.98]">
+<span class="material-symbols-outlined text-[18px]">domain</span>
+<span>Faculty Portal</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md shadow-sm border-b-2 border-primary active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Create Quiz</span>
+</button>
+<!-- Trailing Icons: notifications, school, help -->
+<div class="flex items-center border-l border-outline-variant pl-3 ml-1 gap-1 text-on-surface-variant">
+<button class="p-2 rounded-lg hover:bg-surface-container-low transition-colors duration-150 relative" title="Notifications">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span>
+</button>
+<button class="p-2 rounded-lg hover:bg-surface-container-low transition-colors duration-150" title="School">
+<span class="material-symbols-outlined text-[20px]">school</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-surface-container-low transition-colors duration-150" title="Help">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+</div>
+<!-- Academic Profile Avatar -->
+<div class="flex items-center gap-2 pl-2 border-l border-outline-variant">
+<img class="w-8 h-8 rounded-full border border-secondary/40 object-cover" data-alt="Academic profile picture of Dr. Aris Vance, Faculty Chair, wearing professional dark scholarly blazer in a university office library filled with books and natural daylight, dignified academic portrait photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAVNVh2PMtyl0d7n7IWEjLWKkx4FBhSqSt206_vrc2H2IIBug_QZk7_yEP-B-sfHH9qhVFq_JB52IsNSZghS4dHQmAAFK4YWg-eYxIgzF-Xqpp2Ct3b0EH5XkBalsODYArsyJgq_Ocj0ynN_tutKH4bbuAQe-aJD8UFB5EFR9xg0jJV-sN3lZzbAVEggf5gP9AIDBN4GTL7JVNta6cSOB90REeH1A3qNGfxVip3sZU0Fm87io635gRug"/>
+<div class="hidden 2xl:block text-left">
+<p class="text-label-sm font-label-sm text-primary leading-tight">Dr. Aris Vance</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant text-[11px] leading-tight">Faculty Chair</p>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- ================= MAIN LAYOUT WITH SIDE NAV BAR ================= -->
+<div class="flex flex-1 overflow-hidden">
+<!-- ================= SIDE NAVIGATION BAR (Shared Component: SideNavBar) ================= -->
+<aside class="w-64 h-[calc(100vh-61px)] flex flex-col justify-between p-4 shrink-0 bg-surface-container-low dark:bg-primary-container border-r border-outline-variant dark:border-outline flat no shadows">
+<!-- Top Group -->
+<div class="space-y-4">
+<!-- Header / Term Info -->
+<div class="flex items-center gap-3 px-2 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/60 shadow-xs">
+<div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary-fixed">token</span>
+</div>
+<div class="overflow-hidden">
+<h2 class="text-title-md font-title-md font-bold text-primary dark:text-primary-fixed truncate">Fall Semester 2024</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">Faculty: Prof. Vance</p>
+</div>
+</div>
+<!-- CTA Button -->
+<button class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-primary text-on-primary text-label-md font-label-md shadow-xs active:scale-[0.99] transition-transform duration-100 hover:bg-primary/95">
+<span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+<span>Upload Document</span>
+</button>
+<!-- Navigation Tabs (6 tabs, Master Gradebook active) -->
+<nav class="space-y-1 text-label-sm font-label-sm">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+<span>Library &amp; Texts</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">quiz</span>
+<span>Quiz Forge</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span>Active Sessions</span>
+</a>
+<!-- ACTIVE TAB: Master Gradebook -->
+<a class="bg-secondary text-on-secondary rounded-lg font-bold flex items-center gap-3 px-3 py-2.5 shadow-sm active:scale-[0.99] transition-transform duration-100" href="#">
+<span class="material-symbols-outlined text-[20px]">table_chart</span>
+<span>Master Gradebook</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">insights</span>
+<span>Analytics</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Footer Tabs (Help Desk, Log Out) -->
+<div class="border-t border-outline-variant pt-3 space-y-1 text-label-sm font-label-sm">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-on-surface flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-container-high dark:hover:bg-surface-container transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[19px]">contact_support</span>
+<span>Help Desk</span>
+</a>
+<a class="text-error hover:bg-error-container/40 flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[19px]">logout</span>
+<span>Log Out</span>
+</a>
+</div>
+</aside>
+<!-- ================= MAIN CONTENT CANVAS ================= -->
+<main class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-8 space-y-6">
+<!-- Course & Term Title Banner with Academic Badge -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-label-sm font-label-sm uppercase tracking-wider">Undergraduate Core</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-label-sm font-label-sm">1st Sem 2024</span>
+<span class="px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+              Curriculum Synchronized
+            </span>
+</div>
+<h1 class="text-headline-lg font-headline-lg text-primary tracking-tight">CS-204 Data Structures &amp; Algorithms</h1>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1 flex items-center gap-3">
+<span><strong>Faculty:</strong> Prof. Marcus Vance</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span><strong>Department:</strong> Faculty of Computing &amp; Informatics</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="text-secondary font-semibold">Strict Section Isolation Active</span>
+</p>
+</div>
+<!-- Export Hub Buttons (Excel, Printable PDF, Student Summary Certificates) -->
+<div class="flex flex-wrap items-center gap-2.5">
+<!-- Excel Export -->
+<button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant text-primary text-label-md font-label-md hover:bg-surface-container-low hover:border-secondary transition-colors shadow-xs active:scale-[0.98]">
+<span class="material-symbols-outlined text-on-tertiary-container text-[20px]">table_view</span>
+<span>Export Excel (.xlsx)</span>
+</button>
+<!-- PDF Report Export -->
+<button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant text-primary text-label-md font-label-md hover:bg-surface-container-low hover:border-secondary transition-colors shadow-xs active:scale-[0.98]">
+<span class="material-symbols-outlined text-error text-[20px]">picture_as_pdf</span>
+<span>Export Printable PDF Report</span>
+</button>
+<!-- Download Summary Certificates -->
+<button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-secondary text-on-secondary text-label-md font-label-md shadow-sm border-b-2 border-primary active:scale-[0.98] transition-all hover:bg-secondary/95">
+<span class="material-symbols-outlined text-[19px]">workspace_premium</span>
+<span>Download Student Summary Certificates</span>
+</button>
+</div>
+</div>
+<!-- Performance Summary Stat Bento Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Stat 1: Passing Rate -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm flex items-start justify-between">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Class Passing Rate</p>
+<h3 class="text-display-lg font-display-lg text-primary mt-1">84.6%</h3>
+<p class="text-body-sm font-body-sm text-on-tertiary-container font-semibold mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+3.2% vs previous cohort</span>
+</p>
+</div>
+<div class="p-2.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-[24px]">grade</span>
+</div>
+</div>
+<!-- Stat 2: Class Average Score -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm flex items-start justify-between">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Section Average Score</p>
+<h3 class="text-display-lg font-display-lg text-secondary mt-1">81.2%</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Threshold: 75.0% pass grade</p>
+</div>
+<div class="p-2.5 rounded-lg bg-secondary-fixed text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[24px]">analytics</span>
+</div>
+</div>
+<!-- Stat 3: Total Enrolled in Section -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm flex items-start justify-between">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Section Enrollment</p>
+<h3 class="text-display-lg font-display-lg text-primary mt-1">38</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">Enrolled: BSCS-2A (All active)</p>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-container-high text-primary">
+<span class="material-symbols-outlined text-[24px]">groups</span>
+</div>
+</div>
+<!-- Stat 4: Highest Scorer -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm flex items-start justify-between">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Highest Scorer</p>
+<h3 class="text-headline-md font-headline-md text-primary mt-1">Alcantara, Sofia</h3>
+<p class="text-body-sm font-body-sm text-on-tertiary-container font-bold mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">military_tech</span>
+<span>Average: 94.3% (3 Modules)</span>
+</p>
+</div>
+<div class="p-2.5 rounded-lg bg-secondary-fixed-dim text-primary">
+<span class="material-symbols-outlined text-[24px]">emoji_events</span>
+</div>
+</div>
+</div>
+<!-- MANDATORY SEGREGATED RECORD FILTER BAR -->
+<section class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm space-y-4">
+<!-- Banner on Strict Segregation Rule -->
+<div class="flex items-center justify-between bg-surface-container-low px-4 py-2.5 rounded-lg border border-outline-variant/70 text-body-sm font-body-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">security</span>
+<span class="text-primary font-semibold">Strict Section Isolation Mode:</span>
+<span>Records for <strong>BSCS-2A</strong>, <strong>BSCS-2B</strong>, and <strong>BSCS-2C</strong> are stored in segregated vaults. Cross-section tampering is prevented.</span>
+</div>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-highest text-primary">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+            Secured Vault
+          </span>
+</div>
+<!-- Filter Controls Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+<!-- Dropdown 1: Year Level (Mandatory) -->
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1.5">
+              1. Year Level <span class="text-error">*</span>
+</label>
+<div class="relative">
+<select class="w-full bg-surface-bright border border-outline-variant rounded-lg px-3.5 py-2.5 text-body-sm font-body-sm text-primary font-semibold focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-colors cursor-pointer appearance-none">
+<option selected="" value="2nd Year">Year Level: 2nd Year (Sophomore)</option>
+<option value="1st Year">Year Level: 1st Year (Freshman)</option>
+<option value="3rd Year">Year Level: 3rd Year (Junior)</option>
+<option value="4th Year">Year Level: 4th Year (Senior)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 pointer-events-none text-on-surface-variant text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Dropdown 2: Section (Mandatory & Segregated) -->
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1.5">
+              2. Isolated Section <span class="text-error">*</span>
+</label>
+<div class="relative">
+<select class="w-full bg-surface-bright border border-outline-variant rounded-lg px-3.5 py-2.5 text-body-sm font-body-sm text-secondary font-bold focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-colors cursor-pointer appearance-none">
+<option selected="" value="BSCS-2A">Section: BSCS-2A (38 Enrolled) [Segregated]</option>
+<option value="BSCS-2B">Section: BSCS-2B (36 Enrolled) [Segregated]</option>
+<option value="BSCS-2C">Section: BSCS-2C (40 Enrolled) [Segregated]</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 pointer-events-none text-on-surface-variant text-[20px]">layers</span>
+</div>
+</div>
+<!-- Sort By Controls -->
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1.5">
+              Sort By Order
+            </label>
+<div class="flex items-center bg-surface-container-low p-1 rounded-lg border border-outline-variant">
+<button class="flex-1 py-1.5 px-2 rounded-md bg-surface-container-lowest text-primary font-label-sm text-label-sm shadow-xs border border-outline-variant/60 text-center font-bold">
+                Surname (A to Z)
+              </button>
+<button class="flex-1 py-1.5 px-2 rounded-md text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm text-center">
+                Score (High to Low)
+              </button>
+</div>
+</div>
+<!-- Status Filter -->
+<div>
+<label class="block text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-1.5">
+              Academic Status Filter
+            </label>
+<div class="flex items-center gap-1.5">
+<button class="px-3 py-1.5 rounded-lg bg-primary text-on-primary text-label-sm font-label-sm font-bold shadow-xs">
+                All (38)
+              </button>
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-tertiary-container hover:bg-tertiary-fixed/30 border border-outline-variant text-label-sm font-label-sm font-semibold transition-colors">
+                Passed (&gt;=75%) [32]
+              </button>
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-container-low text-error hover:bg-error-container/30 border border-outline-variant text-label-sm font-label-sm font-semibold transition-colors">
+                Needs Retake [6]
+              </button>
+</div>
+</div>
+</div>
+</section>
+<!-- DETAILED STUDENT PERFORMANCE DATA TABLE -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+<div class="px-6 py-4 border-b border-outline-variant flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface-container-low">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">view_list</span>
+<div>
+<h2 class="text-title-md font-title-md font-bold text-primary">Student Performance Registry: BSCS-2A</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Displaying 1–8 of 38 enrolled candidates in isolated cohort</p>
+</div>
+</div>
+<!-- Bulk Table Actions -->
+<div class="flex items-center gap-2">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-label-sm font-label-sm text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[16px]">select_all</span>
+<span>Select All</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-label-sm font-label-sm text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Adjust Curve</span>
+</button>
+</div>
+</div>
+<!-- Table Container -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider border-b border-outline-variant">
+<th class="py-3 px-4 w-12 text-center">
+<input class="w-4 h-4 rounded border-outline text-secondary focus:ring-secondary/40" type="checkbox"/>
+</th>
+<th class="py-3 px-4">Student ID</th>
+<th class="py-3 px-4">Student Surname &amp; Name</th>
+<th class="py-3 px-4">Year &amp; Section</th>
+<th class="py-3 px-4 text-center">Module 1 Quiz (Trees)</th>
+<th class="py-3 px-4 text-center">Module 2 Quiz (Graphs)</th>
+<th class="py-3 px-4 text-center">Module 3 Quiz (Dynamic Prog.)</th>
+<th class="py-3 px-4 text-center">Average Score</th>
+<th class="py-3 px-4 text-center">Status</th>
+<th class="py-3 px-4 text-center">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant text-body-sm font-body-sm">
+<!-- Student 1 -->
+<tr class="hover:bg-surface-container-low transition-colors duration-150 bg-secondary-fixed/10">
+<td class="py-3.5 px-4 text-center">
+<input checked="" class="w-4 h-4 rounded border-outline text-secondary focus:ring-secondary/40" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4 font-mono font-semibold text-primary">2023-CS-0104</td>
+<td class="py-3.5 px-4">
+<div class="font-bold text-primary">Alcantara, Sofia M.</div>
+<div class="text-[11px] text-on-surface-variant">s.alcantara@univ.edu</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-primary font-semibold">2nd Yr • BSCS-2A</span>
+</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">96%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">92%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">95%</td>
+<td class="py-3.5 px-4 text-center">
+<span class="text-headline-sm font-headline-sm font-bold text-secondary">94.3%</span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                    Passed 94%
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="p-1.5 rounded-lg text-secondary hover:bg-surface-container-high transition-colors" title="View Full Breakdown">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors" title="Download Report">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Student 2 -->
+<tr class="hover:bg-surface-container-low transition-colors duration-150">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded border-outline text-secondary focus:ring-secondary/40" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4 font-mono font-semibold text-primary">2023-CS-0112</td>
+<td class="py-3.5 px-4">
+<div class="font-bold text-primary">Bernardo, Liam K.</div>
+<div class="text-[11px] text-on-surface-variant">l.bernardo@univ.edu</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-primary font-semibold">2nd Yr • BSCS-2A</span>
+</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">88%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">85%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">91%</td>
+<td class="py-3.5 px-4 text-center">
+<span class="text-headline-sm font-headline-sm font-bold text-primary">88.0%</span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                    Passed 88%
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="p-1.5 rounded-lg text-secondary hover:bg-surface-container-high transition-colors" title="View Full Breakdown">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors" title="Download Report">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Student 3: Failed / Retake Required -->
+<tr class="hover:bg-surface-container-low transition-colors duration-150 bg-error-container/10">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded border-outline text-secondary focus:ring-secondary/40" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4 font-mono font-semibold text-primary">2023-CS-0128</td>
+<td class="py-3.5 px-4">
+<div class="font-bold text-primary">Cabrera, Daniel R.</div>
+<div class="text-[11px] text-on-surface-variant">d.cabrera@univ.edu</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-primary font-semibold">2nd Yr • BSCS-2A</span>
+</td>
+<td class="py-3.5 px-4 text-center font-semibold text-error">64%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-error">68%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-error">72%</td>
+<td class="py-3.5 px-4 text-center">
+<span class="text-headline-sm font-headline-sm font-bold text-error">68.0%</span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-error-container text-on-error-container font-bold text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                    Failed 68% - Retake Required
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="p-1.5 rounded-lg text-secondary hover:bg-surface-container-high transition-colors" title="Schedule Retake">
+<span class="material-symbols-outlined text-[20px]">event_repeat</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors" title="Download Report">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Student 4 -->
+<tr class="hover:bg-surface-container-low transition-colors duration-150">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded border-outline text-secondary focus:ring-secondary/40" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4 font-mono font-semibold text-primary">2023-CS-0135</td>
+<td class="py-3.5 px-4">
+<div class="font-bold text-primary">De Vera, Angelica P.</div>
+<div class="text-[11px] text-on-surface-variant">a.devera@univ.edu</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-primary font-semibold">2nd Yr • BSCS-2A</span>
+</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">82%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">79%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">84%</td>
+<td class="py-3.5 px-4 text-center">
+<span class="text-headline-sm font-headline-sm font-bold text-primary">81.7%</span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                    Passed 82%
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="p-1.5 rounded-lg text-secondary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Student 5 -->
+<tr class="hover:bg-surface-container-low transition-colors duration-150">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded border-outline text-secondary focus:ring-secondary/40" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4 font-mono font-semibold text-primary">2023-CS-0141</td>
+<td class="py-3.5 px-4">
+<div class="font-bold text-primary">Flores, Carlos Mateo S.</div>
+<div class="text-[11px] text-on-surface-variant">c.flores@univ.edu</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-primary font-semibold">2nd Yr • BSCS-2A</span>
+</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">76%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">78%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">80%</td>
+<td class="py-3.5 px-4 text-center">
+<span class="text-headline-sm font-headline-sm font-bold text-primary">78.0%</span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                    Passed 78%
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="p-1.5 rounded-lg text-secondary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Student 6: Retake -->
+<tr class="hover:bg-surface-container-low transition-colors duration-150 bg-error-container/10">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded border-outline text-secondary focus:ring-secondary/40" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4 font-mono font-semibold text-primary">2023-CS-0152</td>
+<td class="py-3.5 px-4">
+<div class="font-bold text-primary">Gomez, Enrique T.</div>
+<div class="text-[11px] text-on-surface-variant">e.gomez@univ.edu</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-primary font-semibold">2nd Yr • BSCS-2A</span>
+</td>
+<td class="py-3.5 px-4 text-center font-semibold text-error">70%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-error">65%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-error">74%</td>
+<td class="py-3.5 px-4 text-center">
+<span class="text-headline-sm font-headline-sm font-bold text-error">69.7%</span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-error-container text-on-error-container font-bold text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                    Failed 70% - Retake Required
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="p-1.5 rounded-lg text-secondary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">event_repeat</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Student 7 -->
+<tr class="hover:bg-surface-container-low transition-colors duration-150">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded border-outline text-secondary focus:ring-secondary/40" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4 font-mono font-semibold text-primary">2023-CS-0164</td>
+<td class="py-3.5 px-4">
+<div class="font-bold text-primary">Hermosa, Patricia B.</div>
+<div class="text-[11px] text-on-surface-variant">p.hermosa@univ.edu</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-primary font-semibold">2nd Yr • BSCS-2A</span>
+</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">90%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">88%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">92%</td>
+<td class="py-3.5 px-4 text-center">
+<span class="text-headline-sm font-headline-sm font-bold text-primary">90.0%</span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                    Passed 90%
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="p-1.5 rounded-lg text-secondary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<!-- Student 8 -->
+<tr class="hover:bg-surface-container-low transition-colors duration-150">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded border-outline text-secondary focus:ring-secondary/40" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4 font-mono font-semibold text-primary">2023-CS-0177</td>
+<td class="py-3.5 px-4">
+<div class="font-bold text-primary">Ilagan, Julian Vance D.</div>
+<div class="text-[11px] text-on-surface-variant">j.ilagan@univ.edu</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-primary font-semibold">2nd Yr • BSCS-2A</span>
+</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">84%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">82%</td>
+<td class="py-3.5 px-4 text-center font-semibold text-primary">86%</td>
+<td class="py-3.5 px-4 text-center">
+<span class="text-headline-sm font-headline-sm font-bold text-primary">84.0%</span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-bold text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                    Passed 84%
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-center">
+<button class="p-1.5 rounded-lg text-secondary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination & Footer Summary -->
+<div class="px-6 py-3.5 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-container-low text-body-sm font-body-sm text-on-surface-variant">
+<div>
+            Showing <strong class="text-primary">1–8</strong> of <strong class="text-primary">38</strong> students enrolled in <strong class="text-secondary font-semibold">Section BSCS-2A</strong>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1 rounded border border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high disabled:opacity-50" disabled="">
+              Previous
+            </button>
+<span class="px-2 font-bold text-primary">Page 1 of 5</span>
+<button class="px-3 py-1 rounded border border-outline-variant bg-surface-container-lowest text-primary font-semibold hover:bg-surface-container-high">
+              Next
+            </button>
+</div>
+</div>
+</section>
+<!-- BOTTOM STUDENT PERSONAL GRADE SUMMARY PREVIEW DRAWER -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm p-6 relative overflow-hidden">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-outline-variant pb-4 mb-5">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-secondary text-on-secondary flex items-center justify-center font-bold text-headline-sm">
+              AS
+            </div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-label-sm font-label-sm px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-bold">Currently Selected Candidate</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">ID: 2023-CS-0104</span>
+</div>
+<h2 class="text-headline-sm font-headline-sm text-primary font-bold">Alcantara, Sofia M. — Individual Academic Breakdown</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Enrolled in: 2nd Year, Section BSCS-2A | Degree: Bachelor of Science in Computer Science</p>
+</div>
+</div>
+<!-- Individual Student Personal Export PDF -->
+<div class="flex items-center gap-3">
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary text-label-md font-label-md shadow-sm hover:bg-primary/95 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[19px]">receipt_long</span>
+<span>Export Personal Student Grade Sheet (PDF)</span>
+</button>
+<button class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-outline-variant bg-surface-container-low text-primary text-label-md font-label-md hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[19px]">mail</span>
+<span>Email Grade to Student</span>
+</button>
+</div>
+</div>
+<!-- 3-Column Diagnostic Breakdown for Selected Student -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Card 1: Quiz Module Breakdown -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/60">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-title-md font-title-md text-primary font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">quiz</span>
+                Module Evaluations
+              </h3>
+<span class="text-label-sm font-label-sm text-on-tertiary-container font-bold">3/3 Completed</span>
+</div>
+<div class="space-y-2.5 text-body-sm font-body-sm">
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/40">
+<span class="text-on-surface-variant">Mod 1: Binary Search Trees &amp; AVL</span>
+<span class="font-bold text-primary">96 / 100 (96%)</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/40">
+<span class="text-on-surface-variant">Mod 2: Graph Theory &amp; Shortest Path</span>
+<span class="font-bold text-primary">92 / 100 (92%)</span>
+</div>
+<div class="flex justify-between items-center py-1">
+<span class="text-on-surface-variant">Mod 3: Dynamic Programming &amp; Knapsack</span>
+<span class="font-bold text-primary">95 / 100 (95%)</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Attendance & Laboratory Submissions -->
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/60">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-title-md font-title-md text-primary font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">assignment_turned_in</span>
+                Lab Practicum &amp; Attendance
+              </h3>
+<span class="text-label-sm font-label-sm text-on-tertiary-container font-bold">100% Rate</span>
+</div>
+<div class="space-y-2.5 text-body-sm font-body-sm">
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/40">
+<span class="text-on-surface-variant">Lectures Attended:</span>
+<span class="font-bold text-primary">28 / 28 Sessions</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-outline-variant/40">
+<span class="text-on-surface-variant">C++ Coding Problem Sets:</span>
+<span class="font-bold text-primary">12 / 12 Verified</span>
+</div>
+<div class="flex justify-between items-center py-1">
+<span class="text-on-surface-variant">Peer Review Participation:</span>
+<span class="font-bold text-on-tertiary-container">Exemplary (5/5)</span>
+</div>
+</div>
+</div>
+<!-- Card 3: Final Computed Rating & Faculty Remarks -->
+<div class="p-4 rounded-lg bg-secondary-fixed/30 border border-secondary/20">
+<div class="flex items-center justify-between mb-2">
+<h3 class="text-title-md font-title-md text-primary font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">verified</span>
+                Term Evaluation Status
+              </h3>
+<span class="text-label-sm font-label-sm bg-tertiary-fixed text-on-tertiary-fixed font-bold px-2 py-0.5 rounded">Passed • Honors</span>
+</div>
+<div class="mt-2">
+<div class="text-display-lg font-display-lg text-secondary">94.3%</div>
+<p class="text-body-sm font-body-sm text-primary mt-1">
+<strong>Faculty Remark:</strong> Outstanding conceptual grasping of amortized complexity and tree balancing algorithms. Recommended for Departmental Research Fellowship.
+              </p>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>
