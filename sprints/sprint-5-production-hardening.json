@@ -1,7 +1,7 @@
 {
   "sprintNumber": 5,
   "sprintName": "Global Lesson Directory, Production Hardening & System Telemetry",
-  "status": "planned",
+  "status": "completed",
   "startDate": "2026-12-06",
   "endDate": "2026-12-20",
   "goals": [
@@ -18,9 +18,17 @@
         "cat:curriculum",
         "sev:medium"
       ],
-      "status": "open",
+      "status": "closed",
       "githubIssueNumber": 21,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nCentralized global repository of all faculty-authored topics and lessons, accessible and visible to all (Requirement 9).\n\n#### 2. Capabilities\n- Global keyword search across all subject topics, lesson summaries, and lecture notes.\n- Filtering by semester, academic year level, and faculty instructor.\n- Syllabus overview cards allowing prospective students to explore curriculum outlines."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nCentralized global repository of all faculty-authored topics and lessons, accessible and visible to all (Requirement 9).\n\n#### 2. Capabilities\n- Global keyword search across all subject topics, lesson summaries, and lecture notes.\n- Filtering by semester, academic year level, and faculty instructor.\n- Syllabus overview cards allowing prospective students to explore curriculum outlines.\n\n#### Verified implementation\n- Paginated public metadata directory with title/summary/lecture-text/course/instructor keyword matching, year/term/instructor/format filters, syllabus overviews and prerequisite-aware learning-path links. Full notes/files/keys remain protected.",
+      "implementedAt": "2026-10-22",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/routes/directoryRoutes.ts",
+        "frontend/src/components/directory/LessonDirectory.tsx",
+        "backend/src/__tests__/system.test.ts",
+        "frontend/e2e/sprints4-5.spec.ts"
+      ]
     },
     {
       "id": "QUIKZ-22",
@@ -31,9 +39,22 @@
         "cat:system",
         "sev:high"
       ],
-      "status": "open",
+      "status": "closed",
       "githubIssueNumber": 22,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nComprehensive audit logging, telemetry health monitor, and MongoDB Atlas database connection synchronization engine.\n\n#### 2. Monitoring Metrics\n- Assessment submission latency and transaction logs.\n- MongoDB Atlas cluster connection pool health and failover metrics.\n- Security event logging for authentication attempts and honor code compliance."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nComprehensive audit logging, telemetry health monitor, and MongoDB Atlas database connection synchronization engine.\n\n#### 2. Monitoring Metrics\n- Assessment submission latency and transaction logs.\n- MongoDB Atlas cluster connection pool health and failover metrics.\n- Security event logging for authentication attempts and honor code compliance.\n\n#### Verified implementation\n- Persistent privacy-filtered credential/publication/assessment/integrity/export audit events, idempotent result records, latency statistics, faculty operations dashboard, trusted operator account-ID allowlist, real MongoDB ping/write/read/delete checks, pool/topology event monitoring, and 15-second dashboard refresh. Configured connection failures never silently switch to temporary storage; production requires persistent storage and disables default demo seeding.",
+      "implementedAt": "2026-10-22",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/models/AuditEvent.ts",
+        "backend/src/middleware/audit.ts",
+        "backend/src/services/telemetry.ts",
+        "backend/src/routes/systemRoutes.ts",
+        "frontend/src/components/system/SystemHealth.tsx",
+        "backend/src/__tests__/system.test.ts"
+      ]
     }
-  ]
+  ],
+  "completedAt": "2026-10-22",
+  "auditedAt": "2026-10-22",
+  "auditReport": "sprints/sprint-audit.json"
 }

@@ -8,11 +8,12 @@ import { useAuth } from '../../context/AuthContext.js';
 import { CreateModuleModal } from './CreateModuleModal.js';
 
 interface ModuleReaderProps {
+  initialModuleId?: string;
   subject: Subject;
   onBack: () => void;
 }
 
-export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack }) => {
+export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, initialModuleId }) => {
   const { user } = useAuth();
   const [modules, setModules] = useState<ModuleItem[]>([]);
   const [progress, setProgress] = useState<CurriculumProgress>({ totalModules: 0, completedCount: 0 });
@@ -40,6 +41,8 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack }) =
             if (found) return found;
           }
           const firstUnlocked = res.modules.find((m) => !m.isLocked);
+          const requested = res.modules.find(m => m._id === initialModuleId && !m.isLocked);
+          if (requested) return requested;
           return firstUnlocked || res.modules[0];
         });
       }

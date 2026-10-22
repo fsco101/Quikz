@@ -122,6 +122,8 @@ export const login = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
+    res.locals.auditActorId = user._id;
+    res.locals.auditActorRole = user.role;
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
@@ -155,7 +157,7 @@ export const login = async (req: Request, res: Response) => {
       }
     });
   } catch (err: any) {
-    res.status(500).json({ message: 'Login failed', error: err.message });
+    res.status(500).json({ message: 'Login failed. Please retry.' });
   }
 };
 
@@ -172,6 +174,6 @@ export const getMe = async (req: AuthRequest, res: Response) => {
 
     res.json({ user: { ...user.toObject(), id: String(user._id) } });
   } catch (err: any) {
-    res.status(500).json({ message: 'Failed to retrieve user', error: err.message });
+    res.status(500).json({ message: 'Failed to retrieve user' });
   }
 };

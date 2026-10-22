@@ -6,6 +6,7 @@ import { QuizSubmission } from "../models/QuizSubmission.js";
 import { Module } from "../models/Module.js";
 import { Subject } from "../models/Subject.js";
 import { User } from "../models/User.js";
+import { AuditEvent } from "../models/AuditEvent.js";
 import { AuthRequest } from "../middleware/auth.js";
 import { generateQuestionsFromContent } from "../services/questionGenerator.js";
 import { extractDocumentText } from "../services/documentText.js";
@@ -156,6 +157,27 @@ export const getQuizById = async (req: AuthRequest, res: Response) => {
 };
 
 async function applyProgress(submission: any) {
+  await AuditEvent.updateOne(
+    { dedupeKey: `submission:${submission._id}` },
+    {
+      $setOnInsert: {
+        action: "quiz.result_recorded",
+        actorId: submission.studentId,
+        actorRole: "student",
+        subjectId: submission.subjectId,
+        resourceId: String(submission._id),
+        statusCode: 200,
+        outcome: "success",
+        durationMs: 0,
+        details: {
+          percentage: submission.percentage,
+          passed: submission.passed,
+          blurCount: submission.blurCount,
+        },
+      },
+    },
+    { upsert: true },
+  );
   if (submission.passed && submission.moduleId) {
     const module = await Module.findById(submission.moduleId);
     if (String(module?.quizId) === String(submission.quizId))

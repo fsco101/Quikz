@@ -4,8 +4,8 @@
   "updatedAt": "2026-10-22",
   "totalSprints": 5,
   "totalIssues": 22,
-  "completedIssues": 14,
-  "plannedIssues": 8,
+  "completedIssues": 22,
+  "plannedIssues": 0,
   "sprints": [
     {
       "sprint": 1,
@@ -33,14 +33,14 @@
       "name": "Master Gradebook, Multi-Dimensional Analytics & Export Engine",
       "file": "sprints/sprint-4-gradebook.json",
       "totalIssues": 6,
-      "status": "planned"
+      "status": "completed"
     },
     {
       "sprint": 5,
       "name": "Global Lesson Directory, Production Hardening & System Telemetry",
       "file": "sprints/sprint-5-production-hardening.json",
       "totalIssues": 2,
-      "status": "planned"
+      "status": "completed"
     }
   ],
   "auditReport": "sprints/sprint-audit.json"

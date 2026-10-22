@@ -60,4 +60,5 @@ const ModuleSchema = new Schema<IModule>({
   }
 });
 
+ModuleSchema.index({ subjectId: 1, orderIndex: 1 });
 export const Module = mongoose.model<IModule>('Module', ModuleSchema);

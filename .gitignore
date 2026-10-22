@@ -8,5 +8,6 @@ yarn-error.log*
 uploads/
 *.log
 .analysis/
+graphify-out/
 test-results/
 playwright-report/

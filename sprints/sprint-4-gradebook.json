@@ -1,7 +1,7 @@
 {
   "sprintNumber": 4,
   "sprintName": "Master Gradebook, Multi-Dimensional Analytics & Export Engine",
-  "status": "planned",
+  "status": "completed",
   "startDate": "2026-11-21",
   "endDate": "2026-12-05",
   "goals": [
@@ -19,9 +19,16 @@
         "cat:gradebook",
         "sev:high"
       ],
-      "status": "open",
+      "status": "closed",
       "githubIssueNumber": 11,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nPersonal student performance dashboard displaying all completed quizzes, scores, attempts, and pass/fail statuses.\n\n#### 2. Features\n- Sortable by date, surname, and score (Requirement 7 & 7a).\n- Visual 75% benchmark indicator (Passed in green, Needs Review in amber).\n- Export personal results to individual PDF or spreadsheet report."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nPersonal student performance dashboard displaying all completed quizzes, scores, attempts, and pass/fail statuses.\n\n#### 2. Features\n- Sortable by date, surname, and score (Requirement 7 & 7a).\n- Visual 75% benchmark indicator (Passed in green, Needs Review in amber).\n- Export personal results to individual PDF or spreadsheet report.\n\n#### Verified implementation\n- Personal results, retake numbering, date/surname/score sorting, pass indicators, summary distributions, and personal exports.",
+      "implementedAt": "2026-10-22",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "frontend/src/components/gradebook/Gradebook.tsx",
+        "backend/src/services/gradebook.ts",
+        "backend/src/__tests__/reporting.test.ts"
+      ]
     },
     {
       "id": "QUIKZ-12",
@@ -32,9 +39,16 @@
         "cat:gradebook",
         "sev:critical"
       ],
-      "status": "open",
+      "status": "closed",
       "githubIssueNumber": 12,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nFaculty Master Gradebook with mandatory separation of student records by Year Level and Section (Requirement 8).\n\n#### 2. Data Segregation Architecture\n- Dedicated separate datasets and tabs for each unique combination (e.g. \"3rd Year · Section A\", \"3rd Year · Section B\").\n- Filterable by year level, section, student surname, and score ranges."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nFaculty Master Gradebook with mandatory separation of student records by Year Level and Section (Requirement 8).\n\n#### 2. Data Segregation Architecture\n- Dedicated separate datasets and tabs for each unique combination (e.g. \"3rd Year · Section A\", \"3rd Year · Section B\").\n- Filterable by year level, section, student surname, and score ranges.\n\n#### Verified implementation\n- Faculty-owned subject scope; mandatory cohort-separated datasets and tables; aggregate performance metrics.",
+      "implementedAt": "2026-10-22",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/services/gradebook.ts",
+        "frontend/src/components/gradebook/Gradebook.tsx",
+        "backend/src/__tests__/reporting.test.ts"
+      ]
     },
     {
       "id": "QUIKZ-13",
@@ -45,9 +59,16 @@
         "cat:export",
         "sev:high"
       ],
-      "status": "open",
+      "status": "closed",
       "githubIssueNumber": 13,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nAutomated document export pipeline for formatted PDF documents and Excel (.xlsx) spreadsheets for students and professors.\n\n#### 2. Implementation Stack\n- **Excel Export**: `xlsx` generating styled tabular worksheets.\n- **PDF Export**: `jspdf` + `jspdf-autotable` with academic institutional styling."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nAutomated document export pipeline for formatted PDF documents and Excel (.xlsx) spreadsheets for students and professors.\n\n#### 2. Implementation Stack\n- **Excel Export**: server-side `exceljs` generating styled tabular worksheets.\n- **PDF Export**: `jspdf` + `jspdf-autotable` with academic institutional styling.\n\n#### Verified implementation\n- Authenticated server-side PDF and styled Excel export endpoints share the same scoped filters as the gradebook. ExcelJS supplies worksheet styling.",
+      "implementedAt": "2026-10-22",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/routes/gradebookRoutes.ts",
+        "backend/src/services/reportExport.ts",
+        "backend/src/__tests__/reporting.test.ts"
+      ]
     },
     {
       "id": "QUIKZ-18",
@@ -58,9 +79,16 @@
         "cat:gradebook",
         "sev:critical"
       ],
-      "status": "open",
+      "status": "closed",
       "githubIssueNumber": 18,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nInteractive multi-dimensional gradebook filtering engine strictly maintaining separate records per Year Level & Section.\n\n#### 2. Capabilities\n- Filter chips: Year Level (`1st Year` to `4th Year`), Section (`Section A` to `Section D`).\n- Multi-column sort: Alphabetical by student surname, numerical by score percentage.\n- Real-time search query matching student name, ID, or quiz title."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nInteractive multi-dimensional gradebook filtering engine strictly maintaining separate records per Year Level & Section.\n\n#### 2. Capabilities\n- Filter chips: Year Level (`1st Year` to `4th Year`), Section (`Section A` to `Section D`).\n- Multi-column sort: Alphabetical by student surname, numerical by score percentage.\n- Real-time search query matching student name, ID, or quiz title.\n\n#### Verified implementation\n- Year, section, subject, name/ID/quiz search, score-range and status filters; stable secondary sorting; separate cohort tabs; 25 attempts per cohort per page.",
+      "implementedAt": "2026-10-22",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "frontend/src/components/gradebook/Gradebook.tsx",
+        "backend/src/routes/gradebookRoutes.ts",
+        "backend/src/services/gradebook.ts"
+      ]
     },
     {
       "id": "QUIKZ-19",
@@ -71,9 +99,15 @@
         "cat:export",
         "sev:high"
       ],
-      "status": "open",
+      "status": "closed",
       "githubIssueNumber": 19,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nMulti-sheet Excel workbook export generating distinct spreadsheet tabs for each Year Level and Section combination.\n\n#### 2. Workbook Structure\n- **Sheet 1**: \"3rd Year - Section A\"\n- **Sheet 2**: \"3rd Year - Section B\"\n- **Summary Sheet**: Overall cohort metrics, pass rates (>= 75%), score distributions, and averages."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nMulti-sheet Excel workbook export generating distinct spreadsheet tabs for each Year Level and Section combination.\n\n#### 2. Workbook Structure\n- **Sheet 1**: \"3rd Year - Section A\"\n- **Sheet 2**: \"3rd Year - Section B\"\n- **Summary Sheet**: Overall cohort metrics, pass rates (>= 75%), score distributions, and averages.\n\n#### Verified implementation\n- Summary sheet, separate formatted cohort sheets, numeric percentages/dates, frozen headings, filters, pass/fail styling, cohort metrics and score distribution. Exports include all matching pages.",
+      "implementedAt": "2026-10-22",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/services/reportExport.ts",
+        "backend/src/__tests__/reporting.test.ts"
+      ]
     },
     {
       "id": "QUIKZ-20",
@@ -84,9 +118,18 @@
         "cat:export",
         "sev:high"
       ],
-      "status": "open",
+      "status": "closed",
       "githubIssueNumber": 20,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nFormal PDF report card and faculty master gradebook exporter formatted with academic styling and instructor signature lines.\n\n#### 2. Layout Specifications\n- Institutional Quikz header banner with course code, term, and date.\n- Alphabetical student table sorted by surname with individual quiz scores and pass/fail badges.\n- Formal academic certification block with faculty signature underline."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nFormal PDF report card and faculty master gradebook exporter formatted with academic styling and instructor signature lines.\n\n#### 2. Layout Specifications\n- Institutional Quikz header banner with course code, term, and date.\n- Alphabetical student table sorted by surname with individual quiz scores and pass/fail badges.\n- Formal academic certification block with faculty signature underline.\n\n#### Verified implementation\n- Institutional branding, cohort pages, course/term and score breakdowns, surname indexing, repeated headings, pagination and faculty verification signature lines. Three- and nine-page PDFs rendered and visually reviewed.",
+      "implementedAt": "2026-10-22",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/services/reportExport.ts",
+        "backend/src/__tests__/reporting.test.ts"
+      ]
     }
-  ]
+  ],
+  "completedAt": "2026-10-22",
+  "auditedAt": "2026-10-22",
+  "auditReport": "sprints/sprint-audit.json"
 }

@@ -102,6 +102,7 @@ const QuizSubmissionSchema = new Schema<IQuizSubmission>({
 
 // Index for fast analytics and student gradebook queries
 QuizSubmissionSchema.index({ studentId: 1, subjectId: 1 });
+QuizSubmissionSchema.index({ studentId: 1, submittedAt: -1 });
 QuizSubmissionSchema.index({ attemptId: 1 }, { unique: true, sparse: true });
 QuizSubmissionSchema.index({
   subjectId: 1,
