@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import net from 'node:net';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 let mongod: MongoMemoryServer | null = null;
@@ -18,7 +19,16 @@ export const connectDB = async (): Promise<typeof mongoose> => {
   }
 
   console.log('Starting resilient In-Memory MongoDB Server...');
-  mongod = await MongoMemoryServer.create();
+  // Ask the OS for an available port to avoid Windows excluded port ranges.
+  const port = await new Promise<number>((resolve, reject) => {
+    const probe = net.createServer();
+    probe.once('error', reject);
+    probe.listen(0, '127.0.0.1', () => {
+      const port = (probe.address() as net.AddressInfo).port;
+      probe.close(err => err ? reject(err) : resolve(port));
+    });
+  });
+  mongod = await MongoMemoryServer.create({ instance: { port, ip: '127.0.0.1' } });
   const memoryUri = mongod.getUri();
   await mongoose.connect(memoryUri);
   console.log(`Connected to In-Memory MongoDB at: ${memoryUri}`);

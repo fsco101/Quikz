@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../config/auth.js';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -22,10 +23,10 @@ export const authenticateToken = (
     return res.status(401).json({ message: 'Authentication required. No token provided.' });
   }
 
-  const secret = process.env.JWT_SECRET || 'quikz_super_secret_jwt_key_2026_academic_quiz';
+
 
   try {
-    const decoded = jwt.verify(token, secret) as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
     req.user = decoded;
     next();
   } catch (err) {

@@ -11,6 +11,22 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
   const [agreed, setAgreed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      setAgreed(false);
+      setHasScrolledToBottom(false);
+      const timer = setTimeout(() => {
+        if (scrollRef.current) {
+          const { scrollHeight, clientHeight } = scrollRef.current;
+          if (scrollHeight - clientHeight <= 25) {
+            setHasScrolledToBottom(true);
+          }
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -62,7 +78,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
               <span className="text-[#6063ee]">1.</span> The 75% Mastery Standard & Evaluation Rigor
             </h4>
             <p className="text-xs text-[#47464f] leading-relaxed">
-              Quikz enforces an institutional passing threshold of seventy-five percent (75%) across all end-of-module quizzes and summative evaluation studios. Candidates failing to reach this metric are barred from progression until mandatory retrieval practice intervals are satisfied. Gated course modules require full verification and completion of previous chapter milestones.
+              Quikz enforces an institutional passing threshold of seventy-five percent (75%) across all end-of-module quizzes and summative evaluation studios. Candidates must reach this metric before progressing to the next module. Module quizzes may be retaken immediately to practice and improve. Gated course modules require full verification and completion of previous chapter milestones.
             </p>
           </section>
 

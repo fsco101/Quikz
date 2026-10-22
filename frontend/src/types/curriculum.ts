@@ -20,6 +20,7 @@ export interface ModuleItem {
   textContent?: string;
   fileName?: string;
   fileUrl?: string;
+  quizId?: { _id: string; title: string; timeLimitMinutes: number; passingPercentage: number };
   isLocked?: boolean;
   isCompleted?: boolean;
   createdAt: string;

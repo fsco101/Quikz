@@ -6,7 +6,7 @@ import { upload } from '../middleware/upload.js';
 
 const router = Router();
 
-router.get('/', authenticateToken, getSubjects);
+router.get('/', getSubjects);
 router.post('/', authenticateToken, requireRole('faculty'), createSubject);
 
 router.get('/:subjectId/modules', authenticateToken, getSubjectModules);

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 import { AuthRequest } from '../middleware/auth.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'quikz_super_secret_jwt_key_2026_academic_quiz';
+import { JWT_SECRET } from '../config/auth.js';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -21,15 +21,25 @@ export const register = async (req: Request, res: Response) => {
     } = req.body;
 
     // Requirement: privacy (terms and condition) before proceeding to account creation
-    if (!termsAccepted) {
+    if (termsAccepted !== true) {
       return res.status(400).json({
         message: 'Academic Honor Code and Terms & Conditions must be accepted before account creation.'
       });
     }
 
-    if (!username || !email || !password || !fullName || !surname) {
+    if ([username, email, password, fullName, surname].some(v => typeof v !== 'string' || !v.trim())) {
       return res.status(400).json({
         message: 'All required fields (username, email, password, full name, surname) must be provided.'
+      });
+    }
+
+    if (!['faculty', 'student'].includes(role) || (role === 'student' && (!['1st Year', '2nd Year', '3rd Year', '4th Year'].includes(yearLevel) || !['Section A', 'Section B', 'Section C', 'Section D'].includes(section)))) {
+      return res.status(400).json({ message: 'Select a valid role, year level, and section.' });
+    }
+
+    if (typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({
+        message: 'Password must be at least 6 characters in length.'
       });
     }
 
@@ -88,7 +98,7 @@ export const register = async (req: Request, res: Response) => {
       }
     });
   } catch (err: any) {
-    res.status(500).json({ message: 'Registration failed', error: err.message });
+    res.status(err.name === 'ValidationError' ? 400 : err.code === 11000 ? 409 : 500).json({ message: 'Registration failed', error: err.message });
   }
 };
 
@@ -96,7 +106,7 @@ export const login = async (req: Request, res: Response) => {
   try {
     const { loginIdentifier, password } = req.body;
 
-    if (!loginIdentifier || !password) {
+    if (typeof loginIdentifier !== 'string' || typeof password !== 'string' || !loginIdentifier || !password) {
       return res.status(400).json({
         message: 'Username/Email and password are required.'
       });
@@ -160,7 +170,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json({ user });
+    res.json({ user: { ...user.toObject(), id: String(user._id) } });
   } catch (err: any) {
     res.status(500).json({ message: 'Failed to retrieve user', error: err.message });
   }

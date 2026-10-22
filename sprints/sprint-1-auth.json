@@ -22,7 +22,13 @@
       ],
       "status": "closed",
       "githubIssueNumber": 1,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nImplements dual-role user registration (Faculty vs. Student) requiring explicit acceptance of the institutional Academic Honor Code and Terms of Service before account creation is enabled.\n\n#### 2. Key Components\n- **Frontend**: `frontend/src/components/auth/AuthPage.tsx` & `TermsModal.tsx`\n- **Backend**: `backend/src/controllers/authController.ts` (`register`)\n- **Model**: `backend/src/models/User.ts` (`termsAccepted: { type: Boolean, required: true }`)\n\n#### 3. Behavioral Rules & Constraints\n- Role selector tabs: Faculty (`faculty`) vs Student (`student`).\n- Student profile captures **Year Level** (`1st Year` to `4th Year`) and **Section** (`Section A` to `Section D`).\n- Scroll-to-bottom policy check: The \"I Agree\" checkbox is locked until the registrant scrolls through the terms to the bottom.\n- Account creation button is disabled until terms are accepted.\n\n#### 4. Design Reference\nDirectly conforms to Stitch design token `authentication_compliance_gateway/code.html` with primary tone `#070235`, secondary accent `#6063ee`, and Google Fonts Plus Jakarta Sans."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nImplements dual-role user registration (Faculty vs. Student) requiring explicit acceptance of the institutional Academic Honor Code and Terms of Service before account creation is enabled.\n\n#### 2. Key Components\n- **Frontend**: `frontend/src/components/auth/AuthPage.tsx` & `TermsModal.tsx`\n- **Backend**: `backend/src/controllers/authController.ts` (`register`)\n- **Model**: `backend/src/models/User.ts` (`termsAccepted: { type: Boolean, required: true }`)\n\n#### 3. Behavioral Rules & Constraints\n- Role selector tabs: Faculty (`faculty`) vs Student (`student`).\n- Student profile captures **Year Level** (`1st Year` to `4th Year`) and **Section** (`Section A` to `Section D`).\n- Scroll-to-bottom policy check: The \"I Agree\" checkbox is locked until the registrant scrolls through the terms to the bottom.\n- Account creation button is disabled until terms are accepted.\n\n#### 4. Design Reference\nDirectly conforms to Stitch design token `authentication_compliance_gateway/code.html` with primary tone `#070235`, secondary accent `#6063ee`, and Google Fonts Plus Jakarta Sans.",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/controllers/authController.ts",
+        "frontend/src/components/auth/TermsModal.tsx",
+        "backend/src/__tests__/auth.test.ts"
+      ]
     },
     {
       "id": "QUIKZ-2",
@@ -35,7 +41,13 @@
       ],
       "status": "closed",
       "githubIssueNumber": 2,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nDelivers cryptographic password hashing, JSON Web Token (JWT) exchange, login verification, and role-based route guard middleware.\n\n#### 2. Key Components\n- **Backend Route**: `POST /api/auth/login`, `GET /api/auth/me`\n- **Middleware**: `authenticateToken`, `requireRole('faculty' | 'student')` in `backend/src/middleware/auth.ts`\n- **Context**: `frontend/src/context/AuthContext.tsx` with token persistence in `localStorage`\n\n#### 3. API Contract\n- **Login Request**: `{ loginIdentifier: \"email or username\", password: \"password\" }`\n- **Response**: `{ token: string, user: { id, username, email, role, fullName, surname, yearLevel, section } }`\n- **Security**: BCrypt salt factor 10, JWT expiration 7 days."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nDelivers cryptographic password hashing, JSON Web Token (JWT) exchange, login verification, and role-based route guard middleware.\n\n#### 2. Key Components\n- **Backend Route**: `POST /api/auth/login`, `GET /api/auth/me`\n- **Middleware**: `authenticateToken`, `requireRole('faculty' | 'student')` in `backend/src/middleware/auth.ts`\n- **Context**: `frontend/src/context/AuthContext.tsx` with token persistence in `localStorage`\n\n#### 3. API Contract\n- **Login Request**: `{ loginIdentifier: \"email or username\", password: \"password\" }`\n- **Response**: `{ token: string, user: { id, username, email, role, fullName, surname, yearLevel, section } }`\n- **Security**: BCrypt salt factor 10, JWT expiration 7 days.",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/config/auth.ts",
+        "backend/src/middleware/auth.ts",
+        "backend/src/controllers/authController.ts"
+      ]
     },
     {
       "id": "QUIKZ-3",
@@ -48,7 +60,14 @@
       ],
       "status": "closed",
       "githubIssueNumber": 3,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nAutomated database seeder ensuring testing environments and new deployments immediately possess verified demo accounts.\n\n#### 2. Seeded Credentials\n- **Faculty Account**: `faculty@quikz.edu` / `Faculty@123` (`Prof. Marcus Alvarez`)\n- **Student Account**: `student@quikz.edu` / `Student@123` (`Alex Dela Cruz`, 3rd Year · Section A)\n\n#### 3. Key Components\n- **Seeder Utility**: `backend/src/utils/seeder.ts` called automatically on server startup.\n- **Frontend Quick Login**: 1-click evaluation shortcuts on the AuthPage gateway."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nAutomated database seeder ensuring testing environments and new deployments immediately possess verified demo accounts.\n\n#### 2. Seeded Credentials\n- **Faculty Account**: `faculty@quikz.edu` / `Faculty@123` (`Prof. Marcus Alvarez`)\n- **Student Account**: `student@quikz.edu` / `Student@123` (`Alex Dela Cruz`, 3rd Year · Section A)\n\n#### 3. Key Components\n- **Seeder Utility**: `backend/src/utils/seeder.ts` called automatically on server startup.\n- **Frontend Quick Login**: 1-click evaluation shortcuts on the AuthPage gateway.",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/utils/seeder.ts",
+        "backend/src/__tests__/auth.test.ts"
+      ]
     }
-  ]
+  ],
+  "auditedAt": "2026-10-22",
+  "auditReport": "sprints/sprint-audit.json"
 }

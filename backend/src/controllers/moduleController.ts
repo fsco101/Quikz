@@ -1,180 +1,192 @@
-import { Response } from 'express';
-import { Module } from '../models/Module.js';
-import { Subject } from '../models/Subject.js';
-import { StudentProgress } from '../models/StudentProgress.js';
-import { AuthRequest } from '../middleware/auth.js';
-import mongoose from 'mongoose';
+import { Response } from "express";
+import mongoose from "mongoose";
+import path from "node:path";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+import { Module } from "../models/Module.js";
+import { Subject } from "../models/Subject.js";
+import { QuizSubmission } from "../models/QuizSubmission.js";
+import { AuthRequest } from "../middleware/auth.js";
+import {
+  recordCompletion,
+  requireModuleAccess,
+  verifiedCompletionIds,
+} from "../services/progression.js";
+import { InputError } from "../services/questionBank.js";
 
 export const getSubjectModules = async (req: AuthRequest, res: Response) => {
   try {
     const { subjectId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
-      return res.status(400).json({ message: 'Invalid subject ID' });
-    }
-
-    const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      return res.status(404).json({ message: 'Subject not found' });
-    }
-
-    const modules = await Module.find({ subjectId }).sort({ orderIndex: 1 });
-
-    // If user is faculty, all modules are unlocked for viewing/editing
-    if (!req.user || req.user.role === 'faculty') {
-      const enriched = modules.map((m) => ({
-        ...m.toObject(),
-        isLocked: false,
-        isCompleted: true
-      }));
-      return res.json({ modules: enriched });
-    }
-
-    // If user is student, calculate linear sequential lock status
-    const studentId = req.user.id;
-    let progress = await StudentProgress.findOne({ studentId, subjectId });
-
-    if (!progress) {
-      progress = new StudentProgress({
-        studentId,
-        subjectId,
-        completedModuleIds: []
-      });
-      await progress.save();
-    }
-
-    const completedSet = new Set(
-      progress.completedModuleIds.map((id) => id.toString())
-    );
-
-    // Progression Rule: Module 1 is always unlocked.
-    // Module N is unlocked ONLY if Module N-1 is in completedSet.
-    let enrichedModules = [];
-    let canAccessNext = true;
-
-    for (let i = 0; i < modules.length; i++) {
-      const mod = modules[i];
-      const isCompleted = completedSet.has(mod._id.toString());
-      const isLocked = !canAccessNext;
-
-      enrichedModules.push({
-        ...mod.toObject(),
+    if (!mongoose.isValidObjectId(subjectId))
+      return res.status(400).json({ message: "Invalid subject ID" });
+    if (!(await Subject.exists({ _id: subjectId })))
+      return res.status(404).json({ message: "Subject not found" });
+    const modules = await Module.find({ subjectId })
+      .sort({ orderIndex: 1 })
+      .populate("quizId", "title timeLimitMinutes passingPercentage");
+    const completed =
+      req.user?.role === "student"
+        ? await verifiedCompletionIds(req.user.id, subjectId, modules)
+        : new Set<string>();
+    let accessible = true;
+    const enriched = modules.map((module) => {
+      const isCompleted = completed.has(String(module._id));
+      const isLocked = req.user?.role === "student" && !accessible;
+      if (!isCompleted) accessible = false;
+      const data = module.toObject();
+      // Locked modules expose navigation metadata only, never lecture content or files.
+      return {
+        ...data,
+        textContent: isLocked ? undefined : data.textContent,
+        fileUrl:
+          isLocked || !data.fileName
+            ? undefined
+            : `/api/modules/${module._id}/file`,
+        summary: isLocked ? "" : data.summary,
+        quizId: isLocked ? undefined : data.quizId,
         isLocked,
-        isCompleted
-      });
-
-      // If current module is NOT completed, all subsequent modules are locked!
-      if (!isCompleted) {
-        canAccessNext = false;
-      }
-    }
-
+        isCompleted,
+      };
+    });
     res.json({
-      modules: enrichedModules,
+      modules: enriched,
       progress: {
         totalModules: modules.length,
-        completedCount: completedSet.size
-      }
+        completedCount: modules.filter((m) => completed.has(String(m._id)))
+          .length,
+      },
     });
   } catch (err: any) {
-    res.status(500).json({ message: 'Failed to retrieve modules', error: err.message });
+    res.status(500).json({ message: "Failed to retrieve modules" });
   }
 };
-
 export const createModule = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user || req.user.role !== 'faculty') {
-      return res.status(403).json({ message: 'Only faculty can add topics/modules.' });
-    }
-
     const { subjectId } = req.params;
-    const { title, summary, contentType, textContent } = req.body;
-
-    if (!title || !summary) {
-      return res.status(400).json({ message: 'Title and executive summary are required.' });
-    }
-
+    const {
+      title,
+      summary,
+      contentType = req.file ? "file" : "text",
+      textContent = "",
+    } = req.body;
+    if (!mongoose.isValidObjectId(subjectId))
+      throw new InputError("Invalid subject ID.");
+    if (
+      typeof title !== "string" ||
+      !title.trim() ||
+      typeof summary !== "string" ||
+      !summary.trim()
+    )
+      throw new InputError("Title and executive summary are required.");
+    if (!["text", "file", "presentation"].includes(contentType))
+      throw new InputError("Invalid content type.");
+    if (contentType !== "text" && !req.file)
+      throw new InputError("Attach a lesson file.");
+    if (typeof textContent !== "string")
+      throw new InputError("Lecture content must be text.");
     const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      return res.status(404).json({ message: 'Subject not found.' });
-    }
-
-    // Determine next orderIndex
-    const lastModule = await Module.findOne({ subjectId }).sort({ orderIndex: -1 });
-    const orderIndex = lastModule ? lastModule.orderIndex + 1 : 1;
-
-    let fileName = undefined;
-    let fileUrl = undefined;
-
-    if (req.file) {
-      fileName = req.file.originalname;
-      fileUrl = `/uploads/${req.file.filename}`;
-    }
-
-    const newModule = new Module({
+    if (!subject) throw new InputError("Subject not found.", 404);
+    if (String(subject.facultyId) !== req.user!.id)
+      throw new InputError("Only the subject owner can add modules.", 403);
+    const last = await Module.findOne({ subjectId }).sort({ orderIndex: -1 });
+    const module = await Module.create({
       subjectId,
       title: title.trim(),
-      orderIndex,
       summary: summary.trim(),
-      contentType: contentType || (req.file ? 'file' : 'text'),
-      textContent: textContent || '',
-      fileName,
-      fileUrl
+      orderIndex: (last?.orderIndex || 0) + 1,
+      contentType,
+      textContent,
+      fileName: req.file?.originalname,
+      fileUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
     });
-
-    await newModule.save();
-
-    res.status(201).json({
-      message: 'Module topic created successfully',
-      module: newModule
+    res.status(201).json({ module });
+  } catch (err: any) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    res
+      .status(err instanceof InputError ? err.status : 400)
+      .json({ message: err.message });
+  }
+};
+export const completeModule = async (req: AuthRequest, res: Response) => {
+  try {
+    if (req.user!.role !== "student")
+      throw new InputError("Only students complete modules.", 403);
+    if (!mongoose.isValidObjectId(req.params.id))
+      throw new InputError("Invalid module ID.");
+    const module = await requireModuleAccess(req.user!.id, req.params.id);
+    const passed =
+      module.quizId &&
+      (await QuizSubmission.exists({
+        studentId: req.user!.id,
+        quizId: module.quizId,
+        passed: true,
+      }));
+    if (!passed)
+      throw new InputError(
+        "Pass the designated end quiz with at least 75% before completing this module.",
+        403,
+      );
+    await recordCompletion(req.user!.id, module.subjectId, module._id);
+    res.json({
+      message: "Module completed. Next module unlocked.",
+      unlockedNext: true,
     });
   } catch (err: any) {
-    res.status(500).json({ message: 'Failed to create module', error: err.message });
+    res
+      .status(err instanceof InputError ? err.status : 500)
+      .json({ message: err.message });
+  }
+};
+export const downloadModuleFile = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      throw new InputError("Invalid module ID.");
+    const module =
+      req.user!.role === "student"
+        ? await requireModuleAccess(req.user!.id, req.params.id)
+        : await Module.findById(req.params.id);
+    if (!module?.fileUrl) throw new InputError("Lesson file not found.", 404);
+    const dir = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "../../uploads",
+    );
+    res.download(
+      path.join(dir, path.basename(module.fileUrl)),
+      module.fileName || "lesson",
+      (err) => {
+        if (err && !res.headersSent)
+          res.status(404).json({ message: "Lesson file not found." });
+      },
+    );
+  } catch (err: any) {
+    res
+      .status(err instanceof InputError ? err.status : 500)
+      .json({ message: err.message });
   }
 };
 
-export const completeModule = async (req: AuthRequest, res: Response) => {
+export const getModuleById = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
-
-    const { id } = req.params;
-    const moduleItem = await Module.findById(id);
-
-    if (!moduleItem) {
-      return res.status(404).json({ message: 'Module not found' });
-    }
-
-    const studentId = req.user.id;
-    const subjectId = moduleItem.subjectId;
-
-    let progress = await StudentProgress.findOne({ studentId, subjectId });
-
-    if (!progress) {
-      progress = new StudentProgress({
-        studentId,
-        subjectId,
-        completedModuleIds: [moduleItem._id]
-      });
-    } else {
-      const alreadyCompleted = progress.completedModuleIds.some(
-        (mId) => mId.toString() === moduleItem._id.toString()
-      );
-      if (!alreadyCompleted) {
-        progress.completedModuleIds.push(moduleItem._id as any);
-        progress.updatedAt = new Date();
-      }
-    }
-
-    await progress.save();
-
+    if (!mongoose.isValidObjectId(req.params.id))
+      throw new InputError("Invalid module ID.");
+    if (req.user!.role === "student")
+      await requireModuleAccess(req.user!.id, req.params.id);
+    const module = await Module.findById(req.params.id).populate(
+      "quizId",
+      "title timeLimitMinutes passingPercentage",
+    );
+    if (!module) throw new InputError("Module not found.", 404);
     res.json({
-      message: 'Module completed! Subsequent material unlocked.',
-      unlockedNext: true,
-      completedModuleId: moduleItem._id
+      module: {
+        ...module.toObject(),
+        fileUrl: module.fileName
+          ? `/api/modules/${module._id}/file`
+          : undefined,
+      },
     });
   } catch (err: any) {
-    res.status(500).json({ message: 'Failed to complete module', error: err.message });
+    res
+      .status(err instanceof InputError ? err.status : 500)
+      .json({ message: err.message });
   }
 };

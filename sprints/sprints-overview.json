@@ -4,8 +4,8 @@
   "updatedAt": "2026-10-22",
   "totalSprints": 5,
   "totalIssues": 22,
-  "completedIssues": 7,
-  "plannedIssues": 15,
+  "completedIssues": 14,
+  "plannedIssues": 8,
   "sprints": [
     {
       "sprint": 1,
@@ -26,7 +26,7 @@
       "name": "Kahoot-Hybrid Quiz Maker Studio & Execution Engine",
       "file": "sprints/sprint-3-quiz-maker.json",
       "totalIssues": 7,
-      "status": "planned"
+      "status": "completed"
     },
     {
       "sprint": 4,
@@ -42,5 +42,6 @@
       "totalIssues": 2,
       "status": "planned"
     }
-  ]
+  ],
+  "auditReport": "sprints/sprint-audit.json"
 }

@@ -29,7 +29,7 @@ export const api = {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      throw new Error(data.message || `Request failed with status ${res.status}`);
+      throw new Error([data.message || `Request failed with status ${res.status}`, ...(data.errors || [])].join('\n'));
     }
 
     return data as T;

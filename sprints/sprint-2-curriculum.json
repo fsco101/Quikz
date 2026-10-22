@@ -23,7 +23,13 @@
       ],
       "status": "closed",
       "githubIssueNumber": 4,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nFaculty administration of academic subjects with subject name, unique subject code, term/semester, and year level.\n\n#### 2. Key Components\n- **Model**: `backend/src/models/Subject.ts` (`name`, `code`, `term`, `yearLevel`, `facultyId`, `facultyName`)\n- **Controller & Routes**: `GET /api/subjects`, `POST /api/subjects` in `subjectController.ts`\n- **UI Components**: `SubjectList.tsx` & `CreateSubjectModal.tsx`\n\n#### 3. Validation & Constraints\n- Subject code is unique, trimmed, and uppercase (e.g. `CS101`, `MATH201`).\n- Year levels: `1st Year`, `2nd Year`, `3rd Year`, `4th Year`.\n- Catalog is visible to all students and faculty (Requirement 4 & 9)."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nFaculty administration of academic subjects with subject name, unique subject code, term/semester, and year level.\n\n#### 2. Key Components\n- **Model**: `backend/src/models/Subject.ts` (`name`, `code`, `term`, `yearLevel`, `facultyId`, `facultyName`)\n- **Controller & Routes**: `GET /api/subjects`, `POST /api/subjects` in `subjectController.ts`\n- **UI Components**: `SubjectList.tsx` & `CreateSubjectModal.tsx`\n\n#### 3. Validation & Constraints\n- Subject code is unique, trimmed, and uppercase (e.g. `CS101`, `MATH201`).\n- Year levels: `1st Year`, `2nd Year`, `3rd Year`, `4th Year`.\n- Catalog is visible to all students and faculty (Requirement 4 & 9).",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/controllers/subjectController.ts",
+        "frontend/src/App.tsx",
+        "backend/src/__tests__/curriculum.test.ts"
+      ]
     },
     {
       "id": "QUIKZ-5",
@@ -36,7 +42,13 @@
       ],
       "status": "closed",
       "githubIssueNumber": 5,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nAuthoring of curriculum topics/modules supporting text lecture notes, PDF document uploads, and slide presentations.\n\n#### 2. Key Components\n- **Model**: `backend/src/models/Module.ts` (`subjectId`, `title`, `orderIndex`, `summary`, `contentType`, `textContent`, `fileUrl`)\n- **File Upload Engine**: Multer middleware storing files into `uploads/` static folder with 25MB threshold.\n- **Modal Component**: `CreateModuleModal.tsx` with text input, format picker, and file attachment."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nAuthoring of curriculum topics/modules supporting text lecture notes, PDF document uploads, and slide presentations.\n\n#### 2. Key Components\n- **Model**: `backend/src/models/Module.ts` (`subjectId`, `title`, `orderIndex`, `summary`, `contentType`, `textContent`, `fileUrl`)\n- **File Upload Engine**: Multer middleware storing files into `uploads/` static folder with 25MB threshold.\n- **Modal Component**: `CreateModuleModal.tsx` with text input, format picker, and file attachment.",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "frontend/src/components/curriculum/ModuleReader.tsx",
+        "backend/src/controllers/moduleController.ts",
+        "backend/src/__tests__/curriculum.test.ts"
+      ]
     },
     {
       "id": "QUIKZ-6",
@@ -49,7 +61,13 @@
       ],
       "status": "closed",
       "githubIssueNumber": 6,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nEnforces strict linear course progression: students cannot unlock subsequent topics without passing the prior module's end quiz.\n\n#### 2. Algorithm & Mechanics\n- **Progression State**: Managed in `backend/src/models/StudentProgress.ts` (`completedModuleIds`).\n- **Gating Rule**: Module 1 (`orderIndex: 1`) is unlocked by default. For any module N > 1, `isLocked = true` unless Module N-1 is in `completedModuleIds`.\n- **UI Presentation**: Padlock indicators on locked modules; unlock animation when milestone is completed."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nEnforces strict linear course progression: students cannot unlock subsequent topics without passing the prior module's end quiz.\n\n#### 2. Algorithm & Mechanics\n- **Progression State**: Managed in `backend/src/models/StudentProgress.ts` (`completedModuleIds`).\n- **Gating Rule**: Module 1 (`orderIndex: 1`) is unlocked by default. For any module N > 1, `isLocked = true` unless Module N-1 is in `completedModuleIds`.\n- **UI Presentation**: Padlock indicators on locked modules; unlock animation when milestone is completed.",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "backend/src/services/progression.ts",
+        "backend/src/controllers/moduleController.ts",
+        "backend/src/__tests__/quiz.test.ts"
+      ]
     },
     {
       "id": "QUIKZ-7",
@@ -62,7 +80,13 @@
       ],
       "status": "closed",
       "githubIssueNumber": 7,
-      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nDisplays an executive topic summary for each module inside the Scribd-style reader view for rapid student comprehension (Requirement 5a).\n\n#### 2. Design & Layout\n- Styled card placed at the top of the reading viewport in `ModuleReader.tsx`.\n- Highlights core objectives, expected competencies, and key terminology.\n- Follows Stitch reader template tokens with soft indigo container styling."
+      "implementationDetails": "### Implementation Architecture & Details\n\n#### 1. Scope & Objective\nDisplays an executive topic summary for each module inside the Scribd-style reader view for rapid student comprehension (Requirement 5a).\n\n#### 2. Design & Layout\n- Styled card placed at the top of the reading viewport in `ModuleReader.tsx`.\n- Highlights core objectives, expected competencies, and key terminology.\n- Follows Stitch reader template tokens with soft indigo container styling.",
+      "auditStatus": "verified",
+      "verificationEvidence": [
+        "frontend/src/components/curriculum/ModuleReader.tsx"
+      ]
     }
-  ]
+  ],
+  "auditedAt": "2026-10-22",
+  "auditReport": "sprints/sprint-audit.json"
 }

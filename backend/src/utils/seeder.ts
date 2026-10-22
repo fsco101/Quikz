@@ -2,11 +2,13 @@ import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import { Subject } from '../models/Subject.js';
 import { Module } from '../models/Module.js';
+import { Quiz } from '../models/Quiz.js';
+import { generateQuestionsFromContent } from '../services/questionGenerator.js';
 
 export const seedDatabase = async () => {
   try {
-    const facultyCount = await User.countDocuments({ role: 'faculty' });
-    const studentCount = await User.countDocuments({ role: 'student' });
+    const facultyCount = await User.countDocuments({ email: 'faculty@quikz.edu' });
+    const studentCount = await User.countDocuments({ email: 'student@quikz.edu' });
 
     let facultyUser = null;
 
@@ -25,7 +27,7 @@ export const seedDatabase = async () => {
       });
       console.log('Seeded Faculty: faculty@quikz.edu / Faculty@123');
     } else {
-      facultyUser = await User.findOne({ role: 'faculty' });
+      facultyUser = await User.findOne({ email: 'faculty@quikz.edu' });
     }
 
     if (studentCount === 0) {
@@ -114,6 +116,23 @@ Under network partitions, a distributed system must choose between CP (consisten
       ]);
 
       console.log('Seeded CS101 with 3 sequential modules successfully!');
+    }
+    // Backfill demo end quizzes even when a database was seeded before Sprint 3.
+    const demo = await Subject.findOne({ code: 'CS101', facultyId: facultyUser?._id });
+    if (demo) {
+      const facts = [
+        'Constant time: execution time remains invariant regardless of input size.\nLogarithmic time: search spaces are halved at each step in a binary search.\nLinear time: processing is directly proportional to the size of a collection.\nLinearithmic time: efficient comparison sorting combines linear and logarithmic growth.',
+        'Stack: contiguous last in first out allocation with automatic deallocation.\nHeap: dynamic allocations managed by free lists or garbage collectors.\nCache: fast memory close to the processor that stores frequently accessed data.\nMain memory: DRAM storage accessed by running programs with page fault overhead.',
+        'Consistency: all nodes perceive identical data at the same timestamp.\nAvailability: every non failing node returns a non error response.\nPartition tolerance: the system continues operating despite dropped network messages.\nCAP theorem: under a network partition a distributed system must choose consistency or availability.'
+      ];
+      const modules = await Module.find({ subjectId: demo._id }).sort({ orderIndex: 1 });
+      for (const [index, module] of modules.slice(0, 3).entries()) {
+        if (module.quizId) continue;
+        const existing = await Quiz.findOne({ moduleId: module._id });
+        const quiz = existing || await Quiz.create({ title: `${module.title} ? End Quiz`, subjectId: demo._id, moduleId: module._id, createdBy: demo.facultyId, timeLimitMinutes: 15, passingPercentage: 75, questions: generateQuestionsFromContent(facts[index]) });
+        module.quizId = quiz._id as any;
+        await module.save();
+      }
     }
   } catch (err: any) {
     console.error('Error seeding demo curriculum:', err.message);

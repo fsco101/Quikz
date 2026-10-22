@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext.js';
 import { TermsModal } from './TermsModal.js';
 import { UserRole } from '../../types/auth.js';
 
-export const AuthPage: React.FC = () => {
+export const AuthPage: React.FC<{ onBrowse?: () => void }> = ({ onBrowse }) => {
   const { login, register } = useAuth();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -541,6 +541,7 @@ export const AuthPage: React.FC = () => {
         </div>
       </main>
 
+      {onBrowse && <div className="pb-6 text-center"><button onClick={onBrowse} className="text-sm font-bold text-[#4648d4] underline">Browse the public subject catalog</button></div>}
       {/* Mandatory Terms & Honor Code Modal */}
       <TermsModal
         isOpen={isTermsModalOpen}

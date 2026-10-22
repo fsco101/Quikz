@@ -7,3 +7,6 @@ yarn-debug.log*
 yarn-error.log*
 uploads/
 *.log
+.analysis/
+test-results/
+playwright-report/

@@ -95,5 +95,19 @@ describe('Sprint 1 - Authentication & Academic Honor Gate', () => {
 
     expect(meRes.status).toBe(200);
     expect(meRes.body.user.email).toBe('student@quikz.edu');
+    expect(meRes.body.user.id).toBe(loginRes.body.user.id);
+    expect(meRes.body.user).not.toHaveProperty('passwordHash');
   });
+  it('requires literal consent and valid academic profile values', async () => {
+    const payload = { username: 'invalid_profile', email: 'invalid@test.edu', password: 'Password123!', fullName: 'Invalid Profile', surname: 'Profile', role: 'student', yearLevel: '2nd Year', section: 'Section B', termsAccepted: true };
+    expect((await request(app).post('/api/auth/register').send({ ...payload, termsAccepted: 'false' })).status).toBe(400);
+    expect((await request(app).post('/api/auth/register').send({ ...payload, yearLevel: '5th Year' })).status).toBe(400);
+    expect((await request(app).post('/api/auth/register').send({ ...payload, role: 'admin' })).status).toBe(400);
+  });
+  it('keeps demo accounts and their module quizzes idempotent', async () => {
+    await seedDatabase();
+    expect(await User.countDocuments({ email: 'faculty@quikz.edu' })).toBe(1);
+    expect(await User.countDocuments({ email: 'student@quikz.edu' })).toBe(1);
+  });
+
 });

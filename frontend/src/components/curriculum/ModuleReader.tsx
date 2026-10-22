@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { QuizStudio } from '../quiz/QuizStudio.js';
+import { QuizTaker } from '../quiz/QuizTaker.js';
 import { Subject, ModuleItem, CurriculumProgress } from '../../types/curriculum.js';
 import { api } from '../../services/api.js';
 import { useAuth } from '../../context/AuthContext.js';
@@ -16,6 +19,8 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack }) =
   const [activeModule, setActiveModule] = useState<ModuleItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [studioOpen, setStudioOpen] = useState(false);
+  const [takingQuiz, setTakingQuiz] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const fetchModules = async () => {
@@ -39,7 +44,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack }) =
         });
       }
     } catch (err) {
-      console.error('Failed to load modules:', err);
+      setActionMessage(err instanceof Error ? err.message : 'Failed to load modules');
     } finally {
       setLoading(false);
     }
@@ -49,15 +54,13 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack }) =
     fetchModules();
   }, [subject._id]);
 
-  const handleCompleteModule = async (moduleId: string) => {
+  const download = async (module: ModuleItem) => {
     try {
-      setActionMessage(null);
-      const res = await api.completeModule(moduleId);
-      setActionMessage('Congratulations! 75% Mastery Verified. Next module unlocked.');
-      await fetchModules();
-    } catch (err: any) {
-      setActionMessage(err.message || 'Failed to complete module');
-    }
+      const response = await fetch(module.fileUrl!, { headers: { Authorization: `Bearer ${api.getToken()}` } });
+      if (!response.ok) throw new Error('Unable to download this lesson. Check prerequisites and try again.');
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a'); link.href = url; link.download = module.fileName || 'lesson'; link.click(); URL.revokeObjectURL(url);
+    } catch (err: any) { setActionMessage(err.message); }
   };
 
   const completionPercentage =
@@ -90,7 +93,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack }) =
         </div>
 
         <div className="flex items-center gap-3 self-end md:self-auto">
-          {user?.role === 'faculty' && (
+          {user?.role === 'faculty' && user.id === subject.facultyId && (
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="px-4 py-2 rounded-xl bg-[#070235] hover:bg-[#1e1b4b] text-white text-xs font-bold transition-all shadow-md flex items-center gap-2"
@@ -249,8 +252,8 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack }) =
               {/* Document Reading Viewport */}
               <div className="border border-[#c8c5d0]/40 rounded-xl p-6 bg-[#f8f9ff] text-xs text-[#0b1c30] leading-relaxed select-text space-y-4 max-h-[500px] overflow-y-auto font-sans">
                 {activeModule.textContent ? (
-                  <div className="space-y-3 whitespace-pre-line leading-relaxed">
-                    {activeModule.textContent}
+                  <div className="lesson-prose space-y-3 leading-relaxed">
+                    <ReactMarkdown>{activeModule.textContent}</ReactMarkdown>
                   </div>
                 ) : (
                   <div className="py-6 text-center text-[#47464f]">
@@ -273,15 +276,13 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack }) =
                       </div>
                     </div>
 
-                    <a
-                      href={activeModule.fileUrl}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      onClick={() => download(activeModule)}
                       className="px-3.5 py-1.5 rounded-lg bg-[#eff4ff] hover:bg-[#d3e4fe] text-[#4648d4] font-bold text-xs flex items-center gap-1.5 transition-colors"
                     >
                       <span className="material-symbols-outlined text-[16px]">download</span>
                       <span>Download</span>
-                    </a>
+                    </button>
                   </div>
                 )}
               </div>
@@ -300,24 +301,12 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack }) =
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
-                  {user?.role === 'student' && !activeModule.isCompleted ? (
-                    <button
-                      onClick={() => handleCompleteModule(activeModule._id)}
-                      className="px-5 py-2.5 rounded-xl bg-[#4648d4] hover:bg-[#3436b8] text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">verified</span>
-                      <span>Pass End Quiz (75%) & Unlock Next</span>
-                    </button>
-                  ) : activeModule.isCompleted ? (
-                    <span className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                      <span>Mastered (Completed)</span>
-                    </span>
-                  ) : (
-                    <span className="px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-bold">
-                      Faculty Preview Mode
-                    </span>
-                  )}
+                  {user?.role === 'faculty' ? (
+                    user.id === subject.facultyId && !activeModule.quizId ? <button onClick={() => setStudioOpen(true)} className="px-5 py-2.5 rounded-xl bg-[#4648d4] hover:bg-[#3436b8] text-white text-xs font-bold">Create end quiz</button> : <span className="text-xs text-indigo-200">{activeModule.quizId ? `Published: ${activeModule.quizId.title}` : 'Awaiting instructor assessment'}</span>
+                  ) : activeModule.quizId ? (
+                    <button onClick={() => setTakingQuiz(activeModule.quizId!._id)} className="px-5 py-2.5 rounded-xl bg-[#4648d4] hover:bg-[#3436b8] text-white text-xs font-bold">{activeModule.isCompleted ? 'Practice again' : 'Start / resume end quiz'} · {activeModule.quizId.timeLimitMinutes} min</button>
+                  ) : <span className="text-xs text-indigo-200">Your instructor has not published an end quiz yet.</span>}
+                  {activeModule.isCompleted && user?.role === 'student' && <span className="text-xs font-bold text-emerald-300">Mastered ✓</span>}
                 </div>
               </div>
             </>
@@ -331,6 +320,8 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack }) =
         </div>
       </div>
 
+      {studioOpen && activeModule && <QuizStudio subject={subject} module={activeModule} onClose={() => setStudioOpen(false)} onPublished={() => { setStudioOpen(false); setActionMessage('End quiz published. Students can now take the assessment.'); void fetchModules(); }} />}
+      {takingQuiz && <QuizTaker quizId={takingQuiz} onClose={() => { setTakingQuiz(null); void fetchModules(); }} />}
       {/* Add Module Modal */}
       <CreateModuleModal
         isOpen={isAddModalOpen}

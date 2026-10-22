@@ -1,34 +1,50 @@
-import { Response } from 'express';
-import { Subject } from '../models/Subject.js';
-import { AuthRequest } from '../middleware/auth.js';
-import { User } from '../models/User.js';
+import { Response } from "express";
+import { Subject } from "../models/Subject.js";
+import { AuthRequest } from "../middleware/auth.js";
+import { User } from "../models/User.js";
 
 export const getSubjects = async (req: AuthRequest, res: Response) => {
   try {
     const subjects = await Subject.find().sort({ createdAt: -1 });
     res.json({ subjects });
   } catch (err: any) {
-    res.status(500).json({ message: 'Failed to retrieve subjects', error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to retrieve subjects", error: err.message });
   }
 };
 
 export const createSubject = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user || req.user.role !== 'faculty') {
-      return res.status(403).json({ message: 'Only faculty members can create subjects.' });
+    if (!req.user || req.user.role !== "faculty") {
+      return res
+        .status(403)
+        .json({ message: "Only faculty members can create subjects." });
     }
 
     const { name, code, term, yearLevel, description } = req.body;
 
-    if (!name || !code || !term || !yearLevel) {
+    if (
+      [name, code, term, yearLevel].some(
+        (value) => typeof value !== "string" || !value.trim(),
+      )
+    ) {
       return res.status(400).json({
-        message: 'Name, code, term/semester, and year level are required.'
+        message: "Name, code, term/semester, and year level are required.",
       });
+    }
+
+    if (!["1st Year", "2nd Year", "3rd Year", "4th Year"].includes(yearLevel)) {
+      return res.status(400).json({ message: "Choose a valid year level." });
     }
 
     const existing = await Subject.findOne({ code: code.toUpperCase().trim() });
     if (existing) {
-      return res.status(409).json({ message: `Subject code ${code.toUpperCase()} already exists.` });
+      return res
+        .status(409)
+        .json({
+          message: `Subject code ${code.toUpperCase()} already exists.`,
+        });
     }
 
     const faculty = await User.findById(req.user.id);
@@ -40,16 +56,20 @@ export const createSubject = async (req: AuthRequest, res: Response) => {
       yearLevel: yearLevel.trim(),
       facultyId: req.user.id,
       facultyName: faculty ? faculty.fullName : req.user.username,
-      description: description ? description.trim() : ''
+      description: description ? description.trim() : "",
     });
 
     await subject.save();
 
     res.status(201).json({
-      message: 'Subject created successfully',
-      subject
+      message: "Subject created successfully",
+      subject,
     });
   } catch (err: any) {
-    res.status(500).json({ message: 'Failed to create subject', error: err.message });
+    res
+      .status(
+        err.name === "ValidationError" ? 400 : err.code === 11000 ? 409 : 500,
+      )
+      .json({ message: "Failed to create subject", error: err.message });
   }
 };

@@ -1,0 +1,296 @@
+{
+  "auditedAt": "2026-10-22",
+  "scope": "All five sprint plans read; Sprints 1-2 audited against code, gaps corrected, Sprint 3 implemented. Sprints 4-5 remain planned.",
+  "baseline": {
+    "backendTests": 10,
+    "backendTestsResult": "passed, but the curriculum suite expected the unauthenticated-by-assessment completion bypass",
+    "backendBuild": "ES-module source lacked package type=module",
+    "workingTree": "Existing uncommitted auth, curriculum, server, seeder, terms-modal and partial quiz backend changes were present and incorporated."
+  },
+  "conclusion": {
+    "sprint1Before": "Not fully implemented: consent, JWT configuration/profile, and demo seeding gaps.",
+    "sprint2Before": "Not fully implemented: critical quiz-free progression and content access bypass, missing guest access and formatted lecture rendering.",
+    "sprint1After": "Implemented against sprint acceptance scope.",
+    "sprint2After": "Implemented against sprint acceptance scope, including real quiz-gated progression delivered with Sprint 3.",
+    "sprint3After": "Implemented for all seven issues.",
+    "sprint4": "Planned: personal performance pages, faculty gradebook, cohort filtering and exports.",
+    "sprint5": "Planned: searchable global lesson directory and persistent audit/telemetry dashboards."
+  },
+  "issues": [
+    {
+      "id": "QUIKZ-1",
+      "before": "partial",
+      "findings": [
+        "API accepted truthy non-boolean consent; profile enums were not enforced."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Literal boolean consent and academic profile validation; scroll-gated terms UI retained."
+      ],
+      "evidence": [
+        "backend/src/controllers/authController.ts",
+        "frontend/src/components/auth/TermsModal.tsx",
+        "backend/src/__tests__/auth.test.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-2",
+      "before": "partial",
+      "findings": [
+        "JWT signing secret was evaluated before dotenv initialization and could differ from verification; /auth/me lacked a consistent user id."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Shared JWT configuration, production secret requirement, password hashing, role guards, and consistent profile identity."
+      ],
+      "evidence": [
+        "backend/src/config/auth.ts",
+        "backend/src/middleware/auth.ts",
+        "backend/src/controllers/authController.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-3",
+      "before": "partial",
+      "findings": [
+        "Role-count based seeding could skip the named demo accounts when another account existed."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Demo accounts are checked by email; seeding remains idempotent; demo module quizzes are backfilled."
+      ],
+      "evidence": [
+        "backend/src/utils/seeder.ts",
+        "backend/src/__tests__/auth.test.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-4",
+      "before": "partial",
+      "findings": [
+        "Catalog required login; API did not restrict year level to the specified values."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Guest catalog UI and public subject listing; normalized unique codes and year validation."
+      ],
+      "evidence": [
+        "backend/src/controllers/subjectController.ts",
+        "frontend/src/App.tsx",
+        "backend/src/__tests__/curriculum.test.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-5",
+      "before": "partial",
+      "findings": [
+        "Lecture markup displayed as plain text; static upload URLs bypassed learning-path access checks."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Safe Markdown rendering, faculty-owned authoring, 25 MB attachments, authenticated prerequisite-aware downloads and module detail endpoint."
+      ],
+      "evidence": [
+        "frontend/src/components/curriculum/ModuleReader.tsx",
+        "backend/src/controllers/moduleController.ts",
+        "backend/src/__tests__/curriculum.test.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-6",
+      "before": "incomplete",
+      "findings": [
+        "Direct completion endpoint unlocked modules without assessment; locked lecture text was still delivered to students."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Passing submissions and designated quiz bindings verify completion flags; locked content is omitted; direct completion requires an actual pass; legacy unverified flags cannot unlock modules."
+      ],
+      "evidence": [
+        "backend/src/services/progression.ts",
+        "backend/src/controllers/moduleController.ts",
+        "backend/src/__tests__/quiz.test.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-7",
+      "before": "implemented",
+      "findings": [],
+      "after": "implemented",
+      "implementation": [
+        "Existing executive-summary card retained in the module reader."
+      ],
+      "evidence": [
+        "frontend/src/components/curriculum/ModuleReader.tsx"
+      ]
+    },
+    {
+      "id": "QUIKZ-8",
+      "before": "partial_backend_only",
+      "findings": [
+        "No quiz studio or student countdown UI; timer validation accepted invalid zero via a default."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "10-20 minute constraints, circular countdown, final-two-minute warning, automatic submission, server expiry and original deadline on resume."
+      ],
+      "evidence": [
+        "frontend/src/components/quiz/QuizStudio.tsx",
+        "frontend/src/components/quiz/QuizTaker.tsx",
+        "backend/src/controllers/quizController.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-9",
+      "before": "partial_backend_only",
+      "findings": [
+        "No manual builder, file parser, import preview, or lecture-file extraction UI."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Manual question editor; JSON/CSV/Aiken bank uploads and editable previews; text/file lecture generation."
+      ],
+      "evidence": [
+        "frontend/src/components/quiz/QuizStudio.tsx",
+        "backend/src/services/questionBank.ts",
+        "backend/src/services/documentText.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-10",
+      "before": "partial_backend_only",
+      "findings": [
+        "No student quiz UI, no attempt validation, leaked answer keys, and rounded scoring could promote scores below 75%."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Interactive taker, server grading with exact 75% threshold, idempotent persisted submission, answer-key privacy, own submission history."
+      ],
+      "evidence": [
+        "frontend/src/components/quiz/QuizTaker.tsx",
+        "backend/src/models/QuizSubmission.ts",
+        "backend/src/controllers/quizController.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-14",
+      "before": "partial",
+      "findings": [
+        "Generator used generic unrelated distractors and accepted only pasted content."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Heuristic definition extraction with lecture-derived distractors; TXT/MD/PDF/DOCX/PPTX support and faculty review."
+      ],
+      "evidence": [
+        "backend/src/services/questionGenerator.ts",
+        "backend/src/services/documentText.ts",
+        "backend/src/__tests__/questionBank.test.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-15",
+      "before": "not_implemented",
+      "findings": [
+        "No bank import pipeline."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Strict 4-100 question schema, exactly four distinct options, integer answer-key bounds, indexed errors, syntax linting, quoted CSV parsing, templates and randomized attempt question order."
+      ],
+      "evidence": [
+        "backend/src/services/questionBank.ts",
+        "frontend/src/components/quiz/QuizStudio.tsx",
+        "backend/src/__tests__/questionBank.test.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-16",
+      "before": "not_implemented",
+      "findings": [
+        "Client blur/time values could be fabricated and no session deadline or concurrency lock existed."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Persisted server-owned sessions, unique active-session index, token validation, saved drafts, deduplicated focus warnings, expiry sweep, interrupted-save lease recovery.",
+        "Per-attempt answer-choice shuffling preserves displayed letters across resume and maps responses back to original answer indexes."
+      ],
+      "evidence": [
+        "backend/src/models/QuizAttempt.ts",
+        "backend/src/controllers/quizController.ts",
+        "frontend/src/components/quiz/QuizTaker.tsx",
+        "backend/src/server.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-17",
+      "before": "partial",
+      "findings": [
+        "Quiz-module binding lacked subject/owner checks, prerequisite checks and a failed-attempt review interval."
+      ],
+      "after": "implemented",
+      "implementation": [
+        "Owned same-subject designated binding, passing-result progression, prerequisite enforcement, immediate module retakes after passing or failing, and reader refresh on results."
+      ],
+      "evidence": [
+        "backend/src/controllers/quizController.ts",
+        "backend/src/services/progression.ts",
+        "frontend/src/components/curriculum/ModuleReader.tsx"
+      ]
+    }
+  ],
+  "decisions": {
+    "minimumQuestions": 4,
+    "maximumQuestions": 100,
+    "optionsPerQuestion": 4,
+    "passingPercentage": 75,
+    "reviewIntervalSeconds": 0,
+    "expirySweepSeconds": 15,
+    "saveLeaseRecoverySeconds": 30,
+    "publishedQuizEditing": "Immutable in this sprint to preserve in-flight assessment scoring.",
+    "documentSupport": [
+      "txt",
+      "md",
+      "pdf with text",
+      "docx",
+      "pptx"
+    ],
+    "standaloneQuizReviewIntervalSeconds": 60,
+    "answerChoiceOrder": "Shuffled per question on each new attempt; persisted for resumption; mapped to the original answer key for grading. Legacy active attempts keep their original order."
+  },
+  "verification": {
+    "backendTests": {
+      "command": "cd backend; npm test",
+      "passed": 51,
+      "suites": 5,
+      "database": "isolated local MongoDB"
+    },
+    "backendBuild": {
+      "command": "cd backend; npm run build",
+      "result": "passed"
+    },
+    "frontendBuild": {
+      "command": "cd frontend; npm run build",
+      "result": "passed"
+    },
+    "browserTests": {
+      "command": "cd frontend; npm run test:e2e",
+      "passed": 3,
+      "coverage": [
+        "faculty creates subject/modules, generates a preview, sees import errors, imports and publishes a bank",
+        "student resumes original deadline and saved answers, records focus warnings, submits, passes and unlocks next module",
+        "public subject catalog and mandatory terms acceptance gate",
+        "automatic countdown submission",
+        "desktop quiz screens and mobile reader screenshots reviewed"
+      ]
+    },
+    "liveAtlas": "Not tested; configure a working MONGODB_URI for persistent Atlas storage. Tests use local MongoDB only."
+  },
+  "limits": [
+    "Definition-based heuristic generation requires at least four distinct definitions and faculty review.",
+    "Scanned documents need OCR; legacy DOC/PPT must be converted.",
+    "Browser focus monitoring is an integrity signal and is not proof of cheating.",
+    "Existing MongoDB fallback is ephemeral when Atlas is not configured or unavailable.",
+    "Local sprint statuses do not synchronize GitHub issues."
+  ]
+}

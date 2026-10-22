@@ -8,6 +8,7 @@ import { Subject } from './types/curriculum.js';
 const MainApp: React.FC = () => {
   const { user, logout, loading } = useAuth();
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  const [browseCatalog, setBrowseCatalog] = useState(false);
 
   if (loading) {
     return (
@@ -23,7 +24,8 @@ const MainApp: React.FC = () => {
   }
 
   if (!user) {
-    return <AuthPage />;
+    if (browseCatalog) return <div className="min-h-screen bg-[#f8f9ff] p-6 md:p-10"><div className="mx-auto max-w-7xl space-y-6"><header className="flex justify-between items-center"><h1 className="text-2xl font-black text-[#070235]">Quikz · Public subject catalog</h1><button className="rounded-xl bg-[#070235] px-4 py-2 text-white" onClick={() => { setBrowseCatalog(false); setSelectedSubject(null); }}>Sign in</button></header>{selectedSubject && <section className="rounded-2xl border bg-white p-6"><h2 className="text-xl font-bold">{selectedSubject.name}</h2><p className="my-3">{selectedSubject.description}</p><p className="text-sm text-slate-600">Sign in to read lessons, take quizzes, and track your learning path.</p></section>}<SubjectList onSelectSubject={setSelectedSubject} /></div></div>;
+    return <AuthPage onBrowse={() => setBrowseCatalog(true)} />;
   }
 
   return (
