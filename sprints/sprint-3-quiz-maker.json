@@ -155,5 +155,11 @@
   ],
   "auditedAt": "2026-10-22",
   "auditReport": "sprints/sprint-audit.json",
-  "completedAt": "2026-10-22"
+  "completedAt": "2026-10-22",
+  "scopeUpdate": {
+    "date": "2026-10-22",
+    "source": "User-requested faculty quiz settings",
+    "status": "implemented",
+    "details": "Original issue titles and acceptance text are retained as historical GitHub records. Fixed 10–20 minute total timing and 75% passing rules are superseded: new quizzes use faculty-set time per question in seconds/minutes, passing percentages from 1–100%, and 1–100 questions per attempt up to bank size. Runtime, progression, and reports use these settings; historical quizzes/results retain their prior timing and grading."
+  }
 }

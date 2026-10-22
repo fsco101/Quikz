@@ -23,7 +23,7 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
     quizId: string;
   const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
   beforeAll(async () => {
-    await mkdir('../.analysis/reports', { recursive: true });
+    await mkdir("../.analysis/reports", { recursive: true });
     await connectDB();
     await AuditEvent.init();
     for (const [name, role] of [
@@ -286,6 +286,36 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
     );
     await mkdir("../.analysis/reports", { recursive: true });
     await writeFile("../.analysis/reports/gradebook.xlsx", response.body);
+  });
+  it("exports the recorded faculty passing mark without relabeling historical results", async () => {
+    const record = await QuizSubmission.findOne({ studentName: "Alex Alpha" });
+    const previous = record!.passingPercentage;
+    await QuizSubmission.updateOne(
+      { _id: record!._id },
+      { passingPercentage: 60 },
+    );
+    try {
+      const xlsx = await binary("/api/gradebook/export/xlsx", faculty);
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(xlsx.body);
+      const sheet = workbook.getWorksheet("2nd Year - Section A")!;
+      expect(sheet.getCell("O4").value).toBe("Passing %");
+      expect([sheet.getCell("O5").value, sheet.getCell("O6").value]).toContain(
+        0.6,
+      );
+      const pdf = await binary("/api/gradebook/export/pdf", faculty);
+      const parser = new PDFParse({ data: new Uint8Array(pdf.body) });
+      try {
+        expect((await parser.getText()).text).toContain("Pass mark 60%");
+      } finally {
+        await parser.destroy();
+      }
+    } finally {
+      await QuizSubmission.updateOne(
+        { _id: record!._id },
+        { passingPercentage: previous },
+      );
+    }
   });
   it("exports personal workbooks with no peer records and honors score filters", async () => {
     const response = await binary(

@@ -33,6 +33,21 @@ export function QuizTaker({
     token.current = sessionStorage.getItem(key) || crypto.randomUUID();
     sessionStorage.setItem(key, token.current);
   }, [quizId, user]);
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .request<{ quiz: Quiz }>(`/quizzes/${quizId}`)
+      .then(({ quiz: metadata }) => {
+        if (!cancelled)
+          setQuiz((current) => current || { ...metadata, questions: [] });
+      })
+      .catch((err: Error) => {
+        if (!cancelled) setError(err.message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [quizId]);
   const acceptResult = (submission: Submission) => {
     completed.current = true;
     setResult(submission);
@@ -53,12 +68,13 @@ export function QuizTaker({
         performance.now() +
         Math.max(
           0,
-          Date.parse(res.attempt.expiresAt) - Date.parse(res.attempt.serverNow),
+          Date.parse(res.attempt.questionExpiresAt || res.attempt.expiresAt) -
+            Date.parse(res.attempt.serverNow),
         );
       answersRef.current = res.attempt.answers;
       completed.current = false;
       setResult(null);
-      setPosition(0);
+      setPosition(res.attempt.currentQuestionIndex ?? 0);
       setAnswers(res.attempt.answers);
       setRemaining(Math.ceil((deadline.current - performance.now()) / 1000));
       setBlurs(res.attempt.blurCount);
@@ -81,16 +97,23 @@ export function QuizTaker({
         const res = await api.request<{
           submission?: Submission;
           blurCount: number;
+          attempt?: Attempt;
         }>(endpoint, {
           method: "PATCH",
           body: JSON.stringify({
             sessionToken: token.current,
             answers: draft,
+            questionIndex: attempt.currentQuestionIndex,
             blur,
           }),
         });
         if (res.submission) acceptResult(res.submission);
         else {
+          if (
+            res.attempt &&
+            res.attempt.currentQuestionIndex !== attempt.currentQuestionIndex
+          )
+            acceptAttempt(res.attempt);
           setBlurs(res.blurCount);
           setSaved("Answers saved");
         }
@@ -115,6 +138,7 @@ export function QuizTaker({
           body: JSON.stringify({
             sessionToken: token.current,
             answers: answersRef.current,
+            questionIndex: attempt.currentQuestionIndex,
           }),
         },
       );
@@ -128,6 +152,52 @@ export function QuizTaker({
       submitting.current = false;
     }
   };
+  const acceptAttempt = (next: Attempt) => {
+    deadline.current =
+      performance.now() +
+      Math.max(
+        0,
+        Date.parse(next.questionExpiresAt || next.expiresAt) -
+          Date.parse(next.serverNow),
+      );
+    answersRef.current = next.answers;
+    setAnswers(next.answers);
+    setPosition(next.currentQuestionIndex ?? 0);
+    setAttempt(next);
+    setRemaining(Math.ceil((deadline.current - performance.now()) / 1000));
+    setBlurs(next.blurCount);
+    setSaved("Answers saved");
+  };
+  const advance = async () => {
+    if (!attempt || submitting.current || completed.current) return;
+    submitting.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      await queue.current;
+      if (completed.current) return;
+      const res = await api.request<{
+        attempt?: Attempt;
+        submission?: Submission;
+      }>(`${endpoint}/advance`, {
+        method: "POST",
+        body: JSON.stringify({
+          sessionToken: token.current,
+          answers: answersRef.current,
+          questionIndex: attempt.currentQuestionIndex,
+        }),
+      });
+      if (res.submission) acceptResult(res.submission);
+      else if (res.attempt) acceptAttempt(res.attempt);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+      submitting.current = false;
+    }
+  };
+  const advanceRef = useRef(advance);
+  advanceRef.current = advance;
   const submitRef = useRef(submit);
   submitRef.current = submit;
   const saveRef = useRef(save);
@@ -143,7 +213,11 @@ export function QuizTaker({
       setRemaining(seconds);
       if (!seconds && !autoSubmitted) {
         autoSubmitted = true;
-        void submitRef.current();
+        if (attempt.timePerQuestionSeconds) {
+          void advanceRef.current().finally(() => {
+            autoSubmitted = false;
+          });
+        } else void submitRef.current();
       }
     }, 250);
     let away = false;
@@ -237,7 +311,7 @@ export function QuizTaker({
             </p>
             <p>
               {result.score} of {result.totalQuestions} correct · Passing mark
-              75%
+              {result.passingPercentage ?? quiz?.passingPercentage ?? 75}%
             </p>
             <p>
               {result.passed
@@ -271,9 +345,12 @@ export function QuizTaker({
               Ready to check your understanding?
             </h2>
             <p>
-              Score at least 75% to unlock the next module. Your faculty has set
-              a 10–20 minute time limit. The countdown begins when you start and
-              continues if you refresh or leave this page.
+              {quiz
+                ? `Passing mark: ${quiz.passingPercentage}%. Questions: ${quiz.questionCount}. Time: ${quiz.timePerQuestionSeconds ? `${quiz.timePerQuestionSeconds} seconds per question` : `${quiz.timeLimitMinutes} minutes total`}.`
+                : "Loading quiz settings…"}
+              Each timed question locks when you advance or its time expires.
+              The timer continues if you refresh or leave this page. Existing
+              quizzes may use a total timer.
             </p>
             <p>
               Only one quiz session can be active at a time. Tab changes and
@@ -300,11 +377,15 @@ export function QuizTaker({
                   Question {position + 1} of {quiz!.questions.length}
                 </p>
                 <p className="text-xs text-indigo-200">
+                  Passing mark {quiz!.passingPercentage}% ·{" "}
+                  {attempt.timePerQuestionSeconds
+                    ? "Time for this question · "
+                    : ""}
                   {answered} answered · {saved}
                 </p>
               </div>
               <div
-                className={`relative h-20 w-20 ${remaining <= 120 ? "animate-pulse text-rose-300" : "text-indigo-200"}`}
+                className={`relative h-20 w-20 ${remaining <= (attempt.timePerQuestionSeconds ? Math.min(10, attempt.timePerQuestionSeconds * 0.2) : 120) ? "animate-pulse text-rose-300" : "text-indigo-200"}`}
                 role="timer"
                 aria-label={`${Math.floor(remaining / 60)} minutes ${remaining % 60} seconds remaining`}
               >
@@ -330,7 +411,11 @@ export function QuizTaker({
                     strokeWidth="4"
                     strokeDasharray="220"
                     strokeDashoffset={
-                      220 * (1 - remaining / (quiz!.timeLimitMinutes * 60))
+                      220 *
+                      (1 -
+                        remaining /
+                          (attempt.timePerQuestionSeconds ||
+                            quiz!.timeLimitMinutes * 60))
                     }
                   />
                 </svg>
@@ -379,6 +464,7 @@ export function QuizTaker({
               {answers.map((answer, index) => (
                 <button
                   key={index}
+                  disabled={!!attempt.timePerQuestionSeconds}
                   onClick={() => setPosition(index)}
                   aria-label={`Go to question ${index + 1}${answer >= 0 ? ", answered" : ""}`}
                   aria-current={position === index ? "step" : undefined}
@@ -390,7 +476,7 @@ export function QuizTaker({
             </nav>
             <footer className="flex flex-wrap gap-3 items-center justify-between">
               <button
-                disabled={position === 0}
+                disabled={position === 0 || !!attempt.timePerQuestionSeconds}
                 onClick={() => setPosition((p) => p - 1)}
                 className="rounded-xl border px-4 py-2 disabled:opacity-30"
               >
@@ -399,7 +485,12 @@ export function QuizTaker({
               <div className="flex gap-3">
                 {position < quiz!.questions.length - 1 && (
                   <button
-                    onClick={() => setPosition((p) => p + 1)}
+                    disabled={busy}
+                    onClick={() =>
+                      attempt.timePerQuestionSeconds
+                        ? void advance()
+                        : setPosition((p) => p + 1)
+                    }
                     className="rounded-xl border px-4 py-2"
                   >
                     Next question

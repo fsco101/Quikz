@@ -158,14 +158,14 @@ export const AuthPage: React.FC<{ onBrowse?: () => void; onBrowseLessons?: () =>
                 Mastery-Based Learning with Gated Progression
               </h2>
               <p className="text-sm text-[#e3dfff]/80 leading-relaxed mb-6">
-                Complete modules sequentially, master lecture materials, and achieve the mandatory <strong className="text-white">75% benchmark</strong> on end-quizzes to unlock subsequent topics.
+                Complete modules sequentially, master lecture materials, and achieve the mandatory <strong className="text-white">faculty-set passing mark</strong> on end-quizzes to unlock subsequent topics.
               </p>
 
-              {/* 75% Badge */}
+              {/* Mastery Badge */}
               <div className="bg-white/10 rounded-xl p-4 border border-white/15 flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-black text-sm">
-                    75%
+                    <span className="material-symbols-outlined">school</span>
                   </div>
                   <div>
                     <div className="text-xs font-bold text-white">Passing Standard</div>
@@ -183,7 +183,7 @@ export const AuthPage: React.FC<{ onBrowse?: () => void; onBrowseLessons?: () =>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-emerald-400 text-[18px]">check_circle</span>
-                  <span>Kahoot-hybrid quiz maker with 10–20 min countdown timer</span>
+                  <span>Quiz maker with faculty-set question timers and passing marks</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-emerald-400 text-[18px]">check_circle</span>

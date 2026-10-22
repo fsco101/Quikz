@@ -23,7 +23,10 @@ export const getSubjectModules = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: "Subject not found" });
     const modules = await Module.find({ subjectId })
       .sort({ orderIndex: 1 })
-      .populate("quizId", "title timeLimitMinutes passingPercentage");
+      .populate(
+        "quizId",
+        "title timeLimitMinutes timePerQuestionSeconds questionCount passingPercentage",
+      );
     const completed =
       req.user?.role === "student"
         ? await verifiedCompletionIds(req.user.id, subjectId, modules)
@@ -123,7 +126,7 @@ export const completeModule = async (req: AuthRequest, res: Response) => {
       }));
     if (!passed)
       throw new InputError(
-        "Pass the designated end quiz with at least 75% before completing this module.",
+        "Meet the designated end quiz passing mark before completing this module.",
         403,
       );
     await recordCompletion(req.user!.id, module.subjectId, module._id);
@@ -173,7 +176,7 @@ export const getModuleById = async (req: AuthRequest, res: Response) => {
       await requireModuleAccess(req.user!.id, req.params.id);
     const module = await Module.findById(req.params.id).populate(
       "quizId",
-      "title timeLimitMinutes passingPercentage",
+      "title timeLimitMinutes timePerQuestionSeconds questionCount passingPercentage",
     );
     if (!module) throw new InputError("Module not found.", 404);
     res.json({

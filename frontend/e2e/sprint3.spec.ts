@@ -38,11 +38,13 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
   await expect(
     page.getByRole("heading", { name: "Quiz Studio", exact: true }),
   ).toBeVisible();
-  await page.getByLabel("Time limit in minutes").fill("9");
+  await page.getByLabel("Time per question").fill("0");
   await expect(
     page.getByRole("button", { name: "Publish module quiz" }),
   ).toBeDisabled();
-  await page.getByLabel("Time limit in minutes").fill("10");
+  await page.getByLabel("Time per question").fill("2");
+  await page.getByLabel("Time unit", { exact: true }).selectOption("minutes");
+  await page.getByLabel("Passing percentage").fill("80");
   await page.getByRole("tab", { name: "Generate from lecture" }).click();
   await page.getByRole("button", { name: "Generate preview" }).click();
   await expect(
@@ -80,6 +82,7 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
     path: "test-results/quiz-studio.png",
     fullPage: true,
   });
+  await page.getByLabel("Questions per attempt").fill("3");
   await page.getByRole("button", { name: "Publish module quiz" }).click();
   await expect(
     page.getByText("End quiz published.", { exact: false }),
@@ -113,11 +116,22 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
   expect(resumedAttempt.answers.filter((a: number) => a >= 0)).toHaveLength(1);
   await page.evaluate(() => window.dispatchEvent(new Event("blur")));
   await expect(page.getByText(/Focus warning \d+:/)).toBeVisible();
-  for (let i = 0; i < 4; i++) {
-    await page
-      .getByRole("button", { name: `Go to question ${i + 1}`, exact: false })
-      .click();
+  expect(resumedAttempt.questionExpiresAt).toBe(firstAttempt.questionExpiresAt);
+  await expect(
+    page.getByRole("button", { name: "Previous", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByLabel("Go to question 2", { exact: true }),
+  ).toBeDisabled();
+  for (let i = 0; i < 3; i++) {
+    await expect(
+      page.getByText(`Question ${i + 1} of 3`, { exact: true }),
+    ).toBeVisible();
     await page.getByRole("button", { name: /Correct concept/ }).click();
+    if (i < 2)
+      await page
+        .getByRole("button", { name: "Next question", exact: true })
+        .click();
   }
   await page.screenshot({
     path: "test-results/quiz-taker.png",
@@ -178,7 +192,7 @@ test("public catalog and mandatory terms gate remain accessible", async ({
   ).toBeEnabled();
 });
 
-test("submits saved answers automatically when the countdown expires", async ({
+test("advances timed questions and submits saved answers when the final question expires", async ({
   page,
   request,
 }) => {
@@ -224,13 +238,14 @@ test("submits saved answers automatically when the countdown expires", async ({
           title: "Timed quiz",
           subjectId: subject._id,
           moduleId: module._id,
-          timeLimitMinutes: 10,
+          timePerQuestion: 3,
+          timeUnit: "seconds",
+          questionCount: 2,
           questions,
         },
       })
     ).status(),
   ).toBe(201);
-  await page.clock.install();
   await page.goto("/");
   await page.getByRole("button", { name: "Student Demo" }).click();
   await page.getByRole("button", { name: "Sign In to Quikz" }).click();
@@ -243,11 +258,13 @@ test("submits saved answers automatically when the countdown expires", async ({
     .getByRole("button", { name: /^[ABCD] Correct$/, exact: true })
     .click();
   await expect(page.getByText("Answers saved", { exact: false })).toBeVisible();
-  await page.clock.fastForward(601000);
+  await expect(
+    page.getByText("Question 2 of 2", { exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Keep practicing" }),
   ).toBeVisible();
-  await expect(page.getByText("25%", { exact: true })).toBeVisible();
+  await expect(page.getByText("50%", { exact: true })).toBeVisible();
   await page
     .getByRole("button", { name: "Retake module quiz", exact: true })
     .click();

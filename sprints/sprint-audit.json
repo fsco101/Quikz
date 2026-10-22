@@ -354,10 +354,10 @@
     }
   ],
   "decisions": {
-    "minimumQuestions": 4,
+    "minimumQuestions": 1,
     "maximumQuestions": 100,
     "optionsPerQuestion": 4,
-    "passingPercentage": 75,
+    "passingPercentage": "Faculty-configurable 1–100%, default 75%; snapshot stored on each submission.",
     "reviewIntervalSeconds": 0,
     "expirySweepSeconds": 15,
     "saveLeaseRecoverySeconds": 30,
@@ -376,12 +376,14 @@
     "publicLessonPageSize": 12,
     "systemOperatorPermission": "Faculty account IDs explicitly listed in SYSTEM_ADMIN_USER_IDS; self-registered email addresses do not confer operator access.",
     "productionStorage": "MONGODB_URI required. Configured connections fail closed. Ephemeral fallback allowed only with no URI outside production.",
-    "demoSeeding": "Disabled by default in production; explicit SEED_DEMO_DATA=true opt-in."
+    "demoSeeding": "Disabled by default in production; explicit SEED_DEMO_DATA=true opt-in.",
+    "quizTiming": "Faculty-configurable seconds or minutes per question, from 1 second to 24 hours. Server deadlines survive refresh; advancing locks answers. Existing quizzes retain their saved total timer.",
+    "questionsPerAttempt": "Faculty-selected count from 1 to bank size (maximum 100), sampled without replacement on each new attempt."
   },
   "verification": {
     "backendTests": {
       "command": "cd backend; npm test",
-      "passed": 86,
+      "passed": 102,
       "suites": 7,
       "database": "isolated local MongoDB"
     },
@@ -406,7 +408,9 @@
         "student personal attempt privacy and directory-to-learning-path navigation",
         "guest full-text keyword discovery, syllabus browsing and filters",
         "database health and audit filtering",
-        "desktop and mobile gradebook layouts reviewed"
+        "desktop and mobile gradebook layouts reviewed",
+        "faculty sets per-question minutes, 80% passing mark and 3-question subset of a 4-question bank",
+        "actual server-timed question advancement and automatic final submission"
       ]
     },
     "liveAtlas": "No live Atlas cluster was available for verification. Local MongoDB ping, write/read/delete checks, mocked connection failure, and production no-fallback behavior are tested.",
@@ -463,5 +467,17 @@
     "Live Atlas deployment and failover were not exercised against an external cluster. Health and write/read probes are implemented and tested against local MongoDB.",
     "Report selections are limited to 10,000 attempts and can be narrowed by subject.",
     "System-wide audit access requires explicitly configured trusted faculty account IDs."
-  ]
+  ],
+  "facultyQuizSettingsUpdate": {
+    "date": "2026-10-22",
+    "supersedes": "Original Sprint 3 fixed 10–20 minute total timer, four-question minimum and fixed 75% benchmark; Sprint 4 fixed benchmark labels. Historical audit entries describe the original implementation.",
+    "implemented": [
+      "Faculty-set seconds/minutes per question, passing percentage, and question count",
+      "Persisted per-question deadlines and locked past/future answers",
+      "Sampled subset scored against its actual size",
+      "Submission passing-mark snapshots used in gradebooks and PDF/XLSX exports",
+      "Legacy quiz timing, randomized answer letters, and immediate module retakes preserved"
+    ],
+    "validation": "102 backend tests, 6 browser tests, both production builds, and PDF visual inspection passed."
+  }
 }

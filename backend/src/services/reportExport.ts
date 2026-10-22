@@ -20,6 +20,7 @@ const headers = [
   "Submitted (UTC)",
   "Focus warnings",
   "Time (s)",
+  "Passing %",
 ];
 const values = (r: GradeRow) => [
   r.surname,
@@ -36,6 +37,7 @@ const values = (r: GradeRow) => [
   new Date(r.submittedAt),
   r.blurCount,
   r.timeSpentSeconds,
+  r.passingPercentage / 100,
 ];
 function title(
   sheet: ExcelJS.Worksheet,
@@ -70,7 +72,7 @@ export async function excelReport(report: Gradebook) {
   title(
     summary,
     "QUIKZ | Academic performance",
-    `${report.viewer.name} | Generated ${report.generatedAt} | Passing mark: 75%`,
+    `${report.viewer.name} | Generated ${report.generatedAt} | Faculty-defined passing marks`,
     6,
   );
   summary.addRow([]);
@@ -138,13 +140,13 @@ export async function excelReport(report: Gradebook) {
     title(
       sheet,
       `QUIKZ | ${group.key}`,
-      `${group.metrics.attempts} attempts | Average ${group.metrics.average.toFixed(2)}% | Pass rate ${group.metrics.passRate.toFixed(2)}% | Passing mark: 75%`,
+      `${group.metrics.attempts} attempts | Average ${group.metrics.average.toFixed(2)}% | Pass rate ${group.metrics.passRate.toFixed(2)}% | Faculty-defined passing marks`,
       headers.length,
     );
     sheet.addRow([]);
     sheet.addRow(headers);
     sheet.columns = [
-      18, 26, 28, 18, 20, 44, 12, 12, 12, 14, 18, 24, 16, 14,
+      18, 26, 28, 18, 20, 44, 12, 12, 12, 14, 18, 24, 16, 14, 14,
     ].map((width) => ({ width }));
     for (const record of group.rows) {
       const row = sheet.addRow(values(record));
@@ -155,9 +157,10 @@ export async function excelReport(report: Gradebook) {
         color: { argb: record.passed ? "FF047857" : "FFB45309" },
       };
     }
+    sheet.getColumn(15).numFmt = "0.00%";
     sheet.getColumn(10).numFmt = "0.00%";
     sheet.getColumn(12).numFmt = "yyyy-mm-dd hh:mm";
-    sheet.autoFilter = { from: "A4", to: `N${Math.max(4, sheet.rowCount)}` };
+    sheet.autoFilter = { from: "A4", to: `O${Math.max(4, sheet.rowCount)}` };
     sheet.headerFooter.oddFooter = "Quikz | &P of &N";
   }
   for (const sheet of book.worksheets) {
@@ -198,7 +201,7 @@ export function pdfReport(report: Gradebook) {
     doc.setTextColor(71, 85, 105);
     doc.setFontSize(8);
     doc.text(
-      `Prepared for ${report.viewer.name.slice(0, 80)} | ${report.generatedAt.slice(0, 10)} | Passing benchmark: 75%`,
+      `Prepared for ${report.viewer.name.slice(0, 80)} | ${report.generatedAt.slice(0, 10)} | Faculty-defined passing marks`,
       12,
       35,
     );
@@ -267,7 +270,7 @@ export function pdfReport(report: Gradebook) {
         `${r.subjectCode}\n${r.term}`,
         `${r.quizTitle}\nAttempt ${r.attempt}`,
         `${r.score}/${r.totalQuestions}\n${r.percentage.toFixed(2)}%`,
-        r.passed ? "Passed" : "Needs review",
+        `${r.passed ? "Passed" : "Needs review"}\nPass mark ${r.passingPercentage}%`,
         r.submittedAt.slice(0, 16).replace("T", " "),
       ]),
       styles: { fontSize: 9, cellPadding: 3, overflow: "linebreak" },

@@ -10,10 +10,8 @@ export class InputError extends Error {
   }
 }
 export function validateQuestions(input: unknown): IQuestion[] {
-  if (!Array.isArray(input) || input.length < 4 || input.length > 100)
-    throw new InputError(
-      "Provide between 4 and 100 questions (4 allows an exact 75% benchmark).",
-    );
+  if (!Array.isArray(input) || input.length < 1 || input.length > 100)
+    throw new InputError("Provide between 1 and 100 questions.");
   const errors: string[] = [];
   input.forEach((q, i) => {
     const prefix = `Question ${i + 1}`;

@@ -12,6 +12,8 @@ export interface IQuiz extends Document {
   subjectId: mongoose.Types.ObjectId;
   moduleId?: mongoose.Types.ObjectId;
   timeLimitMinutes: number;
+  timePerQuestionSeconds?: number;
+  questionCount?: number;
   passingPercentage: number;
   questions: IQuestion[];
   createdBy: mongoose.Types.ObjectId;
@@ -67,23 +69,25 @@ const QuizSchema = new Schema<IQuiz>({
   timeLimitMinutes: {
     type: Number,
     required: true,
-    min: [10, "Minimum quiz time limit is 10 minutes"],
-    max: [20, "Maximum quiz time limit is 20 minutes"],
+    min: 0,
     default: 15,
   },
+  timePerQuestionSeconds: { type: Number, min: 1, max: 86400 },
+  questionCount: { type: Number, min: 1, max: 100, validate: Number.isInteger },
   passingPercentage: {
     type: Number,
     required: true,
     default: 75,
-    enum: [75],
+    min: 1,
+    max: 100,
   },
   questions: {
     type: [QuestionSchema],
     required: true,
     validate: {
       validator: (q: IQuestion[]) =>
-        Array.isArray(q) && q.length >= 4 && q.length <= 100,
-      message: "Quiz must contain 4 to 100 questions",
+        Array.isArray(q) && q.length >= 1 && q.length <= 100,
+      message: "Quiz must contain 1 to 100 questions",
     },
   },
   createdBy: {

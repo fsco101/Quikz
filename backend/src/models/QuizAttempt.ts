@@ -8,6 +8,9 @@ interface IQuizAttempt {
   finalizingAt?: Date;
   startedAt: Date;
   expiresAt: Date;
+  timePerQuestionSeconds?: number;
+  currentQuestionIndex?: number;
+  questionExpiresAt?: Date;
   questionOrder: number[];
   optionOrders?: number[][];
   answers: number[];
@@ -22,6 +25,9 @@ const QuizAttemptSchema = new Schema<IQuizAttempt>({
   finalizingAt: Date,
   startedAt: { type: Date, required: true },
   expiresAt: { type: Date, required: true },
+  timePerQuestionSeconds: Number,
+  currentQuestionIndex: Number,
+  questionExpiresAt: Date,
   questionOrder: { type: [Number], required: true },
   // Indexed by original question, mapping displayed letters to original options.
   // Missing on attempts started before choice randomization was introduced.

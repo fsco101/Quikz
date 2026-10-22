@@ -14,6 +14,7 @@ type Row = {
   score: number;
   totalQuestions: number;
   percentage: number;
+  passingPercentage: number;
   passed: boolean;
   submittedAt: string;
   blurCount: number;
@@ -127,7 +128,7 @@ export function Gradebook() {
           <p className="text-sm text-slate-600 mt-2">
             {user?.role === "faculty"
               ? "Your subjects, separated by year level and section. Every attempt stays visible."
-              : "Your attempt history, scores, and progress toward the 75% benchmark."}
+              : "Your attempt history, scores, and progress toward the faculty-set passing mark."}
           </p>
         </div>
         <div className="flex gap-2">
@@ -212,8 +213,8 @@ export function Gradebook() {
             onChange={(e) => update("status", e.target.value)}
           >
             <option value="all">All results</option>
-            <option value="passed">Passed (75% or more)</option>
-            <option value="needs-review">Needs review (below 75%)</option>
+            <option value="passed">Passed</option>
+            <option value="needs-review">Needs review</option>
           </select>
         </label>
         <label className="text-xs font-bold">
@@ -409,6 +410,9 @@ export function Gradebook() {
                           <td className="p-4">#{row.attempt}</td>
                           <td className="p-4">
                             <strong>{row.percentage.toFixed(2)}%</strong>
+                            <p className="text-xs text-slate-500">
+                              Pass mark {row.passingPercentage}%
+                            </p>
                             <p className="text-xs text-slate-500">
                               {row.score}/{row.totalQuestions}
                             </p>

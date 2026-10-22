@@ -1,5 +1,7 @@
 # Quikz Modular Quiz Learning Platform - System Design & Specification
 
+> Faculty quiz settings amendment (2026-10-22): The fixed 10–20 minute total timer and fixed 75% threshold below describe the original design and are superseded. New quizzes use faculty-set time per question in seconds or minutes, a passing percentage from 1–100%, and a question count from 1–100 up to bank size. Attempts sample shuffled questions without replacement, persist per-question deadlines, and lock answers when advancing. Submissions snapshot their passing mark for progression and reports. Existing quizzes retain their saved total timing; historical submissions retain their 75% threshold. See `sprints/sprint-audit.json` for verification.
+
 **Date**: 2026-10-22  
 **System Name**: Quikz  
 **Author**: Antigravity & fsco101  

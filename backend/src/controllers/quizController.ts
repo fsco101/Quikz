@@ -60,17 +60,51 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
     moduleId,
     questions,
     timeLimitMinutes = 15,
+    timePerQuestion,
+    timeUnit,
+    passingPercentage = 75,
+    questionCount,
   } = req.body;
   if (typeof title !== "string" || !title.trim())
     throw new InputError("Quiz title is required.");
+  const perQuestion = timePerQuestion !== undefined || timeUnit !== undefined;
+  const seconds =
+    perQuestion && typeof timePerQuestion === "number"
+      ? timePerQuestion * (timeUnit === "minutes" ? 60 : 1)
+      : undefined;
   if (
-    typeof timeLimitMinutes !== "number" ||
-    !Number.isFinite(timeLimitMinutes) ||
-    timeLimitMinutes < 10 ||
-    timeLimitMinutes > 20
+    perQuestion &&
+    (!["seconds", "minutes"].includes(timeUnit) ||
+      !Number.isFinite(seconds) ||
+      seconds! < 1 ||
+      seconds! > 86400)
   )
-    throw new InputError("Quiz time limit must be between 10 and 20 minutes.");
+    throw new InputError(
+      "Set a time per question from 1 second to 1,440 minutes and choose seconds or minutes.",
+    );
+  if (
+    !perQuestion &&
+    (typeof timeLimitMinutes !== "number" ||
+      !Number.isFinite(timeLimitMinutes) ||
+      timeLimitMinutes <= 0 ||
+      timeLimitMinutes > 1440)
+  )
+    throw new InputError(
+      "Quiz duration must be greater than zero and at most 1,440 minutes.",
+    );
+  if (
+    typeof passingPercentage !== "number" ||
+    !Number.isFinite(passingPercentage) ||
+    passingPercentage < 1 ||
+    passingPercentage > 100
+  )
+    throw new InputError("Passing percentage must be between 1 and 100.");
   const validated = validateQuestions(questions);
+  const count = questionCount === undefined ? validated.length : questionCount;
+  if (!Number.isInteger(count) || count < 1 || count > validated.length)
+    throw new InputError(
+      "Questions per attempt must be a whole number between 1 and the question bank size.",
+    );
   const subject = await Subject.findById(id(subjectId));
   if (!subject) throw new InputError("Subject not found.", 404);
   if (String(subject.facultyId) !== req.user!.id)
@@ -87,8 +121,10 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
     title: title.trim(),
     subjectId,
     moduleId: module?._id,
-    timeLimitMinutes,
-    passingPercentage: 75,
+    timeLimitMinutes: seconds ? (seconds * count) / 60 : timeLimitMinutes,
+    timePerQuestionSeconds: seconds,
+    questionCount: count,
+    passingPercentage,
     questions: validated,
     createdBy: req.user!.id,
   });
@@ -137,8 +173,9 @@ export const getQuizzesBySubject = async (req: AuthRequest, res: Response) => {
       title: q.title,
       moduleId: q.moduleId,
       timeLimitMinutes: q.timeLimitMinutes,
-      questionCount: q.questions.length,
-      passingPercentage: 75,
+      timePerQuestionSeconds: q.timePerQuestionSeconds,
+      questionCount: q.questionCount ?? q.questions.length,
+      passingPercentage: q.passingPercentage,
     })),
   });
 };
@@ -146,7 +183,12 @@ export const getQuizById = async (req: AuthRequest, res: Response) => {
   const quiz = await quizFor(req);
   if (req.user!.role === "student") {
     const { questions, ...metadata } = publicQuiz(quiz);
-    return res.json({ quiz: { ...metadata, questionCount: questions.length } });
+    return res.json({
+      quiz: {
+        ...metadata,
+        questionCount: quiz.questionCount ?? questions.length,
+      },
+    });
   }
   res.json({
     quiz:
@@ -230,7 +272,7 @@ async function finishAttempt(attempt: any) {
       };
     });
     const score = answers.filter((a) => a.isCorrect).length;
-    const percentage = (score / quiz.questions.length) * 100; // Never round a failing score into a pass.
+    const percentage = (score / claim.questionOrder.length) * 100; // Never round a failing score into a pass.
     const now = new Date();
     const submission = await QuizSubmission.create({
       attemptId: claim._id,
@@ -243,13 +285,14 @@ async function finishAttempt(attempt: any) {
       subjectId: quiz.subjectId,
       moduleId: quiz.moduleId,
       score,
-      totalQuestions: quiz.questions.length,
+      totalQuestions: claim.questionOrder.length,
       percentage,
-      passed: percentage >= 75,
+      passingPercentage: quiz.passingPercentage,
+      passed: percentage >= quiz.passingPercentage,
       answers,
       blurCount: claim.blurCount,
       timeSpentSeconds: Math.min(
-        quiz.timeLimitMinutes * 60,
+        (claim.expiresAt.getTime() - claim.startedAt.getTime()) / 1000,
         Math.max(
           0,
           Math.floor((Date.now() - claim.startedAt.getTime()) / 1000),
@@ -257,7 +300,7 @@ async function finishAttempt(attempt: any) {
       ),
       submittedAt: now,
       retryAfter:
-        percentage < 75 && !quiz.moduleId
+        percentage < quiz.passingPercentage && !quiz.moduleId
           ? new Date(now.getTime() + REVIEW_INTERVAL_SECONDS * 1000)
           : undefined,
     });
@@ -272,6 +315,125 @@ async function finishAttempt(attempt: any) {
     throw err;
   }
 }
+function attemptState(attempt: any) {
+  return {
+    id: attempt._id,
+    startedAt: attempt.startedAt,
+    expiresAt: attempt.expiresAt,
+    questionExpiresAt: attempt.questionExpiresAt,
+    currentQuestionIndex: attempt.currentQuestionIndex,
+    timePerQuestionSeconds: attempt.timePerQuestionSeconds,
+    serverNow: new Date(),
+    answers: attempt.answers,
+    blurCount: attempt.blurCount,
+  };
+}
+async function synchronizeQuestion(attempt: any) {
+  if (
+    !attempt.active ||
+    !attempt.timePerQuestionSeconds ||
+    attempt.expiresAt.getTime() <= Date.now()
+  )
+    return attempt;
+  const deadline = attempt.questionExpiresAt.getTime();
+  if (deadline > Date.now()) return attempt;
+  const elapsed =
+    Math.floor(
+      (Date.now() - deadline) / (attempt.timePerQuestionSeconds * 1000),
+    ) + 1;
+  const index = Math.min(
+    attempt.questionOrder.length - 1,
+    attempt.currentQuestionIndex + elapsed,
+  );
+  return (
+    (await QuizAttempt.findOneAndUpdate(
+      {
+        _id: attempt._id,
+        active: true,
+        finalizing: false,
+        currentQuestionIndex: attempt.currentQuestionIndex,
+        questionExpiresAt: attempt.questionExpiresAt,
+      },
+      {
+        $set: {
+          currentQuestionIndex: index,
+          questionExpiresAt: new Date(
+            deadline + elapsed * attempt.timePerQuestionSeconds * 1000,
+          ),
+        },
+      },
+      { new: true },
+    )) ||
+    (await QuizAttempt.findById(attempt._id)) ||
+    attempt
+  );
+}
+function answerUpdate(attempt: any, body: any) {
+  const answers = validateAnswers(body.answers, attempt.questionOrder.length);
+  if (!attempt.timePerQuestionSeconds) return { answers };
+  // Completed and future questions cannot be rewritten by a forged or stale request.
+  if (body.questionIndex !== attempt.currentQuestionIndex) return {};
+  return {
+    [`answers.${attempt.currentQuestionIndex}`]:
+      answers[attempt.currentQuestionIndex],
+  };
+}
+export const advanceQuestion = async (req: AuthRequest, res: Response) => {
+  let attempt = await synchronizeQuestion(await ownAttempt(req));
+  if (!attempt.active || attempt.expiresAt.getTime() <= Date.now())
+    return res.json({ submission: await finishAttempt(attempt) });
+  if (!attempt.timePerQuestionSeconds)
+    throw new InputError("This quiz uses a total timer.");
+  if (req.body.questionIndex === attempt.currentQuestionIndex) {
+    const index = attempt.currentQuestionIndex!;
+    const answers = answerUpdate(attempt, req.body);
+    if (index === attempt.questionOrder.length - 1) {
+      attempt =
+        (await QuizAttempt.findOneAndUpdate(
+          {
+            _id: attempt._id,
+            active: true,
+            finalizing: false,
+            currentQuestionIndex: index,
+            questionExpiresAt: { $gt: new Date() },
+          },
+          { $set: answers },
+          { new: true },
+        )) || attempt;
+      return res.json({ submission: await finishAttempt(attempt) });
+    }
+    const now = Date.now();
+    attempt =
+      (await QuizAttempt.findOneAndUpdate(
+        {
+          _id: attempt._id,
+          active: true,
+          finalizing: false,
+          currentQuestionIndex: index,
+          questionExpiresAt: { $gt: new Date(now) },
+        },
+        {
+          $set: {
+            ...answers,
+            currentQuestionIndex: index + 1,
+            questionExpiresAt: new Date(
+              now + attempt.timePerQuestionSeconds * 1000,
+            ),
+            expiresAt: new Date(
+              now +
+                (attempt.questionOrder.length - index - 1) *
+                  attempt.timePerQuestionSeconds *
+                  1000,
+            ),
+          },
+        },
+        { new: true },
+      )) ||
+      (await QuizAttempt.findById(attempt._id)) ||
+      attempt;
+  }
+  res.json({ attempt: attemptState(attempt) });
+};
 // Persist abandoned sessions from their last server-saved answers, even when
 // the student closes the browser before its countdown can submit.
 export async function finalizeExpiredAttempts() {
@@ -333,17 +495,23 @@ export const startAttempt = async (req: AuthRequest, res: Response) => {
         429,
       );
     try {
+      const count = quiz.questionCount ?? quiz.questions.length;
       active = await QuizAttempt.create({
         studentId: req.user!.id,
         quizId: quiz._id,
         sessionToken,
         startedAt: new Date(),
         expiresAt: new Date(Date.now() + quiz.timeLimitMinutes * 60000),
-        questionOrder: shuffle(quiz.questions.map((_, i) => i)),
+        timePerQuestionSeconds: quiz.timePerQuestionSeconds,
+        currentQuestionIndex: quiz.timePerQuestionSeconds ? 0 : undefined,
+        questionExpiresAt: quiz.timePerQuestionSeconds
+          ? new Date(Date.now() + quiz.timePerQuestionSeconds * 1000)
+          : undefined,
+        questionOrder: shuffle(quiz.questions.map((_, i) => i)).slice(0, count),
         optionOrders: quiz.questions.map((q) =>
           shuffle(q.options.map((_, i) => i)),
         ),
-        answers: quiz.questions.map(() => -1),
+        answers: Array.from({ length: count }, () => -1),
       });
     } catch (err: any) {
       if (err.code === 11000)
@@ -351,21 +519,15 @@ export const startAttempt = async (req: AuthRequest, res: Response) => {
       throw err;
     }
   }
+  active = await synchronizeQuestion(active);
   res.json({
-    attempt: {
-      id: active._id,
-      startedAt: active.startedAt,
-      expiresAt: active.expiresAt,
-      serverNow: new Date(),
-      answers: active.answers,
-      blurCount: active.blurCount,
-    },
+    attempt: attemptState(active),
     quiz: {
       ...publicQuiz(quiz),
-      questions: active.questionOrder.map((i) => ({
+      questions: active!.questionOrder.map((i) => ({
         questionText: quiz.questions[i].questionText,
         options: (
-          active.optionOrders?.[i] ||
+          active!.optionOrders?.[i] ||
           quiz.questions[i].options.map((_, index) => index)
         ).map((index) => quiz.questions[i].options[index]),
       })),
@@ -400,24 +562,27 @@ function validateAnswers(answers: unknown, count: number): number[] {
   return answers;
 }
 export const saveAttempt = async (req: AuthRequest, res: Response) => {
-  const attempt = await ownAttempt(req);
+  const attempt = await synchronizeQuestion(await ownAttempt(req));
   if (!attempt.active || attempt.expiresAt.getTime() <= Date.now()) {
     const submission = await finishAttempt(attempt);
     return res.json({ submission, serverNow: new Date() });
   }
-  const answers = validateAnswers(
-    req.body.answers,
-    attempt.questionOrder.length,
-  );
+  const answers = answerUpdate(attempt, req.body);
   const updated = await QuizAttempt.findOneAndUpdate(
     {
       _id: attempt._id,
       active: true,
       finalizing: false,
       expiresAt: { $gt: new Date() },
+      ...(attempt.timePerQuestionSeconds
+        ? {
+            currentQuestionIndex: attempt.currentQuestionIndex,
+            questionExpiresAt: { $gt: new Date() },
+          }
+        : {}),
     },
     {
-      $set: { answers },
+      $set: answers,
       ...(req.body.blur === true ? { $inc: { blurCount: 1 } } : {}),
     },
     { new: true },
@@ -428,6 +593,7 @@ export const saveAttempt = async (req: AuthRequest, res: Response) => {
       409,
     );
   res.json({
+    attempt: attemptState(updated),
     saved: true,
     blurCount: updated.blurCount,
     serverNow: new Date(),
@@ -435,16 +601,13 @@ export const saveAttempt = async (req: AuthRequest, res: Response) => {
   });
 };
 export const submitQuiz = async (req: AuthRequest, res: Response) => {
-  let attempt = await ownAttempt(req);
+  let attempt = await synchronizeQuestion(await ownAttempt(req));
   if (
     attempt.active &&
     !attempt.finalizing &&
     attempt.expiresAt.getTime() > Date.now()
   ) {
-    const answers = validateAnswers(
-      req.body.answers,
-      attempt.questionOrder.length,
-    );
+    const answers = answerUpdate(attempt, req.body);
     attempt =
       (await QuizAttempt.findOneAndUpdate(
         {
@@ -452,8 +615,14 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
           active: true,
           finalizing: false,
           expiresAt: { $gt: new Date() },
+          ...(attempt.timePerQuestionSeconds
+            ? {
+                currentQuestionIndex: attempt.currentQuestionIndex,
+                questionExpiresAt: { $gt: new Date() },
+              }
+            : {}),
         },
-        { $set: { answers } },
+        { $set: answers },
         { new: true },
       )) || attempt;
   }

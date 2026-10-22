@@ -24,7 +24,11 @@ export function QuizStudio({
   onPublished: () => void;
 }) {
   const [title, setTitle] = useState(`${module.title} — End Quiz`);
-  const [minutes, setMinutes] = useState(15);
+  const [duration, setDuration] = useState(30);
+  const [timeUnit, setTimeUnit] = useState("seconds");
+  const [passingPercentage, setPassingPercentage] = useState(75);
+  const [questionCount, setQuestionCount] = useState(4);
+  const seconds = duration * (timeUnit === "minutes" ? 60 : 1);
   const [questions, setQuestions] = useState<Question[]>(
     Array.from({ length: 4 }, blank),
   );
@@ -40,10 +44,16 @@ export function QuizStudio({
     );
   const valid =
     title.trim() &&
-    Number.isFinite(minutes) &&
-    minutes >= 10 &&
-    minutes <= 20 &&
-    questions.length >= 4 &&
+    Number.isFinite(seconds) &&
+    seconds >= 1 &&
+    seconds <= 86400 &&
+    Number.isFinite(passingPercentage) &&
+    passingPercentage >= 1 &&
+    passingPercentage <= 100 &&
+    Number.isInteger(questionCount) &&
+    questionCount >= 1 &&
+    questionCount <= questions.length &&
+    questions.length >= 1 &&
     questions.length <= 100 &&
     questions.every(
       (q) =>
@@ -69,6 +79,7 @@ export function QuizStudio({
         { method: "POST", body: data },
       );
       setQuestions(result.questions);
+      setQuestionCount(result.questions.length);
       setNotice(
         `Loaded ${result.questions.length} questions. Review the answer keys and explanations below before publishing.`,
       );
@@ -90,7 +101,10 @@ export function QuizStudio({
           title,
           subjectId: subject._id,
           moduleId: module._id,
-          timeLimitMinutes: minutes,
+          timePerQuestion: duration,
+          timeUnit,
+          passingPercentage,
+          questionCount,
           questions,
         }),
       });
@@ -174,23 +188,65 @@ export function QuizStudio({
             />
           </label>
           <label className="text-sm font-bold">
-            Time limit (10–20 min)
+            Time per question
             <input
-              aria-label="Time limit in minutes"
+              aria-label="Time per question"
               type="number"
-              min="10"
-              max="20"
+              min={timeUnit === "minutes" ? 1 / 60 : 1}
+              max={timeUnit === "minutes" ? 1440 : 86400}
               step="any"
               className={`${field} mt-2`}
-              value={minutes}
-              onChange={(e) => setMinutes(Number(e.target.value))}
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
               required
             />
           </label>
+          <label className="text-sm font-bold">
+            Time unit
+            <select
+              aria-label="Time unit"
+              value={timeUnit}
+              onChange={(e) => setTimeUnit(e.target.value)}
+              className={`${field} mt-2`}
+            >
+              <option value="seconds">Seconds</option>
+              <option value="minutes">Minutes</option>
+            </select>
+          </label>
+          <label className="text-sm font-bold">
+            Passing percentage
+            <input
+              aria-label="Passing percentage"
+              type="number"
+              min="1"
+              max="100"
+              step="any"
+              required
+              className={`${field} mt-2`}
+              value={passingPercentage}
+              onChange={(e) => setPassingPercentage(Number(e.target.value))}
+            />
+          </label>
+          <label className="text-sm font-bold">
+            Questions per attempt
+            <input
+              aria-label="Questions per attempt"
+              type="number"
+              min="1"
+              max="100"
+              step="1"
+              required
+              className={`${field} mt-2`}
+              value={questionCount}
+              onChange={(e) => setQuestionCount(Number(e.target.value))}
+            />
+          </label>
           <p className="text-xs text-slate-500 md:col-span-2">
-            Passing mark: 75% · 4–100 questions · Four options per question ·
-            Module quizzes can be retaken immediately. Answer choices shuffle
-            for each attempt.
+            Each attempt draws the selected number from your reviewed question
+            bank ({questions.length} available). Add questions below if you need
+            more. Each question has its own timer; advancing locks its answer.
+            Module retakes are immediate, with shuffled questions and answer
+            choices.
           </p>
         </section>
         <section className="rounded-2xl border bg-white p-5 space-y-4">
@@ -405,7 +461,7 @@ export function QuizStudio({
           <p className="text-sm">
             {valid
               ? "Ready for faculty review and publication."
-              : "Complete all fields, provide 4–100 questions and four distinct options each."}
+              : "Complete all fields, provide 1–100 questions and valid quiz settings and four distinct options each."}
           </p>
           <button type="submit" disabled={!valid || busy} className={button}>
             {busy ? "Working…" : "Publish module quiz"}

@@ -31,6 +31,7 @@ export interface GradeRow {
   score: number;
   totalQuestions: number;
   percentage: number;
+  passingPercentage: number;
   passed: boolean;
   submittedAt: string;
   blurCount: number;
@@ -168,6 +169,7 @@ export async function buildGradebook(req: AuthRequest) {
       score: s.score,
       totalQuestions: s.totalQuestions,
       percentage: s.percentage,
+      passingPercentage: s.passingPercentage ?? 75,
       passed: s.passed,
       submittedAt: s.submittedAt.toISOString(),
       blurCount: s.blurCount,

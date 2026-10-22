@@ -138,7 +138,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
             </div>
             <div className="flex items-center justify-between text-[11px] text-[#47464f] mt-2">
               <span>{progress.completedCount} of {progress.totalModules} modules mastered</span>
-              <span className="text-emerald-700 font-semibold">Min 75% required</span>
+              <span className="text-emerald-700 font-semibold">Meet each quiz passing mark</span>
             </div>
           </div>
 
@@ -299,7 +299,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
                   </div>
                   <h4 className="text-base font-bold text-white">End Quiz Assessment</h4>
                   <p className="text-xs text-[#e3dfff]/80 mt-0.5">
-                    75% passing mark required to unlock the next sequential module.
+                    {activeModule.quizId ? `${activeModule.quizId.passingPercentage}% passing mark` : "Meet the faculty-set passing mark"} to unlock the next sequential module.
                   </p>
                 </div>
 
@@ -307,7 +307,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
                   {user?.role === 'faculty' ? (
                     user.id === subject.facultyId && !activeModule.quizId ? <button onClick={() => setStudioOpen(true)} className="px-5 py-2.5 rounded-xl bg-[#4648d4] hover:bg-[#3436b8] text-white text-xs font-bold">Create end quiz</button> : <span className="text-xs text-indigo-200">{activeModule.quizId ? `Published: ${activeModule.quizId.title}` : 'Awaiting instructor assessment'}</span>
                   ) : activeModule.quizId ? (
-                    <button onClick={() => setTakingQuiz(activeModule.quizId!._id)} className="px-5 py-2.5 rounded-xl bg-[#4648d4] hover:bg-[#3436b8] text-white text-xs font-bold">{activeModule.isCompleted ? 'Practice again' : 'Start / resume end quiz'} · {activeModule.quizId.timeLimitMinutes} min</button>
+                    <button onClick={() => setTakingQuiz(activeModule.quizId!._id)} className="px-5 py-2.5 rounded-xl bg-[#4648d4] hover:bg-[#3436b8] text-white text-xs font-bold">{activeModule.isCompleted ? 'Practice again' : 'Start / resume end quiz'} · {activeModule.quizId.timePerQuestionSeconds ? `${activeModule.quizId.timePerQuestionSeconds} sec / question` : `${activeModule.quizId.timeLimitMinutes} min total`}</button>
                   ) : <span className="text-xs text-indigo-200">Your instructor has not published an end quiz yet.</span>}
                   {activeModule.isCompleted && user?.role === 'student' && <span className="text-xs font-bold text-emerald-300">Mastered ✓</span>}
                 </div>

@@ -14,6 +14,7 @@ export interface IQuizSubmission extends Document {
   score: number;
   totalQuestions: number;
   percentage: number;
+  passingPercentage: number;
   passed: boolean;
   answers: {
     questionIndex: number;
@@ -75,6 +76,7 @@ const QuizSubmissionSchema = new Schema<IQuizSubmission>({
     type: Number,
     required: true,
   },
+  passingPercentage: { type: Number, default: 75, min: 1, max: 100 },
   passed: {
     type: Boolean,
     required: true,

@@ -16,11 +16,18 @@ export interface ModuleItem {
   title: string;
   orderIndex: number;
   summary: string;
-  contentType: 'text' | 'file' | 'presentation';
+  contentType: "text" | "file" | "presentation";
   textContent?: string;
   fileName?: string;
   fileUrl?: string;
-  quizId?: { _id: string; title: string; timeLimitMinutes: number; passingPercentage: number };
+  quizId?: {
+    _id: string;
+    title: string;
+    timeLimitMinutes: number;
+    timePerQuestionSeconds?: number;
+    questionCount?: number;
+    passingPercentage: number;
+  };
   isLocked?: boolean;
   isCompleted?: boolean;
   createdAt: string;

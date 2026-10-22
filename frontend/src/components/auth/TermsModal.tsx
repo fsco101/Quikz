@@ -75,10 +75,10 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
 
           <section className="space-y-1">
             <h4 className="font-bold text-[#070235] text-sm flex items-center gap-1.5">
-              <span className="text-[#6063ee]">1.</span> The 75% Mastery Standard & Evaluation Rigor
+              <span className="text-[#6063ee]">1.</span> Assessment Settings & Evaluation Rigor
             </h4>
             <p className="text-xs text-[#47464f] leading-relaxed">
-              Quikz enforces an institutional passing threshold of seventy-five percent (75%) across all end-of-module quizzes and summative evaluation studios. Candidates must reach this metric before progressing to the next module. Module quizzes may be retaken immediately to practice and improve. Gated course modules require full verification and completion of previous chapter milestones.
+              Faculty set the passing percentage, questions per attempt, and time per question in seconds or minutes. Candidates must meet the published passing mark before progressing to the next module. Module quizzes may be retaken immediately to practice and improve. Gated course modules require full verification and completion of previous chapter milestones.
             </p>
           </section>
 

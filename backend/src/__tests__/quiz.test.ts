@@ -145,7 +145,7 @@ describe("Sprint 3 — Quiz studio, execution, integrity and progression", () =>
   });
   afterAll(disconnectDB);
 
-  it.each([0, 9, 21, -1, null, "15"])(
+  it.each([0, 1441, -1, null, "15"])(
     "rejects invalid time limits: %s",
     async (value) => {
       expect((await publish({ timeLimitMinutes: value })).status).toBe(400);
@@ -155,9 +155,7 @@ describe("Sprint 3 — Quiz studio, execution, integrity and progression", () =>
     expect((await publish({ timeLimitMinutes: value })).status).toBe(201);
   });
   it("validates minimum question count, four distinct options and integer keys", async () => {
-    expect((await publish({ questions: questions.slice(0, 3) })).status).toBe(
-      400,
-    );
+    expect((await publish({ questions: [] })).status).toBe(400);
     for (const patch of [
       { correctIndex: 0.5 },
       { correctIndex: 4 },
@@ -271,7 +269,7 @@ describe("Sprint 3 — Quiz studio, execution, integrity and progression", () =>
     ).toBe(404);
   });
   it("saves drafts and focus warnings, scores exactly 75%, persists once and unlocks the next module", async () => {
-    const quizId = (await publish({ passingPercentage: 1 })).body.quiz._id;
+    const quizId = (await publish({ passingPercentage: 75 })).body.quiz._id;
     const attemptId = (await start(quizId)).body.attempt.id;
     const endpoint = `/api/quizzes/${quizId}/attempts/${attemptId}`;
     const saved = await request(app)
@@ -506,5 +504,136 @@ describe("Sprint 3 — Quiz studio, execution, integrity and progression", () =>
     expect((await submit(quizId, attemptId)).body.submission.percentage).toBe(
       100,
     );
+  });
+  it.each([
+    [30, "seconds", 30],
+    [0.5, "minutes", 30],
+    [25, "minutes", 1500],
+  ])(
+    "accepts %s %s per question and configurable count and passing mark",
+    async (time, unit, seconds) => {
+      const created = await publish({
+        timePerQuestion: time,
+        timeUnit: unit,
+        questionCount: 2,
+        passingPercentage: 60,
+      });
+      expect(created.status).toBe(201);
+      expect(created.body.quiz).toMatchObject({
+        timePerQuestionSeconds: seconds,
+        questionCount: 2,
+        passingPercentage: 60,
+      });
+      const opened = await start(created.body.quiz._id);
+      expect(opened.body.quiz.questions).toHaveLength(2);
+      expect(opened.body.attempt.answers).toEqual([-1, -1]);
+      expect(
+        Date.parse(opened.body.attempt.questionExpiresAt) -
+          Date.parse(opened.body.attempt.startedAt),
+      ).toBeCloseTo(Number(seconds) * 1000, -1);
+    },
+  );
+  it.each([
+    { timePerQuestion: 0, timeUnit: "seconds" },
+    { timePerQuestion: "30", timeUnit: "seconds" },
+    { timePerQuestion: 1, timeUnit: "hours" },
+    { timePerQuestion: 1441, timeUnit: "minutes" },
+    { passingPercentage: 0 },
+    { passingPercentage: 101 },
+    { passingPercentage: "80" },
+    { questionCount: 0 },
+    { questionCount: 5 },
+    { questionCount: 1.5 },
+  ])("rejects invalid faculty settings %j", async (patch) => {
+    expect((await publish(patch)).status).toBe(400);
+  });
+  it("locks past/future answers, resumes the same timer, and grades only the selected subset", async () => {
+    const created = await publish({
+      timePerQuestion: 30,
+      timeUnit: "seconds",
+      questionCount: 2,
+      passingPercentage: 50,
+    });
+    const quizId = created.body.quiz._id;
+    const first = await start(quizId);
+    const attemptId = first.body.attempt.id;
+    const correct = await displayAnswers(attemptId, [0, 0]);
+    const advanced = await request(app)
+      .post(`/api/quizzes/${quizId}/attempts/${attemptId}/advance`)
+      .set(auth(student))
+      .send({ sessionToken, questionIndex: 0, answers: correct });
+    expect(advanced.body.attempt.currentQuestionIndex).toBe(1);
+    expect(advanced.body.attempt.answers).toEqual([correct[0], -1]);
+    const duplicate = await request(app)
+      .post(`/api/quizzes/${quizId}/attempts/${attemptId}/advance`)
+      .set(auth(student))
+      .send({ sessionToken, questionIndex: 0, answers: [-1, -1] });
+    expect(duplicate.body.attempt.questionExpiresAt).toBe(
+      advanced.body.attempt.questionExpiresAt,
+    );
+    const resumed = await start(quizId);
+    expect(resumed.body.attempt.currentQuestionIndex).toBe(1);
+    expect(resumed.body.attempt.questionExpiresAt).toBe(
+      advanced.body.attempt.questionExpiresAt,
+    );
+    const result = await request(app)
+      .post(`/api/quizzes/${quizId}/attempts/${attemptId}/submit`)
+      .set(auth(student))
+      .send({ sessionToken, questionIndex: 1, answers: [-1, -1] });
+    expect(result.body.submission).toMatchObject({
+      score: 1,
+      totalQuestions: 2,
+      percentage: 50,
+      passingPercentage: 50,
+      passed: true,
+    });
+    const unlocked = await request(app)
+      .get(`/api/modules/${nextId}`)
+      .set(auth(student));
+    expect(unlocked.status).toBe(200);
+    const report = await request(app).get("/api/gradebook").set(auth(student));
+    expect(report.body.groups[0].rows[0].passingPercentage).toBe(50);
+  });
+  it("advances expired questions without accepting late answers or resetting deadlines", async () => {
+    const quizId = (await publish({ timePerQuestion: 30, timeUnit: "seconds" }))
+      .body.quiz._id;
+    const opened = await start(quizId);
+    const attemptId = opened.body.attempt.id;
+    const expiredDeadline = new Date(Date.now() - 31000);
+    await QuizAttempt.updateOne(
+      { _id: attemptId },
+      { questionExpiresAt: expiredDeadline },
+    );
+    const late = await request(app)
+      .patch(`/api/quizzes/${quizId}/attempts/${attemptId}`)
+      .set(auth(student))
+      .send({ sessionToken, questionIndex: 0, answers: [0, 0, 0, 0] });
+    expect(late.status).toBe(200);
+    expect(late.body.attempt.currentQuestionIndex).toBe(2);
+    expect(late.body.attempt.answers).toEqual([-1, -1, -1, -1]);
+    expect(Date.parse(late.body.attempt.questionExpiresAt)).toBe(
+      expiredDeadline.getTime() + 60000,
+    );
+    await QuizAttempt.updateOne(
+      { _id: attemptId },
+      { expiresAt: new Date(Date.now() - 1) },
+    );
+    await finalizeExpiredAttempts();
+    const result = await QuizSubmission.findOne({ attemptId });
+    expect(result?.score).toBe(0);
+    expect(result?.passingPercentage).toBe(75);
+  });
+  it("uses a higher faculty threshold for module progression", async () => {
+    const quizId = (await publish({ passingPercentage: 80 })).body.quiz._id;
+    const opened = await start(quizId);
+    const result = await submit(quizId, opened.body.attempt.id, [0, 0, 0, -1]);
+    expect(result.body.submission).toMatchObject({
+      percentage: 75,
+      passed: false,
+      passingPercentage: 80,
+    });
+    expect(
+      await StudentProgress.countDocuments({ completedModuleIds: moduleId }),
+    ).toBe(0);
   });
 });
