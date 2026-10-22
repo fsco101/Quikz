@@ -4,7 +4,12 @@ export interface IUser extends Document {
   username: string;
   email: string;
   passwordHash: string;
-  role: 'faculty' | 'student';
+  role: 'faculty' | 'student' | 'admin';
+  active: boolean;
+  authVersion: number;
+  bio?: string;
+  avatarData?: Buffer;
+  avatarUpdatedAt?: Date;
   fullName: string;
   surname: string;
   yearLevel?: string;
@@ -36,10 +41,15 @@ const UserSchema = new Schema<IUser>({
   },
   role: {
     type: String,
-    enum: ['faculty', 'student'],
+    enum: ['faculty', 'student', 'admin'],
     default: 'student',
     required: true
   },
+  active: { type: Boolean, default: true },
+  authVersion: { type: Number, default: 0 },
+  bio: { type: String, default: '', maxlength: 500 },
+  avatarData: { type: Buffer, select: false },
+  avatarUpdatedAt: Date,
   fullName: {
     type: String,
     required: [true, 'Full name is required'],

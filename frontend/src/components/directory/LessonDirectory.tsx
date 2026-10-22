@@ -1,3 +1,4 @@
+import { Avatar } from "../users/Avatar.js";
 import React, { useEffect, useState } from "react";
 import { api } from "../../services/api.js";
 import { Subject } from "../../types/curriculum.js";
@@ -207,7 +208,7 @@ export function LessonDirectory({
                   {lesson.summary}
                 </p>
                 <p className="text-xs text-slate-500">
-                  {lesson.subject.facultyName}
+                  <Avatar userId={lesson.subject.facultyId} name={lesson.subject.facultyName} size="h-6 w-6" /> {lesson.subject.facultyName}
                   <br />
                   {lesson.subject.yearLevel} · {lesson.subject.term} · Module{" "}
                   {lesson.orderIndex}

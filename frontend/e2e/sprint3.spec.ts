@@ -23,15 +23,13 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
   await page.getByText(unique, { exact: true }).click();
   for (const title of ["Biology foundations", "Biology applications"]) {
     await page.getByRole("button", { name: /Add Topic/ }).click();
-    await page.locator("input[type=text]").last().fill(title);
-    await page
-      .locator("textarea")
-      .nth(0)
-      .fill("Core concepts and definitions.");
-    await page.locator("textarea").nth(1).fill(facts);
+    await page.getByLabel("Module title", { exact: true }).fill(title);
+    await page.getByLabel("Module summary", { exact: true }).fill("Core concepts and definitions.");
+    await page.getByLabel("Lecture text", { exact: true }).fill(facts);
     await page
       .getByRole("button", { name: /Publish Module to Course/ })
       .click();
+    await expect(page.getByLabel("Module title", { exact: true })).toHaveCount(0);
   }
   await page.getByText("Biology foundations", { exact: true }).first().click();
   await page.getByRole("button", { name: "Create end quiz" }).click();

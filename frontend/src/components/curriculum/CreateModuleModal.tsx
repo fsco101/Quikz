@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { ModuleItem } from '../../types/curriculum.js';
 import { api } from '../../services/api.js';
 
 interface CreateModuleModalProps {
   isOpen: boolean;
+  module?: ModuleItem;
   subjectId: string;
   onClose: () => void;
   onCreated: () => void;
@@ -10,18 +12,20 @@ interface CreateModuleModalProps {
 
 export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
   isOpen,
+  module,
   subjectId,
   onClose,
   onCreated
 }) => {
-  const [title, setTitle] = useState('');
-  const [summary, setSummary] = useState('');
-  const [contentType, setContentType] = useState<'text' | 'file' | 'presentation'>('text');
-  const [textContent, setTextContent] = useState('');
+  const [title, setTitle] = useState(module?.title || '');
+  const [summary, setSummary] = useState(module?.summary || '');
+  const [contentType, setContentType] = useState<'text' | 'file' | 'presentation'>(module?.contentType || 'text');
+  const [textContent, setTextContent] = useState(module?.textContent || '');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const [removeFile, setRemoveFile] = useState(false);
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,7 +44,10 @@ export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
         formData.append('file', selectedFile);
       }
 
-      await api.createModule(subjectId, formData);
+      if (module?.__v !== undefined) formData.append('version', String(module.__v));
+      if (removeFile) formData.append('removeFile', 'true');
+      if (module) await api.request(`/modules/${module._id}`, { method: 'PATCH', body: formData });
+      else await api.createModule(subjectId, formData);
       onCreated();
       onClose();
     } catch (err: any) {
@@ -59,7 +66,7 @@ export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
               <span className="material-symbols-outlined text-[20px]">post_add</span>
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#070235]">Add Topic / Learning Module</h3>
+              <h3 className="text-base font-bold text-[#070235]">{module ? 'Edit learning module' : 'Add Topic / Learning Module'}</h3>
               <p className="text-xs text-[#47464f]">Author new sequential material for this subject</p>
             </div>
           </div>
@@ -86,6 +93,7 @@ export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
             <input
               type="text"
               required
+              aria-label="Module title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Module 4: Tree Traversals & Binary Heaps"
@@ -103,6 +111,7 @@ export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
             <textarea
               rows={2}
               required
+              aria-label="Module summary"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               placeholder="Provide a high-level concise summary of the core concepts covered in this module..."
@@ -158,6 +167,7 @@ export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
             <label className="block font-bold text-[#070235] mb-1">Lecture Text & Notes</label>
             <textarea
               rows={5}
+              aria-label="Lecture text"
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
               placeholder="Paste or write formatted lecture notes, learning objectives, and detailed text content..."
@@ -176,6 +186,7 @@ export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
             />
           </div>
 
+          {module?.fileName && <label className="flex items-center gap-2"><input type="checkbox" checked={removeFile} onChange={(e) => setRemoveFile(e.target.checked)} />Remove current attachment: {module.fileName}</label>}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#c8c5d0]/40">
             <button
               type="button"
@@ -190,7 +201,7 @@ export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
               className="px-5 py-2.5 rounded-xl bg-[#070235] hover:bg-[#1e1b4b] text-white font-bold transition-all shadow-md flex items-center gap-1.5 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[16px]">save</span>
-              <span>{loading ? 'Publishing Module...' : 'Publish Module to Course'}</span>
+              <span>{loading ? 'Saving Module...' : module ? 'Save module changes' : 'Publish Module to Course'}</span>
             </button>
           </div>
         </form>

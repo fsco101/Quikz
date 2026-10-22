@@ -1,3 +1,4 @@
+import { Avatar } from "../users/Avatar.js";
 import React, { useState, useEffect } from 'react';
 import { Subject } from '../../types/curriculum.js';
 import { api } from '../../services/api.js';
@@ -144,9 +145,7 @@ export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => 
 
               <div className="pt-4 border-t border-[#c8c5d0]/30 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-[#eff4ff] text-[#4648d4] flex items-center justify-center text-xs font-bold">
-                    {subject.facultyName.charAt(0)}
-                  </div>
+                  <Avatar userId={subject.facultyId} name={subject.facultyName} size="h-7 w-7" />
                   <div className="text-[11px]">
                     <div className="font-bold text-[#070235]">{subject.facultyName}</div>
                     <div className="text-[#47464f]">{subject.yearLevel}</div>

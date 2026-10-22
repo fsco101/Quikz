@@ -83,8 +83,8 @@ export function SystemHealth() {
           System health & audit
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          Refreshes every 15 seconds. Audit records cover your account and
-          subjects you own; health metrics describe this server's database
+          Administrator access only. Refreshes every 15 seconds. Audit records
+          cover the whole system; health metrics describe this server's database
           connection.
         </p>
       </header>

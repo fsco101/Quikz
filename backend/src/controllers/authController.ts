@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 import { AuthRequest } from '../middleware/auth.js';
 
+import { userDTO } from '../services/users.js';
 import { JWT_SECRET } from '../config/auth.js';
 
 export const register = async (req: Request, res: Response) => {
@@ -76,7 +77,8 @@ export const register = async (req: Request, res: Response) => {
         id: newUser._id,
         role: newUser.role,
         email: newUser.email,
-        username: newUser.username
+        username: newUser.username,
+        authVersion: newUser.authVersion
       },
       JWT_SECRET,
       { expiresIn: '7d' }
@@ -85,17 +87,7 @@ export const register = async (req: Request, res: Response) => {
     res.status(201).json({
       message: 'Account created successfully',
       token,
-      user: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        role: newUser.role,
-        fullName: newUser.fullName,
-        surname: newUser.surname,
-        yearLevel: newUser.yearLevel,
-        section: newUser.section,
-        termsAccepted: newUser.termsAccepted
-      }
+      user: userDTO(newUser)
     });
   } catch (err: any) {
     res.status(err.name === 'ValidationError' ? 400 : err.code === 11000 ? 409 : 500).json({ message: 'Registration failed', error: err.message });
@@ -119,7 +111,7 @@ export const login = async (req: Request, res: Response) => {
       ]
     });
 
-    if (!user) {
+    if (!user || user.active === false) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
     res.locals.auditActorId = user._id;
@@ -135,7 +127,8 @@ export const login = async (req: Request, res: Response) => {
         id: user._id,
         role: user.role,
         email: user.email,
-        username: user.username
+        username: user.username,
+        authVersion: user.authVersion
       },
       JWT_SECRET,
       { expiresIn: '7d' }
@@ -144,17 +137,7 @@ export const login = async (req: Request, res: Response) => {
     res.json({
       message: 'Login successful',
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        fullName: user.fullName,
-        surname: user.surname,
-        yearLevel: user.yearLevel,
-        section: user.section,
-        termsAccepted: user.termsAccepted
-      }
+      user: userDTO(user)
     });
   } catch (err: any) {
     res.status(500).json({ message: 'Login failed. Please retry.' });
@@ -172,7 +155,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json({ user: { ...user.toObject(), id: String(user._id) } });
+    res.json({ user: userDTO(user) });
   } catch (err: any) {
     res.status(500).json({ message: 'Failed to retrieve user' });
   }

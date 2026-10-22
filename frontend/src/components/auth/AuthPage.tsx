@@ -29,9 +29,11 @@ export const AuthPage: React.FC<{ onBrowse?: () => void; onBrowseLessons?: () =>
   const [loading, setLoading] = useState(false);
 
   // Quick demo filler
-  const handleDemoFill = (type: 'faculty' | 'student') => {
+  const handleDemoFill = (type: 'faculty' | 'student' | 'admin') => {
     setMode('login');
-    if (type === 'faculty') {
+    if (type === 'admin') {
+      setLoginIdentifier('admin@quikz.edu'); setLoginPassword('Admin@123');
+    } else if (type === 'faculty') {
       setLoginIdentifier('faculty@quikz.edu');
       setLoginPassword('Faculty@123');
     } else {
@@ -192,6 +194,7 @@ export const AuthPage: React.FC<{ onBrowse?: () => void; onBrowseLessons?: () =>
               </div>
             </div>
 
+            {import.meta.env.DEV && <button className="rounded-xl bg-white border p-3 text-sm font-bold" onClick={() => handleDemoFill('admin')}>Admin Demo</button>}
             {/* Quick Demo Credentials Card */}
             <div className="bg-white rounded-2xl border border-[#c8c5d0]/50 p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">

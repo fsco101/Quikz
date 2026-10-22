@@ -13,6 +13,9 @@ export interface Subject {
 export interface ModuleItem {
   _id: string;
   subjectId: string;
+  canEdit?: boolean;
+  __v?: number;
+  createdBy?: string;
   title: string;
   orderIndex: number;
   summary: string;
@@ -22,6 +25,7 @@ export interface ModuleItem {
   fileUrl?: string;
   quizId?: {
     _id: string;
+    createdBy?: string;
     title: string;
     timeLimitMinutes: number;
     timePerQuestionSeconds?: number;

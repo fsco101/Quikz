@@ -8,6 +8,10 @@ import { Gradebook } from "./components/gradebook/Gradebook.js";
 import { LessonDirectory } from "./components/directory/LessonDirectory.js";
 import { SystemHealth } from "./components/system/SystemHealth.js";
 
+import { Avatar } from "./components/users/Avatar.js";
+import { Profile } from "./components/users/Profile.js";
+import { People } from "./components/users/People.js";
+import { UserManagement } from "./components/users/UserManagement.js";
 const MainApp: React.FC = () => {
   const { user, logout, loading } = useAuth();
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
@@ -142,6 +146,16 @@ const MainApp: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <button
+            aria-label="Open my profile"
+            onClick={() => setView("profile")}
+          >
+            <Avatar
+              userId={user.id}
+              name={user.fullName}
+              url={user.avatarUrl}
+            />
+          </button>
           <div className="text-right hidden sm:block">
             <div className="text-xs font-bold text-[#070235]">
               {user.fullName}
@@ -175,12 +189,23 @@ const MainApp: React.FC = () => {
       >
         {[
           ["learning", "Learning path"],
-          [
-            "gradebook",
-            user.role === "faculty" ? "Master gradebook" : "My results",
-          ],
+          ...(user.role !== "admin"
+            ? [
+                [
+                  "gradebook",
+                  user.role === "faculty" ? "Master gradebook" : "My results",
+                ],
+              ]
+            : []),
           ["directory", "Lesson directory"],
-          ...(user.role === "faculty" ? [["system", "System health"]] : []),
+          ["people", "People"],
+          ["profile", "My profile"],
+          ...(user.role === "admin"
+            ? [
+                ["system", "System health"],
+                ["users", "User management"],
+              ]
+            : []),
         ].map(([key, label]) => (
           <button
             key={key}
@@ -195,9 +220,15 @@ const MainApp: React.FC = () => {
 
       {/* Main Body */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
-        {view === "gradebook" ? (
+        {view === "profile" ? (
+          <Profile key={user.id} />
+        ) : view === "people" ? (
+          <People />
+        ) : view === "users" && user.role === "admin" ? (
+          <UserManagement />
+        ) : view === "gradebook" && user.role !== "admin" ? (
           <Gradebook />
-        ) : view === "system" && user.role === "faculty" ? (
+        ) : view === "system" && user.role === "admin" ? (
           <SystemHealth />
         ) : view === "directory" ? (
           <LessonDirectory

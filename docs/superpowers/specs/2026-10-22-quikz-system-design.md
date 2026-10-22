@@ -1,5 +1,7 @@
 # Quikz Modular Quiz Learning Platform - System Design & Specification
 
+> Account and ownership amendment (2026-10-22): Only the creating faculty can edit modules/quizzes; admins cannot bypass content ownership. Attempts snapshot their original assessment for stable grading after edits. System health and the system-wide audit are now admin-only, replacing faculty operator allowlists. Admins manage user roles, access and password resets; all users can update their own profile/password/avatar. A signed-in people directory shares only name, username, role, bio and avatar, with avatar pixels also public for display. See README.md and sprint-audit.json for setup and verification.
+
 > Faculty quiz settings amendment (2026-10-22): The fixed 10–20 minute total timer and fixed 75% threshold below describe the original design and are superseded. New quizzes use faculty-set time per question in seconds or minutes, a passing percentage from 1–100%, and a question count from 1–100 up to bank size. Attempts sample shuffled questions without replacement, persist per-question deadlines, and lock answers when advancing. Submissions snapshot their passing mark for progression and reports. Existing quizzes retain their saved total timing; historical submissions retain their 75% threshold. See `sprints/sprint-audit.json` for verification.
 
 **Date**: 2026-10-22  

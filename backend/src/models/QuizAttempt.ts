@@ -1,5 +1,6 @@
 import mongoose, { Schema, Types } from "mongoose";
 interface IQuizAttempt {
+  quizSnapshot?: any;
   studentId: Types.ObjectId;
   quizId: Types.ObjectId;
   sessionToken: string;
@@ -17,6 +18,7 @@ interface IQuizAttempt {
   blurCount: number;
 }
 const QuizAttemptSchema = new Schema<IQuizAttempt>({
+  quizSnapshot: { type: Schema.Types.Mixed, select: false },
   studentId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   quizId: { type: Schema.Types.ObjectId, ref: "Quiz", required: true },
   sessionToken: { type: String, required: true },

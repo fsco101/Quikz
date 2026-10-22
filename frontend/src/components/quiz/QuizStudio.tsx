@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { api } from "../../services/api.js";
 import { ModuleItem, Subject } from "../../types/curriculum.js";
-import { Question } from "../../types/quiz.js";
+import { Quiz, Question } from "../../types/quiz.js";
 const blank = (): Question => ({
   questionText: "",
   options: ["", "", "", ""],
@@ -37,7 +37,40 @@ export function QuizStudio({
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(!!module.quizId);
+  const [version, setVersion] = useState<number>();
+  const [legacyTotal, setLegacyTotal] = useState(false);
+  useEffect(() => {
+    if (!module.quizId) return;
+    let cancelled = false;
+    api
+      .request<{ quiz: Quiz & { __v: number } }>(
+        `/quizzes/${module.quizId._id}`,
+      )
+      .then(({ quiz }) => {
+        if (cancelled) return;
+        setTitle(quiz.title);
+        setQuestions(quiz.questions);
+        setQuestionCount(quiz.questionCount ?? quiz.questions.length);
+        setPassingPercentage(quiz.passingPercentage);
+        setVersion(quiz.__v);
+        setLegacyTotal(!quiz.timePerQuestionSeconds);
+        setDuration(quiz.timePerQuestionSeconds ?? quiz.timeLimitMinutes);
+        setTimeUnit(quiz.timePerQuestionSeconds ? "seconds" : "minutes");
+        setNotice(
+          "Editing this quiz. Active attempts and saved results keep their original grading settings.",
+        );
+      })
+      .catch((err: Error) => {
+        if (!cancelled) setError(err.message);
+      })
+      .finally(() => {
+        if (!cancelled) setBusy(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [module.quizId?._id]);
   const edit = (index: number, patch: Partial<Question>) =>
     setQuestions((q) =>
       q.map((item, i) => (i === index ? { ...item, ...patch } : item)),
@@ -95,19 +128,24 @@ export function QuizStudio({
     setBusy(true);
     setError("");
     try {
-      await api.request("/quizzes", {
-        method: "POST",
-        body: JSON.stringify({
-          title,
-          subjectId: subject._id,
-          moduleId: module._id,
-          timePerQuestion: duration,
-          timeUnit,
-          passingPercentage,
-          questionCount,
-          questions,
-        }),
-      });
+      await api.request(
+        module.quizId ? `/quizzes/${module.quizId._id}` : "/quizzes",
+        {
+          method: module.quizId ? "PATCH" : "POST",
+          body: JSON.stringify({
+            title,
+            subjectId: subject._id,
+            moduleId: module._id,
+            ...(legacyTotal
+              ? { timeLimitMinutes: seconds / 60 }
+              : { timePerQuestion: duration, timeUnit }),
+            version,
+            passingPercentage,
+            questionCount,
+            questions,
+          }),
+        },
+      );
       onPublished();
     } catch (err: any) {
       setError(err.message);
@@ -176,6 +214,22 @@ export function QuizStudio({
             Close studio
           </button>
         </header>
+        {legacyTotal && (
+          <p className="rounded-xl border bg-white p-4 text-sm">
+            This existing quiz uses a total timer.{" "}
+            <button
+              type="button"
+              className="font-bold text-indigo-700 underline"
+              onClick={() => {
+                setLegacyTotal(false);
+                setDuration(30);
+                setTimeUnit("seconds");
+              }}
+            >
+              Use per-question timing
+            </button>
+          </p>
+        )}
         <section className="rounded-2xl border bg-white p-5 grid gap-4 md:grid-cols-[1fr_200px]">
           <label className="text-sm font-bold">
             Quiz title
@@ -188,7 +242,7 @@ export function QuizStudio({
             />
           </label>
           <label className="text-sm font-bold">
-            Time per question
+            {legacyTotal ? "Total quiz time" : "Time per question"}
             <input
               aria-label="Time per question"
               type="number"
@@ -464,7 +518,11 @@ export function QuizStudio({
               : "Complete all fields, provide 1–100 questions and valid quiz settings and four distinct options each."}
           </p>
           <button type="submit" disabled={!valid || busy} className={button}>
-            {busy ? "Working…" : "Publish module quiz"}
+            {busy
+              ? "Working…"
+              : module.quizId
+                ? "Save quiz changes"
+                : "Publish module quiz"}
           </button>
         </footer>
       </form>

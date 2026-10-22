@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IModule extends Document {
+  createdBy?: mongoose.Types.ObjectId;
   subjectId: mongoose.Types.ObjectId;
   title: string;
   orderIndex: number;
@@ -14,6 +15,7 @@ export interface IModule extends Document {
 }
 
 const ModuleSchema = new Schema<IModule>({
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   subjectId: {
     type: Schema.Types.ObjectId,
     ref: 'Subject',

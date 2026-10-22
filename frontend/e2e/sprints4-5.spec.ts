@@ -216,7 +216,7 @@ test("student sees only personal attempts and can return to a lesson from direct
     }),
   ).toBeVisible();
 });
-test("guests search the directory and faculty inspect the live health and audit dashboards", async ({
+test("guests search the directory and admins inspect the live health and audit dashboards", async ({
   page,
 }) => {
   await page.goto("/");
@@ -244,7 +244,7 @@ test("guests search the directory and faculty inspect the live health and audit 
     fullPage: true,
   });
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await page.getByRole("button", { name: /Faculty Demo/ }).click();
+  await page.getByRole("button", { name: /Admin Demo/ }).click();
   await page.getByRole("button", { name: /Sign In to Quikz/ }).click();
   await page
     .getByRole("button", { name: "System health", exact: true })

@@ -19,13 +19,13 @@ export const getSubjectModules = async (req: AuthRequest, res: Response) => {
     const { subjectId } = req.params;
     if (!mongoose.isValidObjectId(subjectId))
       return res.status(400).json({ message: "Invalid subject ID" });
-    if (!(await Subject.exists({ _id: subjectId })))
-      return res.status(404).json({ message: "Subject not found" });
+    const subject = await Subject.findById(subjectId);
+    if (!subject) return res.status(404).json({ message: "Subject not found" });
     const modules = await Module.find({ subjectId })
       .sort({ orderIndex: 1 })
       .populate(
         "quizId",
-        "title timeLimitMinutes timePerQuestionSeconds questionCount passingPercentage",
+        "title timeLimitMinutes timePerQuestionSeconds questionCount passingPercentage createdBy",
       );
     const completed =
       req.user?.role === "student"
@@ -40,6 +40,9 @@ export const getSubjectModules = async (req: AuthRequest, res: Response) => {
       // Locked modules expose navigation metadata only, never lecture content or files.
       return {
         ...data,
+        canEdit:
+          req.user?.role === "faculty" &&
+          String(module.createdBy || subject.facultyId) === req.user.id,
         textContent: isLocked ? undefined : data.textContent,
         fileUrl:
           isLocked || !data.fileName
@@ -97,6 +100,7 @@ export const createModule = async (req: AuthRequest, res: Response) => {
       title: title.trim(),
       summary: summary.trim(),
       orderIndex: (last?.orderIndex || 0) + 1,
+      createdBy: req.user!.id,
       contentType,
       textContent,
       fileName: req.file?.originalname,
@@ -176,7 +180,7 @@ export const getModuleById = async (req: AuthRequest, res: Response) => {
       await requireModuleAccess(req.user!.id, req.params.id);
     const module = await Module.findById(req.params.id).populate(
       "quizId",
-      "title timeLimitMinutes timePerQuestionSeconds questionCount passingPercentage",
+      "title timeLimitMinutes timePerQuestionSeconds questionCount passingPercentage createdBy",
     );
     if (!module) throw new InputError("Module not found.", 404);
     res.json({
@@ -190,6 +194,82 @@ export const getModuleById = async (req: AuthRequest, res: Response) => {
   } catch (err: any) {
     res
       .status(err instanceof InputError ? err.status : 500)
+      .json({ message: err.message });
+  }
+};
+
+export const updateModule = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      throw new InputError("Invalid module ID.");
+    const module = await Module.findById(req.params.id);
+    if (!module) throw new InputError("Module not found.", 404);
+    const subject = await Subject.findById(module.subjectId);
+    if (String(module.createdBy || subject?.facultyId) !== req.user!.id)
+      throw new InputError(
+        "Only the module creator can edit this module.",
+        403,
+      );
+    if (
+      ["createdBy", "subjectId", "quizId", "orderIndex"].some(
+        (key) => key in req.body,
+      )
+    )
+      throw new InputError(
+        "Module ownership, order and quiz binding cannot be changed here.",
+      );
+    if (
+      req.body.version !== undefined &&
+      Number(req.body.version) !== (module as any).__v
+    )
+      throw new InputError(
+        "Module changed elsewhere. Reopen it before saving.",
+        409,
+      );
+    const fields: any = {};
+    for (const key of ["title", "summary", "textContent"] as const) {
+      if (req.body[key] !== undefined) {
+        if (
+          typeof req.body[key] !== "string" ||
+          (key !== "textContent" && !req.body[key].trim())
+        )
+          throw new InputError(`Provide a valid ${key}.`);
+        fields[key] = req.body[key].trim();
+      }
+    }
+    const type = req.body.contentType ?? module.contentType;
+    if (!["text", "file", "presentation"].includes(type))
+      throw new InputError("Invalid content type.");
+    const removeFile =
+      req.body.removeFile === true || req.body.removeFile === "true";
+    if (type !== "text" && !req.file && (!module.fileUrl || removeFile))
+      throw new InputError("Attach a lesson file.");
+    fields.contentType = type;
+    if (req.file) {
+      fields.fileName = req.file.originalname;
+      fields.fileUrl = `/uploads/${req.file.filename}`;
+    }
+    const updated = await Module.findOneAndUpdate(
+      { _id: module._id, __v: (module as any).__v },
+      {
+        $set: fields,
+        $inc: { __v: 1 },
+        ...(removeFile && !req.file
+          ? { $unset: { fileName: 1, fileUrl: 1 } }
+          : {}),
+      },
+      { new: true, runValidators: true },
+    );
+    if (!updated)
+      throw new InputError(
+        "Module changed elsewhere. Reopen it before saving.",
+        409,
+      );
+    res.json({ module: updated });
+  } catch (err: any) {
+    if (req.file) fs.unlink(req.file.path, () => {});
+    res
+      .status(err instanceof InputError ? err.status : 400)
       .json({ message: err.message });
   }
 };

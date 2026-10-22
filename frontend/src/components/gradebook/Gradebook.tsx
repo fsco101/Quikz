@@ -1,3 +1,4 @@
+import { Avatar } from "../users/Avatar.js";
 import React, { useEffect, useState } from "react";
 import { api } from "../../services/api.js";
 import { useAuth } from "../../context/AuthContext.js";
@@ -391,7 +392,7 @@ export function Gradebook() {
                         <tr key={row.id} className="border-t hover:bg-slate-50">
                           <td className="p-4">
                             <p className="font-semibold whitespace-nowrap">
-                              {row.studentName}
+                              <Avatar userId={row.studentId} name={row.studentName} size="h-7 w-7" /> {row.studentName}
                             </p>
                             <p className="text-xs text-slate-500">
                               {row.surname}

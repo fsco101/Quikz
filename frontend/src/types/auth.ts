@@ -1,7 +1,10 @@
-export type UserRole = 'faculty' | 'student';
+export type UserRole = 'faculty' | 'student' | 'admin';
 
 export interface User {
   id: string;
+  active?: boolean;
+  avatarUrl?: string;
+  bio?: string;
   username: string;
   email: string;
   role: UserRole;

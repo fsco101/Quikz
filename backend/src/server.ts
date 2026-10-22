@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
+import userRoutes from "./routes/userRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import { bootstrapAdmin } from "./services/users.js";
 import authRoutes from "./routes/authRoutes.js";
 import subjectRoutes from "./routes/subjectRoutes.js";
 import moduleRoutes from "./routes/moduleRoutes.js";
@@ -35,7 +38,8 @@ app.use(auditRequests);
 app.use((req, res, next) => {
   if (
     req.path.startsWith("/api/gradebook") ||
-    req.path.startsWith("/api/system")
+    req.path.startsWith("/api/system") ||
+    req.path.startsWith("/api/admin") || req.path.startsWith("/api/auth/me")
   )
     res.setHeader("Cache-Control", "no-store");
   next();
@@ -46,6 +50,8 @@ app.get("/api/modules/:id/file", authenticateToken, downloadModuleFile);
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/modules", moduleRoutes);
 app.use("/api/quizzes", quizRoutes);
@@ -62,6 +68,7 @@ app.use(
     const status =
       err instanceof InputError
         ? err.status
+        : err.code === 11000 ? 409
         : err instanceof multer.MulterError
           ? 400
           : err.name === "CastError" ||
@@ -72,7 +79,7 @@ app.use(
     res
       .status(status)
       .json({
-        message: status === 500 ? "Request failed. Please retry." : err.message,
+        message: status === 500 ? "Request failed. Please retry." : status === 409 && err.code === 11000 ? "Username or email is already in use." : err.message,
         errors: err.details,
       });
   },
@@ -89,6 +96,7 @@ app.get("/api/health", (req, res) => {
 
 export const startServer = async () => {
   await connectDB();
+  await bootstrapAdmin();
   await Promise.all([
     QuizAttempt.init(),
     QuizSubmission.init(),

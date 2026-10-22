@@ -10,11 +10,11 @@ In `backend`, copy `.env.example` to `.env`, set a private `JWT_SECRET`, and opt
 
 In `frontend`, run `npm run dev` and open http://localhost:3000. Without a MongoDB URI, the backend uses an ephemeral local MongoDB instance; that data disappears when the server stops. Atlas persistence requires a working URI.
 
-Demo accounts: `faculty@quikz.edu` / `Faculty@123` and `student@quikz.edu` / `Student@123`. The CS101 demo includes three linked end quizzes. Guests can browse the public subject catalog from the login page.
+Demo accounts: `faculty@quikz.edu` / `Faculty@123` and `student@quikz.edu` / `Student@123`. Local development also seeds `admin@quikz.edu` / `Admin@123`; the Admin Demo button is available in development only. The CS101 demo includes three linked end quizzes. Guests can browse the public subject catalog from the login page.
 
 ## Quiz workflow
 
-Open a subject you own, add a module, and choose **Create end quiz**. Build questions manually, import a bank, or generate a draft from lecture text/files. Review questions and answer keys before publishing. Published quizzes are immutable in this sprint.
+Open a subject you own, add a module, and choose **Create end quiz**. Build questions manually, import a bank, or generate a draft from lecture text/files. Review questions and answer keys before publishing. Creators can use **Edit module** and **Edit quiz** to update their own content. Other faculty, students and admins cannot edit someone else’s module or quiz. Legacy modules without a creator field belong to their subject’s faculty owner. Active attempts keep a private snapshot of the original questions, answer keys, passing mark and timing. Existing results and earned progress remain intact. Editing is temporarily blocked if an active attempt predates assessment snapshots; finish or expire that session first.
 
 - Question banks contain 1–100 questions, each with four distinct options and one correct answer. Faculty set questions per attempt (up to the bank size), passing percentage (1–100%), and time per question in seconds or minutes (1 second–24 hours). Each attempt draws a shuffled subset and independently shuffles its answer choices.
 - JSON accepts an array or `{ "questions": [...] }`, with fields `questionText`, `options`, `correctIndex` (0–3), and optional `explanation`.
@@ -35,7 +35,15 @@ Summary averages, pass rates, and score distributions count all matching attempt
 
 ## Audit and database operations
 
-Faculty can open **System health** for database ping, an actual write/read/delete verification, observed connection-pool events, topology changes, request latency, and a persistent audit trail. The dashboard refreshes every 15 seconds. Ordinary faculty can see audit records for their own account and subjects. Set `SYSTEM_ADMIN_USER_IDS` to a comma-separated list of trusted faculty account IDs to grant those existing accounts system-wide audit visibility. Account IDs are available from `/api/auth/me`; public registration email addresses do not grant operator access.
+Only administrators can open **System health** or access `/api/system/health` and `/api/system/audit`. The dashboard shows database ping, actual write/read/delete verification, observed connection-pool events, topology changes, latency, and the system-wide audit trail, refreshed every 15 seconds. The former `SYSTEM_ADMIN_USER_IDS` faculty allowlist no longer grants access. `/api/health` remains a minimal liveness endpoint for deployment checks.
+
+## Administrators, profiles and avatars
+
+For the initial production administrator, set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and optionally `ADMIN_USERNAME` and `ADMIN_FULL_NAME` before starting the backend. Bootstrap creates one administrator only when none exists; it never promotes an existing account or resets an existing admin’s password. Remove the bootstrap password from the environment after provisioning. Production never seeds the development admin account.
+
+Admins open **User management** to search/filter accounts, create students/faculty/admins, edit details and roles, reset passwords, and disable/reactivate accounts. Creation requires confirmation that the user accepted the Terms and Honor Code. Disabling preserves ownership and grade history. Role changes take effect on the next API request; deactivation and password changes revoke old sessions. Admins cannot disable or demote themselves. Public registration offers only student and faculty roles.
+
+Every user can open **My profile** to update name, surname, username, email, bio, student year/section, avatar and password. Password changes require the current password and sign out existing sessions. Avatars accept PNG/JPEG/WebP up to 5 MB and 25 megapixels, then are decoded, resized to 256×256 and re-encoded as WebP without the original metadata. Others see avatars in course cards, the lesson directory, gradebooks, and the signed-in **People** directory. People profiles expose only display name, username, role, bio and avatar; email and academic records remain private. Avatar pixels themselves are publicly readable for display.
 
 Audit events cover registration/consent, login successes and failures, curriculum/quiz publication, quiz sessions, focus warnings, persisted results (including abandoned expired sessions), and exports. Credentials, tokens, answer keys, submitted answers, and lecture content are excluded. If an audit write fails after processing a mutation, the API reports that failure; check the result before retrying. The health dashboard exposes audit-write failures.
 

@@ -37,6 +37,21 @@ export function auditRequests(
     action = "quiz.focus_warning";
   else if (req.method === "GET" && route.startsWith("/api/gradebook/export/"))
     action = "gradebook.exported";
+  if (req.method === "PATCH" && /^\/api\/modules\/[^/]+$/.test(route))
+    action = "curriculum.module_updated";
+  if (req.method === "PATCH" && /^\/api\/quizzes\/[^/]+$/.test(route))
+    action = "quiz.updated";
+  if (
+    route.startsWith("/api/admin/users") &&
+    ["POST", "PATCH"].includes(req.method)
+  )
+    action =
+      req.method === "POST" ? "admin.user_created" : "admin.user_updated";
+  if (
+    route.startsWith("/api/users/me") &&
+    ["POST", "PATCH", "DELETE"].includes(req.method)
+  )
+    action = "profile.updated";
   if (!action || action === "gradebook.exported") {
     next();
     return;

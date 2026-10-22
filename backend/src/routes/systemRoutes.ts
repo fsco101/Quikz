@@ -1,17 +1,15 @@
 import { Router } from "express";
-import mongoose from "mongoose";
 import {
   authenticateToken,
   requireRole,
   AuthRequest,
 } from "../middleware/auth.js";
 import { AuditEvent } from "../models/AuditEvent.js";
-import { Subject } from "../models/Subject.js";
 import { databaseHealth } from "../services/telemetry.js";
 import { queryText } from "../services/gradebook.js";
 import { InputError } from "../services/questionBank.js";
 const router = Router();
-router.use(authenticateToken, requireRole("faculty"));
+router.use(authenticateToken, requireRole("admin"));
 router.get("/health", async (req, res, next) => {
   try {
     const health = await databaseHealth();
@@ -32,22 +30,7 @@ router.get("/audit", async (req: AuthRequest, res, next) => {
       (outcome && !["success", "failure"].includes(outcome))
     )
       throw new InputError("Invalid audit filter.");
-    const subjects = await Subject.find({ facultyId: req.user!.id }).select(
-      "_id",
-    );
-    const operator = (process.env.SYSTEM_ADMIN_USER_IDS || "")
-      .split(",")
-      .map((s) => s.trim().toLowerCase())
-      .filter(Boolean)
-      .includes(req.user!.id.toLowerCase());
-    const scope = operator
-      ? {}
-      : {
-          $or: [
-            { actorId: new mongoose.Types.ObjectId(req.user!.id) },
-            { subjectId: { $in: subjects.map((s) => s._id) } },
-          ],
-        };
+    const scope = {};
     const filter: any = { ...scope };
     if (action) filter.action = action;
     if (outcome) filter.outcome = outcome;
@@ -78,7 +61,7 @@ router.get("/audit", async (req: AuthRequest, res, next) => {
       pages: Math.ceil(total / 25),
       events,
       stats,
-      scope: operator ? "system" : "own-subjects",
+      scope: "system",
     });
   } catch (err) {
     next(err);

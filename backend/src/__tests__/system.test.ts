@@ -1,3 +1,4 @@
+import { User } from "../models/User.js";
 import { beforeAll, afterAll, describe, expect, it, vi } from "vitest";
 import request from "supertest";
 import mongoose from "mongoose";
@@ -10,7 +11,8 @@ import { AuditEvent } from "../models/AuditEvent.js";
 import { databaseHealth, telemetry } from "../services/telemetry.js";
 
 describe("Sprint 5 — public lesson discovery, audit and actual database health", () => {
-  let faculty: string,
+  let admin: string,
+    faculty: string,
     facultyId: string,
     other: string,
     otherId: string,
@@ -49,6 +51,20 @@ describe("Sprint 5 — public lesson discovery, audit and actual database health
       }
       if (name === "student") student = result.body.token;
     }
+    const account = await User.create({
+      username: "sys_admin",
+      email: "admin@system.test",
+      role: "admin",
+      fullName: "System Admin",
+      surname: "Admin",
+      termsAccepted: true,
+      passwordHash: (await User.findById(facultyId))!.passwordHash,
+    });
+    admin = (
+      await request(app)
+        .post("/api/auth/login")
+        .send({ loginIdentifier: account.email, password: "Password123!" })
+    ).body.token;
     const result = await request(app)
       .post("/api/subjects")
       .set(auth(faculty))
@@ -207,51 +223,37 @@ describe("Sprint 5 — public lesson discovery, audit and actual database health
       /Password123|wrong-password-secret|audit-session-token|Private publication text|correctIndex|passwordHash/,
     );
   });
-  it("requires faculty access and limits regular faculty to their own account/subjects", async () => {
+  it("restricts health and audit to administrators, including when the legacy faculty allowlist is configured", async () => {
     expect((await request(app).get("/api/system/health")).status).toBe(401);
-    expect(
-      (await request(app).get("/api/system/audit").set(auth(student))).status,
-    ).toBe(403);
-    const own = await request(app).get("/api/system/audit").set(auth(faculty));
-    expect(own.status).toBe(200);
-    expect(own.body.total).toBeGreaterThan(0);
-    expect(own.body.scope).toBe("own-subjects");
-    expect(
-      own.body.events.every(
-        (e: any) => e.actorId === facultyId || e.subjectId === subjectId,
-      ),
-    ).toBe(true);
-    const peer = await request(app).get("/api/system/audit").set(auth(other));
-    expect(peer.body.events.every((e: any) => e.actorId === otherId)).toBe(
-      true,
-    );
-    const failed = await request(app)
-      .get("/api/system/audit?action=auth.login&outcome=failure")
-      .set(auth(faculty));
-    expect(failed.body.events).toHaveLength(1);
-    expect(
-      (await request(app).get("/api/system/audit?page=0").set(auth(faculty)))
-        .status,
-    ).toBe(400);
-  });
-  it("allows explicitly configured faculty operators to inspect the full audit stream", async () => {
     process.env.SYSTEM_ADMIN_USER_IDS = facultyId;
     try {
-      const result = await request(app)
-        .get("/api/system/audit")
-        .set(auth(faculty));
-      expect(result.body.scope).toBe("system");
-      expect(result.body.events.some((e: any) => e.actorId === otherId)).toBe(
-        true,
-      );
+      for (const token of [student, faculty, other]) {
+        for (const route of ["health", "audit"])
+          expect(
+            (await request(app).get(`/api/system/${route}`).set(auth(token)))
+              .status,
+          ).toBe(403);
+      }
     } finally {
       delete process.env.SYSTEM_ADMIN_USER_IDS;
     }
+    const all = await request(app).get("/api/system/audit").set(auth(admin));
+    expect(all.status).toBe(200);
+    expect(all.body.scope).toBe("system");
+    expect(all.body.events.some((e: any) => e.actorId === otherId)).toBe(true);
+    const failed = await request(app)
+      .get("/api/system/audit?action=auth.login&outcome=failure")
+      .set(auth(admin));
+    expect(failed.body.events).toHaveLength(1);
+    expect(
+      (await request(app).get("/api/system/audit?page=0").set(auth(admin)))
+        .status,
+    ).toBe(400);
   });
   it("pings and verifies an actual database write/read while labeling ephemeral storage honestly", async () => {
     const result = await request(app)
       .get("/api/system/health")
-      .set(auth(faculty));
+      .set(auth(admin));
     expect(result.status).toBe(200);
     expect(result.body.mode).toBe("ephemeral");
     expect(result.body.persistent).toBe(false);

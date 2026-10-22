@@ -7,6 +7,9 @@ import { generateQuestionsFromContent } from '../services/questionGenerator.js';
 
 export const seedDatabase = async () => {
   try {
+    if (process.env.NODE_ENV !== 'production' && !await User.exists({ email: 'admin@quikz.edu' })) {
+      await User.create({ username: 'quikz_admin', email: 'admin@quikz.edu', passwordHash: await bcrypt.hash('Admin@123', 10), role: 'admin', fullName: 'Quikz Administrator', surname: 'Administrator', termsAccepted: true });
+    }
     const facultyCount = await User.countDocuments({ email: 'faculty@quikz.edu' });
     const studentCount = await User.countDocuments({ email: 'student@quikz.edu' });
 

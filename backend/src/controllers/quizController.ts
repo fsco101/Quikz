@@ -44,7 +44,7 @@ async function quizFor(req: AuthRequest) {
   return quiz;
 }
 function publicQuiz(quiz: any) {
-  const data = quiz.toObject();
+  const data = quiz.toObject ? quiz.toObject() : quiz;
   return {
     ...data,
     questions: data.questions.map((q: any) => ({
@@ -53,18 +53,16 @@ function publicQuiz(quiz: any) {
     })),
   };
 }
-export const createQuiz = async (req: AuthRequest, res: Response) => {
+function quizSettings(body: any) {
   const {
     title,
-    subjectId,
-    moduleId,
     questions,
     timeLimitMinutes = 15,
     timePerQuestion,
     timeUnit,
     passingPercentage = 75,
     questionCount,
-  } = req.body;
+  } = body;
   if (typeof title !== "string" || !title.trim())
     throw new InputError("Quiz title is required.");
   const perQuestion = timePerQuestion !== undefined || timeUnit !== undefined;
@@ -105,6 +103,18 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
     throw new InputError(
       "Questions per attempt must be a whole number between 1 and the question bank size.",
     );
+  return {
+    title: title.trim(),
+    questions: validated,
+    questionCount: count,
+    timeLimitMinutes: seconds ? (seconds * count) / 60 : timeLimitMinutes,
+    timePerQuestionSeconds: seconds,
+    passingPercentage,
+  };
+}
+export const createQuiz = async (req: AuthRequest, res: Response) => {
+  const { subjectId, moduleId } = req.body;
+  const settings = quizSettings(req.body);
   const subject = await Subject.findById(id(subjectId));
   if (!subject) throw new InputError("Subject not found.", 404);
   if (String(subject.facultyId) !== req.user!.id)
@@ -114,18 +124,15 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
     module = await Module.findById(id(moduleId));
     if (!module || String(module.subjectId) !== subjectId)
       throw new InputError("Module must belong to the selected subject.");
+    if (module.createdBy && String(module.createdBy) !== req.user!.id)
+      throw new InputError("Only the module creator can add its quiz.", 403);
     if (module.quizId)
       throw new InputError("This module already has an end quiz.", 409);
   }
   const quiz = await Quiz.create({
-    title: title.trim(),
+    ...settings,
     subjectId,
     moduleId: module?._id,
-    timeLimitMinutes: seconds ? (seconds * count) / 60 : timeLimitMinutes,
-    timePerQuestionSeconds: seconds,
-    questionCount: count,
-    passingPercentage,
-    questions: validated,
     createdBy: req.user!.id,
   });
   if (module) {
@@ -139,6 +146,62 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
     }
   }
   res.status(201).json({ quiz });
+};
+export const updateQuiz = async (req: AuthRequest, res: Response) => {
+  const quiz = await Quiz.findById(id(req.params.id));
+  if (!quiz) throw new InputError("Quiz not found.", 404);
+  if (String(quiz.createdBy) !== req.user!.id)
+    throw new InputError("Only the quiz creator can edit this quiz.", 403);
+  if (
+    ["subjectId", "moduleId", "createdBy"].some(
+      (key) =>
+        req.body[key] !== undefined &&
+        String(req.body[key]) !== String((quiz as any)[key] || ""),
+    )
+  )
+    throw new InputError(
+      "A quiz cannot be moved to another module, subject or creator.",
+    );
+  if (
+    await QuizAttempt.exists({
+      quizId: quiz._id,
+      active: true,
+      quizSnapshot: { $exists: false },
+    })
+  )
+    throw new InputError(
+      "An older quiz session is active. Edit after that session finishes; its scoring must be preserved.",
+      409,
+    );
+  const previous = quiz.toObject();
+  const settings = quizSettings({
+    ...previous,
+    ...(quiz.timePerQuestionSeconds
+      ? { timePerQuestion: quiz.timePerQuestionSeconds, timeUnit: "seconds" }
+      : {}),
+    ...req.body,
+  });
+  const version = (quiz as any).__v;
+  if (req.body.version !== undefined && req.body.version !== version)
+    throw new InputError(
+      "This quiz was updated elsewhere. Reopen it before saving.",
+      409,
+    );
+  const updated = await Quiz.findOneAndUpdate(
+    { _id: quiz._id, createdBy: req.user!.id, __v: version },
+    { $set: settings, $inc: { __v: 1 } },
+    { new: true, runValidators: true },
+  );
+  if (!updated)
+    throw new InputError(
+      "This quiz was updated elsewhere. Reopen it before saving.",
+      409,
+    );
+  res.json({
+    quiz: updated,
+    message:
+      "Quiz updated. Existing attempts keep their original assessment settings.",
+  });
 };
 export const importQuestions = async (req: AuthRequest, res: Response) => {
   if (!req.file) throw new InputError("Select a question bank file.");
@@ -255,7 +318,10 @@ async function finishAttempt(attempt: any) {
   if (!claim)
     throw new InputError("Submission is being saved. Retry shortly.", 409);
   try {
-    const quiz = await Quiz.findById(claim.quizId);
+    const stored = await QuizAttempt.findById(claim._id).select(
+      "+quizSnapshot",
+    );
+    const quiz = stored?.quizSnapshot || (await Quiz.findById(claim.quizId));
     const student = await User.findById(claim.studentId);
     if (!quiz || !student)
       throw new InputError("Quiz or student no longer exists.", 404);
@@ -497,6 +563,7 @@ export const startAttempt = async (req: AuthRequest, res: Response) => {
     try {
       const count = quiz.questionCount ?? quiz.questions.length;
       active = await QuizAttempt.create({
+        quizSnapshot: quiz.toObject(),
         studentId: req.user!.id,
         quizId: quiz._id,
         sessionToken,
@@ -520,16 +587,19 @@ export const startAttempt = async (req: AuthRequest, res: Response) => {
     }
   }
   active = await synchronizeQuestion(active);
+  const snapshot =
+    (await QuizAttempt.findById(active!._id).select("+quizSnapshot"))
+      ?.quizSnapshot || quiz;
   res.json({
     attempt: attemptState(active),
     quiz: {
-      ...publicQuiz(quiz),
+      ...publicQuiz(snapshot),
       questions: active!.questionOrder.map((i) => ({
-        questionText: quiz.questions[i].questionText,
+        questionText: snapshot.questions[i].questionText,
         options: (
           active!.optionOrders?.[i] ||
-          quiz.questions[i].options.map((_, index) => index)
-        ).map((index) => quiz.questions[i].options[index]),
+          snapshot.questions[i].options.map((_: string, index: number) => index)
+        ).map((index: number) => snapshot.questions[i].options[index]),
       })),
     },
   });

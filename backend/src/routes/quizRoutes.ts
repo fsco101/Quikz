@@ -2,6 +2,7 @@ import { Router, RequestHandler } from "express";
 import multer from "multer";
 import {
   createQuiz,
+  updateQuiz,
   importQuestions,
   generateQuestions,
   getQuizzesBySubject,
@@ -39,6 +40,7 @@ router.post(
 );
 router.get("/subject/:subjectId", run(getQuizzesBySubject));
 router.get("/submissions", requireRole("student"), run(getStudentSubmissions));
+router.patch("/:id", requireRole("faculty"), run(updateQuiz));
 router.get("/:id", run(getQuizById));
 router.post("/:id/attempts", requireRole("student"), run(startAttempt));
 router.patch(

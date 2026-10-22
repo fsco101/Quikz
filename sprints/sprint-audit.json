@@ -361,7 +361,7 @@
     "reviewIntervalSeconds": 0,
     "expirySweepSeconds": 15,
     "saveLeaseRecoverySeconds": 30,
-    "publishedQuizEditing": "Immutable in this sprint to preserve in-flight assessment scoring.",
+    "publishedQuizEditing": "Creator-only editing with optimistic concurrency checks. New attempts snapshot assessment questions, grading and timing so edits cannot change active attempts. Legacy active attempts without snapshots block edits until completion.",
     "documentSupport": [
       "txt",
       "md",
@@ -374,17 +374,21 @@
     "reportPageSizePerCohort": 25,
     "reportAttemptLimitPerSelection": 10000,
     "publicLessonPageSize": 12,
-    "systemOperatorPermission": "Faculty account IDs explicitly listed in SYSTEM_ADMIN_USER_IDS; self-registered email addresses do not confer operator access.",
+    "systemOperatorPermission": "Admin role only for health and system-wide audit. Roles/status are read from the database for each request. Legacy faculty allowlists no longer grant access.",
     "productionStorage": "MONGODB_URI required. Configured connections fail closed. Ephemeral fallback allowed only with no URI outside production.",
     "demoSeeding": "Disabled by default in production; explicit SEED_DEMO_DATA=true opt-in.",
     "quizTiming": "Faculty-configurable seconds or minutes per question, from 1 second to 24 hours. Server deadlines survive refresh; advancing locks answers. Existing quizzes retain their saved total timer.",
-    "questionsPerAttempt": "Faculty-selected count from 1 to bank size (maximum 100), sampled without replacement on each new attempt."
+    "questionsPerAttempt": "Faculty-selected count from 1 to bank size (maximum 100), sampled without replacement on each new attempt.",
+    "moduleOwnership": "Persist createdBy on new modules; for legacy modules use subject facultyId. Only the owning faculty may edit; admins do not bypass content ownership.",
+    "accountManagement": "Administrators create/edit users, manage roles, reset passwords, and disable/reactivate accounts without deleting academic records. Self-disable/demotion is blocked; serialized account writes protect against concurrent mutual demotions.",
+    "profilePrivacy": "All roles can edit their own profile. Signed-in people directory exposes name, username, role, bio and avatar only; avatar pixels are public for display, while email, academic cohort and results remain private.",
+    "avatarStorage": "Decode PNG/JPEG/WebP up to 5 MB and 25 megapixels; resize to 256x256 and re-encode WebP without original metadata, stored in MongoDB."
   },
   "verification": {
     "backendTests": {
       "command": "cd backend; npm test",
-      "passed": 102,
-      "suites": 7,
+      "passed": 120,
+      "suites": 8,
       "database": "isolated local MongoDB"
     },
     "backendBuild": {
@@ -397,7 +401,7 @@
     },
     "browserTests": {
       "command": "cd frontend; npm run test:e2e",
-      "passed": 6,
+      "passed": 8,
       "coverage": [
         "faculty creates subject/modules, generates a preview, sees import errors, imports and publishes a bank",
         "student resumes original deadline and saved answers, records focus warnings, submits, passes and unlocks next module",
@@ -410,7 +414,10 @@
         "database health and audit filtering",
         "desktop and mobile gradebook layouts reviewed",
         "faculty sets per-question minutes, 80% passing mark and 3-question subset of a 4-question bank",
-        "actual server-timed question advancement and automatic final submission"
+        "actual server-timed question advancement and automatic final submission",
+        "creator-only module and quiz editing, concurrent edit protection and active assessment snapshot preservation",
+        "admin user creation, role/status changes, password reset, exclusive health access and mobile management layout",
+        "self profile updates and uploaded avatars visible from another faculty account"
       ]
     },
     "liveAtlas": "No live Atlas cluster was available for verification. Local MongoDB ping, write/read/delete checks, mocked connection failure, and production no-fallback behavior are tested.",
@@ -479,5 +486,32 @@
       "Legacy quiz timing, randomized answer letters, and immediate module retakes preserved"
     ],
     "validation": "102 backend tests, 6 browser tests, both production builds, and PDF visual inspection passed."
+  },
+  "accountAndOwnershipUpdate": {
+    "date": "2026-10-22",
+    "status": "implemented",
+    "requestedFeatures": [
+      "Owner-only module and quiz editing",
+      "Admin role with exclusive system health and user management",
+      "Self profile and password updates for all roles",
+      "Shared profile avatars in courses, gradebooks and people directory"
+    ],
+    "compatibility": [
+      "Old JWTs remain usable with default session version zero; permissions are loaded from the current account",
+      "Deactivation and password changes revoke prior tokens",
+      "Existing academic history and earned progress remain intact",
+      "Production bootstrap requires explicit ADMIN_EMAIL and ADMIN_PASSWORD; development admin is never seeded in production"
+    ],
+    "verification": "120 backend tests, 8 browser tests and both production builds passed. Profile, shared avatar and admin desktop/mobile screenshots reviewed. All existing GitHub sprint issues remain closed.",
+    "evidence": [
+      "backend/src/__tests__/accounts.test.ts",
+      "backend/src/__tests__/system.test.ts",
+      "frontend/e2e/accounts.spec.ts",
+      "backend/src/routes/adminRoutes.ts",
+      "backend/src/routes/userRoutes.ts",
+      "backend/src/services/adminAccess.ts",
+      "frontend/src/components/users",
+      "README.md"
+    ]
   }
 }

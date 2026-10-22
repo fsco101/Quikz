@@ -161,5 +161,10 @@
     "source": "User-requested faculty quiz settings",
     "status": "implemented",
     "details": "Original issue titles and acceptance text are retained as historical GitHub records. Fixed 10–20 minute total timing and 75% passing rules are superseded: new quizzes use faculty-set time per question in seconds/minutes, passing percentages from 1–100%, and 1–100 questions per attempt up to bank size. Runtime, progression, and reports use these settings; historical quizzes/results retain their prior timing and grading."
+  },
+  "accountOwnershipAmendment": {
+    "date": "2026-10-22",
+    "status": "implemented",
+    "details": "User-requested owner-only edits, admin-only health/user management, editable self profiles and shared avatars supersede historical immutable-quiz and faculty-operator acceptance text. Existing GitHub issue titles and statuses remain historical records. See sprint-audit.json accountAndOwnershipUpdate for current rules and validation."
   }
 }

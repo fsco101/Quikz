@@ -6,7 +6,9 @@ import { User } from "../models/User.js";
 export const getSubjects = async (req: AuthRequest, res: Response) => {
   try {
     const subjects = await Subject.find().sort({ createdAt: -1 });
-    res.json({ subjects });
+    const authors = await User.find({ _id: { $in: subjects.map((s) => s.facultyId) } }).select("fullName");
+    const names = new Map(authors.map((u) => [String(u._id), u.fullName]));
+    res.json({ subjects: subjects.map((s) => ({ ...s.toObject(), facultyName: names.get(String(s.facultyId)) || s.facultyName })) });
   } catch (err: any) {
     res
       .status(500)

@@ -19,6 +19,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
   const [progress, setProgress] = useState<CurriculumProgress>({ totalModules: 0, completedCount: 0 });
   const [activeModule, setActiveModule] = useState<ModuleItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingModule, setEditingModule] = useState<ModuleItem | undefined>();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [studioOpen, setStudioOpen] = useState(false);
   const [takingQuiz, setTakingQuiz] = useState<string | null>(null);
@@ -98,7 +99,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
         <div className="flex items-center gap-3 self-end md:self-auto">
           {user?.role === 'faculty' && user.id === subject.facultyId && (
             <button
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={() => { setEditingModule(undefined); setIsAddModalOpen(true); }}
               className="px-4 py-2 rounded-xl bg-[#070235] hover:bg-[#1e1b4b] text-white text-xs font-bold transition-all shadow-md flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-[18px]">post_add</span>
@@ -305,11 +306,13 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
 
                 <div className="flex items-center gap-3 shrink-0">
                   {user?.role === 'faculty' ? (
-                    user.id === subject.facultyId && !activeModule.quizId ? <button onClick={() => setStudioOpen(true)} className="px-5 py-2.5 rounded-xl bg-[#4648d4] hover:bg-[#3436b8] text-white text-xs font-bold">Create end quiz</button> : <span className="text-xs text-indigo-200">{activeModule.quizId ? `Published: ${activeModule.quizId.title}` : 'Awaiting instructor assessment'}</span>
-                  ) : activeModule.quizId ? (
+                    activeModule.canEdit && !activeModule.quizId ? <button onClick={() => setStudioOpen(true)} className="px-5 py-2.5 rounded-xl bg-[#4648d4] hover:bg-[#3436b8] text-white text-xs font-bold">Create end quiz</button> : <span className="text-xs text-indigo-200">{activeModule.quizId ? `Published: ${activeModule.quizId.title}` : 'Awaiting instructor assessment'}</span>
+                  ) : activeModule.quizId && user?.role === 'student' ? (
                     <button onClick={() => setTakingQuiz(activeModule.quizId!._id)} className="px-5 py-2.5 rounded-xl bg-[#4648d4] hover:bg-[#3436b8] text-white text-xs font-bold">{activeModule.isCompleted ? 'Practice again' : 'Start / resume end quiz'} · {activeModule.quizId.timePerQuestionSeconds ? `${activeModule.quizId.timePerQuestionSeconds} sec / question` : `${activeModule.quizId.timeLimitMinutes} min total`}</button>
                   ) : <span className="text-xs text-indigo-200">Your instructor has not published an end quiz yet.</span>}
-                  {activeModule.isCompleted && user?.role === 'student' && <span className="text-xs font-bold text-emerald-300">Mastered ✓</span>}
+                  {user?.role === 'faculty' && activeModule.canEdit && <button className="rounded-xl border px-4 py-2 text-xs font-bold" onClick={() => { setEditingModule(activeModule); setIsAddModalOpen(true); }}>Edit module</button>}
+                  {user?.role === 'faculty' && activeModule.quizId?.createdBy === user.id && <button className="rounded-xl border px-4 py-2 text-xs font-bold" onClick={() => setStudioOpen(true)}>Edit quiz</button>}
+                  {activeModule.isCompleted && user?.role === 'student'  && <span className="text-xs font-bold text-emerald-300">Mastered ✓</span>}
                 </div>
               </div>
             </>
@@ -323,15 +326,16 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
         </div>
       </div>
 
-      {studioOpen && activeModule && <QuizStudio subject={subject} module={activeModule} onClose={() => setStudioOpen(false)} onPublished={() => { setStudioOpen(false); setActionMessage('End quiz published. Students can now take the assessment.'); void fetchModules(); }} />}
+      {studioOpen && activeModule && <QuizStudio subject={subject} module={activeModule} onClose={() => setStudioOpen(false)} onPublished={() => { setStudioOpen(false); setActionMessage('End quiz published. Assessment saved successfully.'); void fetchModules(); }} />}
       {takingQuiz && <QuizTaker quizId={takingQuiz} onClose={() => { setTakingQuiz(null); void fetchModules(); }} />}
       {/* Add Module Modal */}
-      <CreateModuleModal
+      {isAddModalOpen && <CreateModuleModal
         isOpen={isAddModalOpen}
         subjectId={subject._id}
+        module={editingModule}
         onClose={() => setIsAddModalOpen(false)}
         onCreated={fetchModules}
-      />
+      />}
     </div>
   );
 };
