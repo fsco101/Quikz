@@ -416,7 +416,9 @@
       "completedSprints": [
         1,
         2,
-        3
+        3,
+        4,
+        5
       ],
       "closedIssueNumbers": [
         1,
@@ -429,32 +431,23 @@
         8,
         9,
         10,
+        11,
+        12,
+        13,
         14,
         15,
         16,
-        17
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
       ],
       "stateReason": "COMPLETED",
-      "remainingPlannedIssueNumbers": [
-        11,
-        12,
-        13,
-        18,
-        19,
-        20,
-        21,
-        22
-      ],
-      "pendingClosureIssueNumbers": [
-        11,
-        12,
-        13,
-        18,
-        19,
-        20,
-        21,
-        22
-      ]
+      "remainingPlannedIssueNumbers": [],
+      "openIssueNumbers": [],
+      "implementationCommit": "928e0de"
     },
     "reports": {
       "xlsx": "Generated workbooks reopened and checked for correct cohort sheets, styles, percentages, frozen headings and personal scope.",
