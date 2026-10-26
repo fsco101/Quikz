@@ -1,11 +1,13 @@
 import { Subject } from "../models/Subject.js";
 import { Module } from "../models/Module.js";
 import { verifiedCourseCompletionIds } from "./progression.js";
+import { readableModules, hiddenSubjectIds } from "./connections.js";
 
 export async function courseOverview(user: { id: string; role: "student" | "faculty" }) {
-  const subjects = await Subject.find(user.role === "faculty" ? { facultyId: user.id } : {})
+  const identity = { ...user, email: "", username: "" };
+  const subjects = await Subject.find({ ...(user.role === "faculty" ? { facultyId: user.id } : {}), _id: { $nin: await hiddenSubjectIds(identity) } })
     .select("_id").lean();
-  const modules = await Module.find({ subjectId: { $in: subjects.map((s) => s._id) } })
+  const modules = await Module.find({ $and: [{ subjectId: { $in: subjects.map((s) => s._id) } }, await readableModules({ ...user, email: "", username: "" })] })
     .select("subjectId title orderIndex quizId")
     .sort({ orderIndex: 1, _id: 1 })
     .populate("quizId", "subjectId moduleId")

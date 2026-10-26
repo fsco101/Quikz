@@ -218,7 +218,7 @@ test("advances timed questions and submits saved answers when the final question
         title: "Timed practice",
         summary: "Timer demonstration",
         textContent: "Study the facts here.",
-        contentType: "text",
+        audience: "both", contentType: "text",
       },
     },
   );

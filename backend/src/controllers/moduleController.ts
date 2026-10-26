@@ -13,6 +13,7 @@ import {
   verifiedCompletionIds,
 } from "../services/progression.js";
 import { InputError } from "../services/questionBank.js";
+import { moduleAudience, readableModules, requireAudienceAccess } from "../services/connections.js";
 
 export const getSubjectModules = async (req: AuthRequest, res: Response) => {
   try {
@@ -21,7 +22,7 @@ export const getSubjectModules = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Invalid subject ID" });
     const subject = await Subject.findById(subjectId);
     if (!subject) return res.status(404).json({ message: "Subject not found" });
-    const modules = await Module.find({ subjectId })
+    const modules = await Module.find({ $and: [{ subjectId }, await readableModules(req.user)] })
       .sort({ orderIndex: 1 })
       .populate(
         "quizId",
@@ -96,6 +97,7 @@ export const createModule = async (req: AuthRequest, res: Response) => {
       throw new InputError("Only the subject owner can add modules.", 403);
     const last = await Module.findOne({ subjectId }).sort({ orderIndex: -1 });
     const module = await Module.create({
+      audience: moduleAudience(req.body.audience ?? "connected"),
       subjectId,
       title: title.trim(),
       summary: summary.trim(),
@@ -153,6 +155,7 @@ export const downloadModuleFile = async (req: AuthRequest, res: Response) => {
         ? await requireModuleAccess(req.user!.id, req.params.id)
         : await Module.findById(req.params.id);
     if (!module?.fileUrl) throw new InputError("Lesson file not found.", 404);
+    await requireAudienceAccess(req.user!, module);
     const dir = path.resolve(
       path.dirname(fileURLToPath(import.meta.url)),
       "../../uploads",
@@ -183,6 +186,7 @@ export const getModuleById = async (req: AuthRequest, res: Response) => {
       "title timeLimitMinutes timePerQuestionSeconds questionCount passingPercentage createdBy",
     );
     if (!module) throw new InputError("Module not found.", 404);
+    await requireAudienceAccess(req.user!, module);
     res.json({
       module: {
         ...module.toObject(),
@@ -227,6 +231,7 @@ export const updateModule = async (req: AuthRequest, res: Response) => {
         409,
       );
     const fields: any = {};
+    if (req.body.audience !== undefined) fields.audience = moduleAudience(req.body.audience);
     for (const key of ["title", "summary", "textContent"] as const) {
       if (req.body[key] !== undefined) {
         if (

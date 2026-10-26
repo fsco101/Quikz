@@ -20,6 +20,22 @@ The lesson reader provides a wider reading canvas and sticky course navigation o
 
 Responsive and keyboard coverage lives in `frontend/e2e/design.spec.ts`, alongside the existing workflow tests. The shared styles are in `frontend/src/index.css`; reusable workspace components are under `frontend/src/components/layout` and `frontend/src/components/ui`.
 
+## Student and professor connections
+
+Open **Connections** as a student or faculty member and enter the other person's registered Quikz email. Either role can send a request. The recipient accepts it from **Incoming requests**; sending or receiving a pending request grants no lesson or report access. **My students** or **My professors** shows accepted connections, with name/email search and pagination. You can decline incoming requests, cancel sent requests, or disconnect an accepted relationship. Students can connect to multiple professors. Requests are delivered inside Quikz; email addresses identify existing accounts, and this workflow does not send email or verify mailbox ownership.
+
+Faculty see academic year/section only for their accepted students. The **People** directory exposes student profiles only to the student, their connected professors and administrators. Faculty profiles remain discoverable. Only administrators retain the complete account directory.
+
+When creating or editing a module, choose its audience:
+
+- **Connected students only**: the default for new uploads. Only accepted students of the course owner can study the lesson; the owner and administrators retain access. Other professors and unconnected students cannot retrieve its content, attachment or assessment. Private lessons are omitted from public search, syllabuses and unrelated course overviews.
+- **Public**: publish a directory preview and make the lesson available to signed-in learners. Public study does not add students to the professor's roster or share their results.
+- **Both connected students and public**: share the lesson with the connected class and public learners. Public access includes connected students, so the reading permissions overlap with Public; neither option makes student data public.
+
+Public directory previews contain summaries, not full lecture text, attachment URLs or quiz answers. Full lessons and assessments still require sign-in. Prerequisites apply to the modules the student is permitted to access; hidden private modules do not block a public learning path. Editing a module's audience updates the lesson, attachment and bound quiz permissions together.
+
+Disconnecting immediately ends private lesson access and removes the student from that professor's reports and exports. Previously downloaded material cannot be recalled. Saved quiz history remains available to the student. Faculty can report only on accepted, active students **and** subjects they own. Public learners' results are not disclosed to faculty without an accepted connection. Existing modules retain their previous public-discovery behavior as **Both** until their owner changes the audience. Existing accounts are not automatically connected; only a newly seeded demo pair starts connected, and restarting does not restore a removed demo connection.
+
 ## Course overview
 
 The subject catalog now shows students how many modules they have mastered in each course, with filters for in-progress, not-started, completed and empty courses. **Start learning** and **Continue learning** open the first unfinished lesson. Opening a course normally also selects that lesson. Progress uses the same recorded completion plus designated-quiz pass evidence as prerequisite checks; historical flags alone never count. Empty courses are not treated as completed.
@@ -41,7 +57,7 @@ Open a subject you own, add a module, and choose **Create end quiz**. Build ques
 
 ## Results and reports
 
-Open **My results** as a student or **Master gradebook** as faculty. Student reports contain only the signed-in student's records. Faculty reports contain only subjects they own, with separate year-and-section tables and cohort tabs. Filter by subject, year, section, student/name/quiz search, score range, and pass status; sort by surname, score, or date. Surname sorting uses highest score as a secondary key. Attempt numbers include retakes.
+Open **My results** as a student or **Master gradebook** as faculty. Student reports, totals, subject options, cohort tabs, quiz submission history and PDF/Excel exports contain only the signed-in student's records. Supplying another student's ID in a query cannot change that scope. Faculty reports contain only their accepted, active students' results in subjects they own, with separate year-and-section tables and cohort tabs. Filter by subject, year, section, student/name/quiz search, score range, and pass status; sort by surname, score, or date. Surname sorting uses highest score as a secondary key. Attempt numbers include retakes.
 
 Summary averages, pass rates, and score distributions count all matching attempts. Tables show up to 25 attempts per cohort per page. **Export PDF** and **Export Excel** include every matching page, keeping cohorts separate. Excel workbooks have a summary plus one styled sheet per cohort; PDFs include institutional headers, surname indexing, course/term details, page numbers, and a faculty verification signature line. Reports are limited to 10,000 attempts per subject selection; narrow the subject selection if the combined report exceeds this limit.
 

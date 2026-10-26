@@ -2,6 +2,7 @@ import { Module } from "../models/Module.js";
 import { StudentProgress } from "../models/StudentProgress.js";
 import { InputError } from "./questionBank.js";
 import { QuizSubmission } from "../models/QuizSubmission.js";
+import { readableModules, requireAudienceAccess } from "./connections.js";
 
 export async function verifiedCompletionIds(
   studentId: string,
@@ -45,10 +46,12 @@ export async function verifiedCourseCompletionIds(
 export async function requireModuleAccess(studentId: string, moduleId: string) {
   const module = await Module.findById(moduleId);
   if (!module) throw new InputError("Module not found.", 404);
-  const previous = await Module.find({
+  const user = { id: studentId, role: "student" as const, email: "", username: "" };
+  await requireAudienceAccess(user, module);
+  const previous = await Module.find({ $and: [await readableModules(user), {
     subjectId: module.subjectId,
     orderIndex: { $lt: module.orderIndex },
-  }).select("_id quizId");
+  }] }).select("_id quizId");
   const completed = await verifiedCompletionIds(
     studentId,
     module.subjectId,

@@ -594,5 +594,61 @@
       "sprints/sprint-7-design-refresh.json",
       "frontend/e2e/design.spec.ts"
     ]
+  },
+  "facultyConnectionsUpdate": {
+    "date": "2026-10-26",
+    "status": "implemented",
+    "sprint": 8,
+    "issues": [
+      29,
+      30,
+      31
+    ],
+    "implemented": [
+      "Email-matched requests from either student or faculty require recipient acceptance; no access while pending. Unique pairs, participant-only accept/delete, active/role checks, multiple professors, declined/cancelled requests, paginated name/email search, incoming/outgoing tabs and explicit disconnection confirmation. The accepted faculty roster includes only connected students; pending academic details are withheld. Students are told which course results they share. Lifecycle actions are audited without request emails or bodies.",
+      "Module create/edit supports connected, public and both audiences; new API uploads default to connected. Legacy lessons preserve their former public behavior. Shared permission helpers filter module lists, private-only courses, overview counts, public directory search/syllabuses, direct lesson/file access and bound quizzes. Student prerequisites consider only visible lessons. Connection removal blocks private quiz mutations, including attempts with snapshots. Owner/admin access remains available. Lesson reader clears unavailable content after a failed refresh.",
+      "Student gradebooks, totals, cohorts, subject options, submissions and PDF/Excel exports use the authenticated student ID; forged student/user/faculty query IDs cannot replace it. Faculty records, totals, cohorts and both export formats require accepted active students and subject ownership. People no longer exposes all students to faculty or fellow students. Disconnection hides faculty records without deleting personal academic history. Parsed workbook/PDF tests verify cross-account exclusion."
+    ],
+    "validation": {
+      "backendTests": {
+        "command": "cd backend && npm test",
+        "passed": 140,
+        "files": 10
+      },
+      "browserTests": {
+        "command": "cd frontend && npm run test:e2e",
+        "passed": 14
+      },
+      "finalFocusedChecks": "After consent/count wording and screenshot polish: 12 connection/privacy backend tests, the connection browser workflow and both builds passed again.",
+      "backendBuild": {
+        "command": "cd backend && npm run build",
+        "result": "passed"
+      },
+      "frontendBuild": {
+        "command": "cd frontend && npm run build",
+        "result": "passed"
+      },
+      "diffCheck": {
+        "command": "git diff --check",
+        "result": "passed"
+      },
+      "visualReview": "Connection roster inspected at desktop 1440px and mobile 390px; no horizontal page overflow. Student personal result screenshot reviewed. PDF/Excel report contents parsed for peer exclusion."
+    },
+    "githubVerification": {
+      "verifiedAt": "2026-10-26",
+      "closedIssueNumbers": [
+        29,
+        30,
+        31
+      ],
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "openIssueNumbers": []
+    },
+    "evidence": [
+      "sprints/sprint-8-faculty-connections.json",
+      "backend/src/__tests__/connections.test.ts",
+      "frontend/e2e/connections.spec.ts"
+    ]
   }
 }

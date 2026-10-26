@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { getSubjects, createSubject } from '../controllers/subjectController.js';
 import { getSubjectModules, createModule } from '../controllers/moduleController.js';
-import { authenticateToken, requireRole, AuthRequest } from '../middleware/auth.js';
+import { authenticateToken, optionalAuthentication, requireRole, AuthRequest } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
 import { courseOverview } from '../services/courseOverview.js';
 
 const router = Router();
 
-router.get('/', getSubjects);
+router.get('/', optionalAuthentication, getSubjects);
 router.get('/overview', authenticateToken, async (req: AuthRequest, res, next) => {
   try {
     const user = req.user!;

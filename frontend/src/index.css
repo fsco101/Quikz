@@ -437,6 +437,46 @@
   .auth-form-panel input, .auth-form-panel select { font-size: 16px; }
 }
 @media (max-width: 374px) { .auth-field-row, .auth-role-options { grid-template-columns: minmax(0,1fr); } .auth-topbar { padding: 18px 12px; } }
+.connection-invite { padding: 25px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 30px; align-items: center; }
+.connection-icon { display: inline-flex; padding: 10px; border-radius: 12px; background: #eeebfa; color: #6552ac; margin-bottom: 12px; }
+.connection-invite h2, .connection-card h2 { font-size: 16px; font-weight: 700; color: var(--ink); }
+.connection-invite p { margin-top: 8px; color: var(--muted); font-size: 13px; line-height: 1.7; max-width: 400px; }
+.connection-invite-form label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+.connection-invite-form > div { display: flex; gap: 10px; flex-wrap: wrap; }
+.connection-invite input { flex: 1; min-width: 150px; width: 100%; border: 1px solid var(--line); padding: 12px; border-radius: 10px; font-size: 14px; }
+.connection-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.connection-tabs { display: flex; flex-wrap: wrap; gap: 5px; }
+.connection-tabs button { padding: 10px 13px; border-radius: 9px; font-size: 12px; color: var(--muted); }
+.connection-tabs button[aria-pressed=true] { background: #eae6f8; color: #514083; font-weight: 700; }
+.connection-search { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: white; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); max-width: 100%; }
+.connection-search input { min-width: 0; width: 200px; font-size: 13px; background: transparent; }
+.connection-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.connection-card { padding: 22px; display: flex; flex-direction: column; gap: 19px; min-width: 0; }
+.connection-person { display: flex; align-items: center; gap: 12px; }
+.connection-person > div { min-width: 0; }
+.connection-person h2, .connection-person p { overflow-wrap: anywhere; }
+.connection-person p, .connection-details p { font-size: 12px; color: var(--muted); margin-top: 5px; }
+.connection-badge { font-size: 11px; color: #866025; background: #fff7e6; padding: 5px 9px; border-radius: 7px; display: inline-block; }
+.connection-badge.is-connected { color: #286a59; background: #e7f4ed; }
+.connection-actions { display: flex; gap: 9px; flex-wrap: wrap; margin-top: auto; }
+.connection-confirm p { font-size: 13px; color: #7e3d35; line-height: 1.6; }
+.connection-confirm > div { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 12px; }
+.connection-danger { color: #9c342e; background: #fff0ed; border: 1px solid #efc9c2; }
+.connection-message, .connection-error { padding: 14px 18px; font-size: 13px; border-radius: 12px; line-height: 1.7; }
+.connection-message { color: #286a59; background: #e7f4ed; }
+.connection-error { color: #9c342e; background: #fff0ed; }
+.connection-empty { text-align: center; padding: 40px 24px; color: var(--muted); }
+.connection-empty > svg { margin: 0 auto 15px; color: #8170ae; }
+.connection-empty h2 { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
+.connection-empty p { font-size: 13px; line-height: 1.8; max-width: 500px; margin: auto; }
+@media (max-width: 767px) {
+  .connection-invite, .connection-grid { grid-template-columns: minmax(0, 1fr); }
+  .connection-invite { gap: 20px; padding: 20px; }
+  .connection-invite input { font-size: 16px; }
+  .connection-invite-form > div > button { width: 100%; justify-content: center; }
+  .connection-search { width: 100%; }
+  .connection-search input { width: 100%; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

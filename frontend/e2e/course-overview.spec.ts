@@ -19,7 +19,7 @@ async function fixture(request: APIRequestContext) {
   const modules = [];
   for (const title of ["First mastery lesson", "Next practice lesson"]) {
     const response = await request.post(`${root}/subjects/${subject._id}/modules`, { headers, multipart: {
-      title, summary: "Understand and practice the lesson", contentType: "text", textContent: "Lecture notes for this lesson.",
+      title, summary: "Understand and practice the lesson", audience: "both", contentType: "text", textContent: "Lecture notes for this lesson.",
     } });
     expect(response.status()).toBe(201);
     modules.push((await response.json()).module);

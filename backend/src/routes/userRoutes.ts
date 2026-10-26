@@ -8,6 +8,7 @@ import { User } from "../models/User.js";
 import { Subject } from "../models/Subject.js";
 import { InputError } from "../services/questionBank.js";
 import { profileFields, userDTO, validatePassword } from "../services/users.js";
+import { connectedUserIds } from "../services/connections.js";
 const router = Router();
 const run = (fn: any) => (req: any, res: any, next: any) =>
   Promise.resolve(fn(req, res)).catch(next);
@@ -46,6 +47,12 @@ router.get(
     )
       throw new InputError("Invalid people search.");
     const filter: any = { active: { $ne: false } };
+    if (req.user!.role !== "admin") {
+      const connected = await connectedUserIds(req.user!);
+      // Faculty profiles remain discoverable; students are visible only to
+      // themselves and their accepted professors, never a global student roster.
+      filter.$and = [{ $or: [{ role: "faculty" }, { _id: req.user!.id }, ...(req.user!.role === "faculty" ? [{ _id: { $in: connected }, role: "student" }] : [])] }];
+    }
     if (search.trim()) {
       const literal = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       filter.$or = ["fullName", "username"].map((key) => ({

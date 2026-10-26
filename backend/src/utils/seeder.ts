@@ -3,6 +3,7 @@ import { User } from '../models/User.js';
 import { Subject } from '../models/Subject.js';
 import { Module } from '../models/Module.js';
 import { Quiz } from '../models/Quiz.js';
+import { FacultyConnection } from '../models/FacultyConnection.js';
 import { generateQuestionsFromContent } from '../services/questionGenerator.js';
 
 export const seedDatabase = async () => {
@@ -49,6 +50,13 @@ export const seedDatabase = async () => {
         termsAcceptedAt: new Date()
       });
       console.log('Seeded Student: student@quikz.edu / Student@123');
+    }
+
+    // Only connect a freshly seeded demo pair. Restarting must never restore a
+    // connection deliberately removed by either demo account.
+    if ((facultyCount === 0 || studentCount === 0) && facultyUser) {
+      const student = await User.findOne({ email: 'student@quikz.edu', role: 'student' });
+      if (student) await FacultyConnection.updateOne({ facultyId: facultyUser._id, studentId: student._id }, { $setOnInsert: { requestedBy: facultyUser._id, status: 'accepted', acceptedAt: new Date() } }, { upsert: true });
     }
 
     // Seed Demo Subject and Modules if none exist

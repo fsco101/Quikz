@@ -83,7 +83,7 @@ describe("Owned editing, admin permissions, profile updates and shared avatars",
         title: "Original module",
         summary: "Summary",
         textContent: "Original lecture",
-        contentType: "text",
+        audience: "both", contentType: "text",
       });
     expect(module.status).toBe(201);
     moduleId = module.body.module._id;
