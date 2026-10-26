@@ -2,9 +2,9 @@
   "project": "Quikz",
   "repository": "fsco101/Quikz",
   "updatedAt": "2026-10-26",
-  "totalSprints": 6,
-  "totalIssues": 24,
-  "completedIssues": 24,
+  "totalSprints": 9,
+  "totalIssues": 31,
+  "completedIssues": 31,
   "plannedIssues": 0,
   "sprints": [
     {
@@ -46,6 +46,27 @@
       "sprint": 6,
       "name": "Course Progress and Assessment Readiness",
       "file": "sprints/sprint-6-course-overview.json",
+      "totalIssues": 2,
+      "status": "completed"
+    },
+    {
+      "sprint": 7,
+      "name": "Interface Design Refresh",
+      "file": "sprints/sprint-7-design-refresh.json",
+      "totalIssues": 2,
+      "status": "completed"
+    },
+    {
+      "sprint": 8,
+      "name": "Faculty Connections and Student Privacy",
+      "file": "sprints/sprint-8-faculty-connections.json",
+      "totalIssues": 3,
+      "status": "completed"
+    },
+    {
+      "sprint": 9,
+      "name": "CSV Class Roster Invitations",
+      "file": "sprints/sprint-9-csv-roster-invitations.json",
       "totalIssues": 2,
       "status": "completed"
     }

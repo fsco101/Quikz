@@ -1,3 +1,4 @@
+import { PageHeading } from "../ui/PageHeading.js";
 import React, { useEffect, useState } from "react";
 import { api } from "../../services/api.js";
 type Health = {
@@ -75,19 +76,7 @@ export function SystemHealth() {
   }, [page, action, outcome]);
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-xs uppercase tracking-widest text-indigo-600 font-bold">
-          Operations
-        </p>
-        <h1 className="text-3xl font-black text-[#070235]">
-          System health & audit
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Administrator access only. Refreshes every 15 seconds. Audit records
-          cover the whole system; health metrics describe this server's database
-          connection.
-        </p>
-      </header>
+      <PageHeading eyebrow="Behind the scenes" title="System health & audit" description="Keep an eye on database health and system activity. Metrics refresh every 15 seconds." />
       {error && (
         <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-800">
           {error}
@@ -113,7 +102,7 @@ export function SystemHealth() {
                 health.writeReadVerified ? "Verified" : "Failed",
               ],
             ].map(([label, value]) => (
-              <section key={label} className="rounded-2xl border bg-white p-5">
+              <section key={label} className="ui-panel p-5">
                 <p className="text-xs text-slate-500">{label}</p>
                 <p className="mt-2 text-lg font-bold text-[#070235]">{value}</p>
               </section>
@@ -125,7 +114,7 @@ export function SystemHealth() {
               MONGODB_URI for persistent MongoDB / Atlas storage.
             </p>
           )}
-          <section className="rounded-2xl border bg-white p-5">
+          <section className="ui-panel p-5">
             <h2 className="font-bold mb-4">Driver connection monitoring</h2>
             <dl className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               {[
@@ -163,7 +152,7 @@ export function SystemHealth() {
       )}
       {audit && (
         <>
-          <section className="rounded-2xl border bg-white p-5">
+          <section className="ui-panel p-5">
             <h2 className="font-bold mb-3">Recorded activity & latency</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {audit.stats.map((stat) => (

@@ -1,0 +1,92 @@
+{
+  "sprintNumber": 7,
+  "sprintName": "Interface Design Refresh",
+  "status": "completed",
+  "startDate": "2026-10-26",
+  "endDate": "2026-10-26",
+  "completedAt": "2026-10-26",
+  "auditedAt": "2026-10-26",
+  "goals": [
+    "Give learning and teaching a consistent visual identity",
+    "Improve navigation and lesson readability across desktop and mobile",
+    "Preserve tested account, assessment, reporting and prerequisite workflows"
+  ],
+  "issues": [
+    {
+      "id": "QUIKZ-26",
+      "githubIssueNumber": 26,
+      "title": "[Design] Responsive workspace shell and account entry experience",
+      "labels": [
+        "sprint:7"
+      ],
+      "status": "closed",
+      "stateReason": "COMPLETED",
+      "implementedAt": "2026-10-26",
+      "auditStatus": "verified",
+      "implementationDetails": "Shared brand, favicon, navy desktop sidebar, compact mobile navigation, active-page indicators, skip link, profile identity, and consistent headings. Redesigned sign-in and registration retain demo access and the Terms and Honor Code gate. Keyboard role selection uses native buttons.",
+      "verificationEvidence": [
+        "frontend/src/components/layout/AppShell.tsx",
+        "frontend/src/components/layout/Brand.tsx",
+        "frontend/src/components/auth/AuthPage.tsx",
+        "frontend/src/components/ui/PageHeading.tsx",
+        "frontend/src/index.css",
+        "frontend/e2e/design.spec.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-27",
+      "githubIssueNumber": 27,
+      "title": "[Design] Consistent learning teaching and account screens",
+      "labels": [
+        "sprint:7"
+      ],
+      "status": "closed",
+      "stateReason": "COMPLETED",
+      "implementedAt": "2026-10-26",
+      "auditStatus": "verified",
+      "implementationDetails": "Course covers, real progress/readiness metrics, unified filters, readable lesson canvas, desktop sticky module navigation and collapsible mobile modules. Returning to Learning path resets the selected course. Shared surfaces and headings align directory, gradebook, people, profile, admin and quiz pages; answer selection has explicit text and aria-pressed state.",
+      "verificationEvidence": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/curriculum/SubjectList.tsx",
+        "frontend/src/components/curriculum/ModuleReader.tsx",
+        "frontend/src/components/quiz/QuizTaker.tsx",
+        "frontend/src/index.css",
+        "frontend/e2e/design.spec.ts"
+      ]
+    }
+  ],
+  "validation": {
+    "frontendBuild": {
+      "command": "cd frontend && npm run build",
+      "result": "passed"
+    },
+    "browserTests": {
+      "command": "cd frontend && npm run test:e2e",
+      "passed": 13
+    },
+    "finalResponsiveChecks": {
+      "command": "cd frontend && npx playwright test e2e/design.spec.ts",
+      "passed": 2,
+      "result": "passed after final responsive polish"
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "result": "passed"
+    },
+    "visualReview": "Desktop and mobile screenshots reviewed for authentication, catalog, reader, gradebook, quiz and account layouts. Responsive assertions also cover 320px and 768px widths.",
+    "backend": "No backend code changes; backend unit suite was not rerun for this design sprint."
+  },
+  "githubVerification": {
+    "verifiedAt": "2026-10-26",
+    "closedIssueNumbers": [
+      26,
+      27
+    ],
+    "state": "CLOSED",
+    "stateReason": "COMPLETED",
+    "openIssueNumbers": []
+  },
+  "limits": [
+    "Browser checks use Chromium and isolated local MongoDB; external Atlas and other browser engines were not exercised."
+  ]
+}

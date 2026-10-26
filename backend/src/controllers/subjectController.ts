@@ -2,10 +2,11 @@ import { Response } from "express";
 import { Subject } from "../models/Subject.js";
 import { AuthRequest } from "../middleware/auth.js";
 import { User } from "../models/User.js";
+import { hiddenSubjectIds } from "../services/connections.js";
 
 export const getSubjects = async (req: AuthRequest, res: Response) => {
   try {
-    const subjects = await Subject.find().sort({ createdAt: -1 });
+    const subjects = await Subject.find({ _id: { $nin: await hiddenSubjectIds(req.user) } }).sort({ createdAt: -1 });
     const authors = await User.find({ _id: { $in: subjects.map((s) => s.facultyId) } }).select("fullName");
     const names = new Map(authors.map((u) => [String(u._id), u.fullName]));
     res.json({ subjects: subjects.map((s) => ({ ...s.toObject(), facultyName: names.get(String(s.facultyId)) || s.facultyName })) });

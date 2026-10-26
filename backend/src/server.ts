@@ -24,6 +24,8 @@ import systemRoutes from "./routes/systemRoutes.js";
 import { auditRequests } from "./middleware/audit.js";
 import { AuditEvent } from "./models/AuditEvent.js";
 import mongoose from "mongoose";
+import connectionRoutes from "./routes/connectionRoutes.js";
+import { FacultyConnection } from "./models/FacultyConnection.js";
 
 dotenv.config();
 
@@ -39,7 +41,9 @@ app.use((req, res, next) => {
   if (
     req.path.startsWith("/api/gradebook") ||
     req.path.startsWith("/api/system") ||
-    req.path.startsWith("/api/admin") || req.path.startsWith("/api/auth/me")
+    req.path.startsWith("/api/admin") || req.path.startsWith("/api/auth/me") ||
+    req.path.startsWith("/api/connections") || req.path.startsWith("/api/subjects") ||
+    req.path.startsWith("/api/modules") || req.path.startsWith("/api/quizzes") || req.path.startsWith("/api/users")
   )
     res.setHeader("Cache-Control", "no-store");
   next();
@@ -51,6 +55,7 @@ app.get("/api/modules/:id/file", authenticateToken, downloadModuleFile);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/connections", connectionRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/modules", moduleRoutes);
@@ -102,6 +107,7 @@ export const startServer = async () => {
     QuizSubmission.init(),
     StudentProgress.init(),
     AuditEvent.init(),
+    FacultyConnection.init(),
   ]);
   if (process.env.NODE_ENV !== 'production' || process.env.SEED_DEMO_DATA === 'true') await seedDatabase();
   const sweep = setInterval(() => {

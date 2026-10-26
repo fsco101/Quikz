@@ -58,3 +58,8 @@ export const requireRole =
         .json({ message: `Access denied. Requires ${role} privileges.` });
     next();
   };
+
+// Public discovery may be personalized, but an invalid supplied token never
+// silently becomes a guest request.
+export const optionalAuthentication = (req: AuthRequest, res: Response, next: NextFunction) =>
+  req.headers.authorization ? authenticateToken(req, res, next) : next();

@@ -12,7 +12,11 @@ export function auditRequests(
   const start = performance.now();
   const route = req.path;
   let action = "";
-  if (req.method === "POST" && route === "/api/auth/login")
+  if (req.method === "POST" && route === "/api/connections/roster/send") action = "connection.roster_invited";
+  else if (req.method === "POST" && route === "/api/connections") action = "connection.requested";
+  else if (req.method === "POST" && /^\/api\/connections\/[^/]+\/accept$/.test(route)) action = "connection.accepted";
+  else if (req.method === "DELETE" && /^\/api\/connections\/[^/]+$/.test(route)) action = "connection.removed";
+  else if (req.method === "POST" && route === "/api/auth/login")
     action = "auth.login";
   else if (req.method === "POST" && route === "/api/auth/register")
     action = "auth.register";
@@ -67,6 +71,10 @@ export function auditRequests(
     let subjectId =
       resource?.subjectId || (body?.subject ? body.subject._id : undefined);
     const details: Record<string, unknown> = {};
+    if (action === "connection.roster_invited" && body?.summary) {
+      for (const key of ["total", "sent", "skipped", "failed"])
+        if (Number.isInteger(body.summary[key])) details[key] = body.summary[key];
+    }
     if (action === "auth.register")
       details.termsAccepted = req.body?.termsAccepted === true;
     if (body?.submission) {

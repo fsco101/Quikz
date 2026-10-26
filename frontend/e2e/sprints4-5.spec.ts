@@ -28,6 +28,15 @@ test.beforeAll(async ({ request }) => {
       },
     });
     expect(result.status()).toBe(201);
+    const studentData = await result.json();
+    const invite = await request.post(`${server}/api/connections`, {
+      headers: { Authorization: `Bearer ${facultyToken}` }, data: { email: `${name}${code}@test.edu` },
+    });
+    expect(invite.status()).toBe(201);
+    const incoming = await request.get(`${server}/api/connections?view=incoming`, { headers: { Authorization: `Bearer ${studentData.token}` } });
+    const link = (await incoming.json()).connections[0];
+    const accepted = await request.post(`${server}/api/connections/${link.id}/accept`, { headers: { Authorization: `Bearer ${studentData.token}` } });
+    expect(accepted.status()).toBe(200);
     if (name === "alpha") alphaToken = (await result.json()).token;
     else betaToken = (await result.json()).token;
   }
@@ -51,7 +60,7 @@ test.beforeAll(async ({ request }) => {
         title: "Discoverable foundations",
         summary: "Understand the foundations.",
         textContent: "Unique chlorophyll discovery term in the lecture.",
-        contentType: "text",
+        audience: "both", contentType: "text",
       },
     },
   );
@@ -62,7 +71,7 @@ test.beforeAll(async ({ request }) => {
       title: "Advanced discoverable applications",
       summary: "Apply the foundations.",
       textContent: "Protected advanced lecture body.",
-      contentType: "text",
+      audience: "both", contentType: "text",
     },
   });
   const quiz = await request.post(`${server}/api/quizzes`, {

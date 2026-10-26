@@ -1,3 +1,4 @@
+import { ArrowRight, BookOpen, CheckCircle2, FileText, Layers, Plus, RefreshCw, Search } from 'lucide-react';
 import { Avatar } from "../users/Avatar.js";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Subject, CourseOverview } from "../../types/curriculum.js";
@@ -71,120 +72,77 @@ export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => 
   ]);
 
   return (
-    <div className="space-y-6">
-      <header className="bg-white rounded-2xl border border-[#c8c5d0]/50 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-[#070235]">Academic Subject Catalog</h2>
-          <p className="text-xs text-[#47464f] mt-1">
-            {student ? "Track your mastery and continue with your next unfinished lesson."
-              : user?.role === "faculty" ? "Manage your courses and find lessons that still need an end quiz."
-              : "Browse modular learning curricula and course prerequisite milestones."}
-          </p>
+    <div className="catalog-page">
+      <header className="catalog-welcome">
+        <div className="catalog-welcome-copy">
+          <p className="eyebrow">{user ? "Welcome to your workspace" : "A world of understanding"}</p>
+          <h1>{student ? "Your next chapter starts here." : user?.role === "faculty" ? "Make every lesson count." : "Find your next chapter."}</h1>
+          <p>{student ? "Pick up where you left off. Every lesson brings you a little further."
+            : user?.role === "faculty" ? "Create thoughtful lessons, keep assessments on track, and help your students grow."
+            : "Explore courses, discover new ideas, and build your understanding one lesson at a time."}</p>
+          {user?.role === "faculty" && <button onClick={() => setIsModalOpen(true)} className="ui-button ui-button-primary"><Plus size={17} aria-hidden="true" />Create New Subject</button>}
         </div>
-        {user?.role === "faculty" && (
-          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2.5 rounded-xl bg-[#070235] text-white text-xs font-bold self-start">
-            Create New Subject
-          </button>
-        )}
+        <div className="learning-illustration" aria-hidden="true">
+          <span className="illustration-orbit orbit-one" /><span className="illustration-orbit orbit-two" />
+          <div className="illustration-book"><BookOpen size={42} strokeWidth={1.4} /></div>
+          <span className="illustration-step step-read"><FileText size={16} /> Explore</span>
+          <span className="illustration-step step-master"><CheckCircle2 size={17} /> Make progress</span>
+          <span className="illustration-spark">✦</span>
+        </div>
       </header>
 
       {!loading && !error && totals && (
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label={student ? "Learning overview" : "Teaching overview"}>
-          {totals.map(([label, value]) => (
-            <div key={label} className="rounded-2xl border bg-white p-5">
-              <p className="text-sm text-slate-600">{label}</p>
-              <p className="text-3xl font-black text-[#070235] mt-1">{value}</p>
-            </div>
-          ))}
+        <section className="overview-grid" aria-label={student ? "Learning overview" : "Teaching overview"}>
+          {totals.map(([label, value], index) => {
+            const Icon = [BookOpen, Layers, CheckCircle2][index];
+            return <div key={label} className={`overview-metric metric-${index}`}>
+              <span className="metric-icon"><Icon size={21} aria-hidden="true" /></span>
+              <div><p>{label}</p><strong>{value}</strong></div>
+            </div>;
+          })}
         </section>
       )}
 
-      <div className="flex flex-wrap gap-3 items-center">
-        <input aria-label="Search subjects" type="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by code, title, or instructor..."
-          className="flex-1 min-w-0 w-full sm:min-w-64 rounded-xl border border-[#c8c5d0] bg-white px-4 py-2 text-sm" />
-        <label className="text-xs font-bold">
-          <span className="sr-only">Subject year level</span>
-          <select aria-label="Subject year level" value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="rounded-xl border bg-white px-3 py-2 text-sm">
+      <section aria-label="Subject catalog" className="catalog-section">
+        <div className="section-heading"><div><p className="eyebrow">Explore & grow</p><h2>Academic Subject Catalog</h2></div>
+          {!loading && !error && <span className="count-label">{filteredSubjects.length} {filteredSubjects.length === 1 ? "course" : "courses"}</span>}
+        </div>
+        <div className="catalog-toolbar">
+          <label className="search-field"><Search size={18} aria-hidden="true" /><input aria-label="Search subjects" type="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by code, title, or instructor..." /></label>
+          <select aria-label="Subject year level" value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="ui-select">
             {["All", "1st Year", "2nd Year", "3rd Year", "4th Year"].map((yr) => <option key={yr} value={yr}>{yr === "All" ? "All year levels" : yr}</option>)}
           </select>
-        </label>
-        {personalized && (
-          <select aria-label="Course status" value={courseStatus} onChange={(e) => setCourseStatus(e.target.value)} disabled={loading || !overview}
-            className="rounded-xl border bg-white px-3 py-2 text-sm disabled:opacity-50">
+          {personalized && <select aria-label="Course status" value={courseStatus} onChange={(e) => setCourseStatus(e.target.value)} disabled={loading || !overview} className="ui-select">
             <option value="all">All courses</option>
-            {student ? <>
-              <option value="in-progress">In progress</option>
-              <option value="not-started">Not started</option>
-              <option value="completed">Completed</option>
-              <option value="empty">No modules yet</option>
-            </> : <>
-              <option value="mine">My courses</option>
-              <option value="needs-quizzes">Needs end quizzes</option>
-              <option value="ready">All end quizzes ready</option>
-              <option value="empty">My empty courses</option>
-            </>}
-          </select>
-        )}
-      </div>
-
-      {(error || overviewError) && (
-        <div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 flex flex-wrap gap-3 justify-between">
-          <span>{error || overviewError}</span>
-          <button disabled={loading} className="font-bold underline disabled:opacity-50" onClick={() => void fetchSubjects()}>Retry catalog</button>
+            {student ? <><option value="in-progress">In progress</option><option value="not-started">Not started</option><option value="completed">Completed</option><option value="empty">No modules yet</option></>
+              : <><option value="mine">My courses</option><option value="needs-quizzes">Needs end quizzes</option><option value="ready">All end quizzes ready</option><option value="empty">My empty courses</option></>}
+          </select>}
         </div>
-      )}
-      {loading ? <p role="status" className="py-16 text-center text-sm">Loading Academic Catalog...</p>
-        : !error && filteredSubjects.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-dashed p-10 text-center">
-            <h3 className="font-bold text-[#070235]">No Subjects Found</h3>
-            <p className="text-sm text-slate-600 mt-2">Try adjusting your search or course filters.</p>
-            <button className="mt-4 font-bold text-indigo-700" onClick={() => { setSearchQuery(""); setFilterYear("All"); setCourseStatus("all"); }}>Clear filters</button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {(error || overviewError) && <div role="alert" className="catalog-alert"><span>{error || overviewError}</span><button disabled={loading} className="ui-text-button" onClick={() => void fetchSubjects()}>Retry catalog <RefreshCw size={15} aria-hidden="true" /></button></div>}
+        {loading ? <div role="status" className="catalog-loading"><span className="loading-ring" /><p>Loading Academic Catalog...</p></div>
+          : !error && filteredSubjects.length === 0 ? <div className="ui-empty"><BookOpen size={34} aria-hidden="true" /><h3>No Subjects Found</h3><p>Try a different keyword or give your course filters a little more room.</p><button className="ui-button ui-button-secondary" onClick={() => { setSearchQuery(""); setFilterYear("All"); setCourseStatus("all"); }}>Clear filters</button></div>
+          : <div className="course-grid">
             {filteredSubjects.map((subject) => {
               const course = courseMap.get(subject._id);
               const percentage = course?.totalModules ? Math.round((course.completedCount || 0) / course.totalModules * 100) : 0;
-              return (
-                <article key={subject._id} aria-label={`${subject.code} course`} className="bg-white rounded-2xl border border-[#c8c5d0]/60 p-6 shadow-sm flex flex-col">
-                  <button onClick={() => onSelectSubject(subject)} className="text-left group rounded-lg focus-visible:outline-indigo-600">
-                    <span className="inline-block rounded-lg bg-[#eff4ff] text-[#4648d4] px-2.5 py-1 text-xs font-black">{subject.code}</span>
-                    <h3 className="text-base font-bold text-[#070235] group-hover:text-[#4648d4] mt-3 mb-2">{subject.name}</h3>
-                    <p className="text-xs text-slate-600">{subject.term} · {subject.yearLevel}</p>
-                    <p className="text-xs text-slate-600 line-clamp-2 mt-3">{subject.description || "Structured academic modules with sequential progression and mastery verification."}</p>
-                  </button>
-                  <div className="flex items-center gap-2 mt-4 text-xs text-slate-600">
-                    <Avatar userId={subject.facultyId} name={subject.facultyName} size="h-7 w-7" />
-                    {subject.facultyName}
-                  </div>
-                  {course && (
-                    <div className="mt-4 pt-4 border-t text-sm space-y-3">
-                      {student ? <>
-                        <p>{course.completedCount} of {course.totalModules} modules mastered</p>
-                        <progress aria-label={`${subject.code} completion`} className="w-full h-2 accent-indigo-600" max={100} value={percentage} />
-                        <p className="text-xs text-slate-600">{course.status === "completed" ? "Course mastered. You can revisit any lesson."
-                          : course.status === "empty" ? "No modules published yet."
-                          : `Next: ${course.nextModule?.title}`}</p>
-                      </> : <>
-                        <p>{course.readyQuizCount} of {course.totalModules} end quizzes ready</p>
-                        <p className={`text-xs ${course.missingQuizCount ? "text-amber-800" : "text-slate-600"}`}>
-                          {course.status === "empty" ? "Add your first module to begin."
-                            : course.missingQuizCount ? `${course.missingQuizCount} modules still need a valid end quiz.` : "Every module has a linked end quiz."}
-                        </p>
-                      </>}
-                      {course.nextModule && (
-                        <button onClick={() => onSelectSubject(subject, course.nextModule!.id)} className="w-full rounded-xl bg-[#070235] text-white py-2 px-3 text-xs font-bold">
-                          {student ? course.completedCount ? "Continue learning" : "Start learning" : "Review missing end quiz"}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </article>
-              );
+              const tone = [...subject.code].reduce((n, char) => n + char.charCodeAt(0), 0) % 3;
+              const status = course && ({ "completed": "Mastered", "in-progress": "In progress", "not-started": "Ready to begin", "empty": "Coming together", "needs-quizzes": "Needs end quizzes", "ready": "Quizzes ready" }[course.status]);
+              return <article key={subject._id} aria-label={`${subject.code} course`} className={`course-card course-tone-${tone}`}>
+                <button onClick={() => onSelectSubject(subject)} className="course-entry" aria-label={`Open ${subject.code}: ${subject.name}`}>
+                  <div className="course-cover"><span className="course-cover-icon"><BookOpen size={27} strokeWidth={1.6} aria-hidden="true" /></span><span className="course-code">{subject.code}</span><span className="course-cover-lines" aria-hidden="true" /></div>
+                  <div className="course-description"><p className="course-meta">{subject.yearLevel} <span>·</span> {subject.term}</p><h3>{subject.name}</h3><p className="course-summary">{subject.description || "Build your understanding through guided lessons and practical assessments."}</p></div>
+                </button>
+                <div className="course-instructor"><Avatar userId={subject.facultyId} name={subject.facultyName} size="h-7 w-7" /><span>{subject.facultyName}</span></div>
+                {course ? <div className="course-progress">
+                  <div className="course-progress-label"><span className={`status-pill ${course.status === "completed" || course.status === "ready" ? "status-success" : course.status === "needs-quizzes" ? "status-warning" : ""}`}>{status}</span>{student && course.totalModules > 0 && <strong>{percentage}%</strong>}</div>
+                  {student ? <><progress aria-label={`${subject.code} completion`} max={100} value={percentage} /><p>{course.completedCount} of {course.totalModules} modules mastered</p><p className="course-next">{course.status === "completed" ? "Well done. Revisit any lesson, anytime." : course.status === "empty" ? "Your instructor is preparing this course." : `Up next: ${course.nextModule?.title}`}</p></>
+                    : <><p>{course.readyQuizCount} of {course.totalModules} end quizzes ready</p><p className="course-next">{course.status === "empty" ? "Add your first module to begin." : course.missingQuizCount ? `${course.missingQuizCount} ${course.missingQuizCount === 1 ? "module still needs" : "modules still need"} a valid end quiz.` : "Every module has a linked end quiz."}</p></>}
+                  <button onClick={() => onSelectSubject(subject, course.nextModule?.id)} className="course-action">{course.nextModule ? student ? course.completedCount ? "Continue learning" : "Start learning" : "Review missing end quiz" : student && course.status === "completed" ? "Revisit course" : "Open course"}<ArrowRight size={17} aria-hidden="true" /></button>
+                </div> : <div className="course-progress"><button onClick={() => onSelectSubject(subject)} className="course-action">Explore course <ArrowRight size={17} aria-hidden="true" /></button></div>}
+              </article>;
             })}
-          </div>
-        )}
+          </div>}
+      </section>
       <CreateSubjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onCreated={() => void fetchSubjects()} />
     </div>
   );

@@ -1,3 +1,4 @@
+import { PageHeading } from "../ui/PageHeading.js";
 ﻿import React, { useEffect, useState } from "react";
 import { api } from "../../services/api.js";
 import { Avatar } from "./Avatar.js";
@@ -37,10 +38,7 @@ export function People() {
   }, [search, page]);
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-black text-[#070235]">People</h1>
-      <p className="text-slate-600">
-        Meet the faculty, students and administrators in Quikz.
-      </p>
+      <PageHeading eyebrow="Better, together" title="People" description="Discover faculty profiles and the people connected to you. Student profiles are visible only to themselves, their connected professors and administrators." />
       <input
         aria-label="Search people"
         placeholder="Search name or username"
@@ -56,16 +54,16 @@ export function People() {
         {result.users.map((person) => (
           <article
             key={person.id}
-            className="rounded-2xl border bg-white p-5 space-y-3"
+            className="person-card ui-panel space-y-3"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <Avatar
                 userId={person.id}
                 name={person.fullName}
                 url={person.avatarUrl}
                 size="h-14 w-14"
               />
-              <div>
+              <div className="min-w-0 break-words">
                 <h2 className="font-bold">{person.fullName}</h2>
                 <p className="text-sm text-slate-500">
                   @{person.username} · {person.role}
@@ -79,7 +77,7 @@ export function People() {
         ))}
       </div>
       {!result.users.length && <p>No people found.</p>}
-      <div className="flex items-center gap-4">
+      <div className="pagination-row">
         <button
           disabled={page === 1}
           onClick={() => setPage(page - 1)}

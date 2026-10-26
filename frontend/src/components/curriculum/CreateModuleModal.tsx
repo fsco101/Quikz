@@ -21,6 +21,7 @@ export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
   const [summary, setSummary] = useState(module?.summary || '');
   const [contentType, setContentType] = useState<'text' | 'file' | 'presentation'>(module?.contentType || 'text');
   const [textContent, setTextContent] = useState(module?.textContent || '');
+  const [audience, setAudience] = useState<string>(module ? module.audience || 'both' : 'connected');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
       formData.append('summary', summary);
       formData.append('contentType', contentType);
       formData.append('textContent', textContent);
+      formData.append('audience', audience);
 
       if (selectedFile) {
         formData.append('file', selectedFile);
@@ -86,6 +88,14 @@ export const CreateModuleModal: React.FC<CreateModuleModalProps> = ({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+          <label className="block font-bold text-[#070235]">Who can access this module?
+            <select aria-label="Module audience" className="block w-full mt-2 px-3.5 py-2.5 rounded-xl border border-[#c8c5d0] bg-white" value={audience} onChange={(e) => setAudience(e.target.value)}>
+              <option value="connected">Connected students only</option>
+              <option value="public">Public</option>
+              <option value="both">Both connected students and public</option>
+            </select>
+            <span className="block mt-2 text-xs font-normal leading-relaxed text-slate-600">{audience === 'connected' ? 'Only your accepted students can study this lesson. Hidden from the public directory and other professors.' : audience === 'public' ? 'Published in the public directory. Any signed-in learner can study it; your student roster stays private.' : 'Available to your accepted students and published in the public directory for other learners. Your roster stays private.'} Quizzes still follow the learning path prerequisites.</span>
+          </label>
           <div>
             <label className="block font-bold text-[#070235] mb-1">
               Topic / Module Title <span className="text-red-500">*</span>
