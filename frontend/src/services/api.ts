@@ -1,4 +1,5 @@
 import { AuthResponse, LoginPayload, RegisterPayload, User } from '../types/auth.js';
+import { CourseOverview } from '../types/curriculum.js';
 
 const API_BASE = '/api';
 
@@ -59,8 +60,11 @@ export const api = {
   },
 
   // Subjects
-  async getSubjects(): Promise<{ subjects: any[] }> {
-    return this.request<{ subjects: any[] }>('/subjects');
+  async getCourseOverview(signal?: AbortSignal): Promise<{ courses: CourseOverview[] }> {
+    return this.request('/subjects/overview', { signal });
+  },
+  async getSubjects(signal?: AbortSignal): Promise<{ subjects: any[] }> {
+    return this.request<{ subjects: any[] }>('/subjects', { signal });
   },
 
   async createSubject(data: { name: string; code: string; term: string; yearLevel: string; description?: string }): Promise<{ subject: any }> {

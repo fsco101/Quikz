@@ -1,10 +1,10 @@
 {
   "project": "Quikz",
   "repository": "fsco101/Quikz",
-  "updatedAt": "2026-10-22",
-  "totalSprints": 5,
-  "totalIssues": 22,
-  "completedIssues": 22,
+  "updatedAt": "2026-10-26",
+  "totalSprints": 6,
+  "totalIssues": 24,
+  "completedIssues": 24,
   "plannedIssues": 0,
   "sprints": [
     {
@@ -41,7 +41,15 @@
       "file": "sprints/sprint-5-production-hardening.json",
       "totalIssues": 2,
       "status": "completed"
+    },
+    {
+      "sprint": 6,
+      "name": "Course Progress and Assessment Readiness",
+      "file": "sprints/sprint-6-course-overview.json",
+      "totalIssues": 2,
+      "status": "completed"
     }
   ],
-  "auditReport": "sprints/sprint-audit.json"
+  "auditReport": "sprints/sprint-audit.json",
+  "requirementsReviewReport": "sprints/requirements-review-2026-10-26.json"
 }

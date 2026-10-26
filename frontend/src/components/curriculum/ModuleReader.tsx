@@ -41,7 +41,8 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
             const found = res.modules.find((m) => m._id === prev._id);
             if (found) return found;
           }
-          const firstUnlocked = res.modules.find((m) => !m.isLocked);
+          const firstUnlocked = res.modules.find((m) => !m.isLocked && !m.isCompleted)
+            || res.modules.find((m) => !m.isLocked);
           const requested = res.modules.find(m => m._id === initialModuleId && !m.isLocked);
           if (requested) return requested;
           return firstUnlocked || res.modules[0];

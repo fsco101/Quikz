@@ -12,7 +12,15 @@ In `frontend`, run `npm run dev` and open http://localhost:3000. Without a Mongo
 
 Demo accounts: `faculty@quikz.edu` / `Faculty@123` and `student@quikz.edu` / `Student@123`. Local development also seeds `admin@quikz.edu` / `Admin@123`; the Admin Demo button is available in development only. The CS101 demo includes three linked end quizzes. Guests can browse the public subject catalog from the login page.
 
-## Quiz workflow
+## Course overview
+
+The subject catalog now shows students how many modules they have mastered in each course, with filters for in-progress, not-started, completed and empty courses. **Start learning** and **Continue learning** open the first unfinished lesson. Opening a course normally also selects that lesson. Progress uses the same recorded completion plus designated-quiz pass evidence as prerequisite checks; historical flags alone never count. Empty courses are not treated as completed.
+
+Faculty see totals for their own courses, end quizzes ready, and modules missing a valid end quiz. Filter to **My courses**, **Needs end quizzes**, **All end quizzes ready**, or **My empty courses**. **Review missing end quiz** opens the first affected lesson. Readiness checks the referenced quiz exists and belongs to that course and module. These indicators describe assessment coverage, not faculty approval of question quality. Personal overview data is authenticated, marked `no-store`, and separate from the public catalog.
+
+Catalog errors display **Retry catalog**; if only the overview fails, course browsing remains available. Search includes course code, name, instructor and term; year/status filters combine with search. Course buttons support keyboard navigation.
+
+## Quiz authoring and attempts
 
 Open a subject you own, add a module, and choose **Create end quiz**. Build questions manually, import a bank, or generate a draft from lecture text/files. Review questions and answer keys before publishing. Creators can use **Edit module** and **Edit quiz** to update their own content. Other faculty, students and admins cannot edit someone else’s module or quiz. Legacy modules without a creator field belong to their subject’s faculty owner. Active attempts keep a private snapshot of the original questions, answer keys, passing mark and timing. Existing results and earned progress remain intact. Editing is temporarily blocked if an active attempt predates assessment snapshots; finish or expire that session first.
 
