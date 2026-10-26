@@ -12,6 +12,14 @@ In `frontend`, run `npm run dev` and open http://localhost:3000. Without a Mongo
 
 Demo accounts: `faculty@quikz.edu` / `Faculty@123` and `student@quikz.edu` / `Student@123`. Local development also seeds `admin@quikz.edu` / `Admin@123`; the Admin Demo button is available in development only. The CS101 demo includes three linked end quizzes. Guests can browse the public subject catalog from the login page.
 
+## Workspace design
+
+The workspace uses a shared Quikz identity, a desktop sidebar, and compact mobile navigation with an active-page indicator. Course cards combine learning progress or teaching readiness with clear next actions. Returning to **Learning path** opens the course catalog.
+
+The lesson reader provides a wider reading canvas and sticky course navigation on desktop. On phones, **Show course modules** expands the module list and choosing an available lesson closes it again. Locked prerequisites remain disabled. Authentication, reporting, directory, quizzes and account pages share consistent headings, controls, focus states and surfaces; registration still requires acceptance of the Terms and Honor Code.
+
+Responsive and keyboard coverage lives in `frontend/e2e/design.spec.ts`, alongside the existing workflow tests. The shared styles are in `frontend/src/index.css`; reusable workspace components are under `frontend/src/components/layout` and `frontend/src/components/ui`.
+
 ## Course overview
 
 The subject catalog now shows students how many modules they have mastered in each course, with filters for in-progress, not-started, completed and empty courses. **Start learning** and **Continue learning** open the first unfinished lesson. Opening a course normally also selects that lesson. Progress uses the same recorded completion plus designated-quiz pass evidence as prerequisite checks; historical flags alone never count. Empty courses are not treated as completed.

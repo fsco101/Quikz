@@ -1,3 +1,5 @@
+import { BookOpen, FileText, Presentation, ArrowUpRight } from "lucide-react";
+import { PageHeading } from "../ui/PageHeading.js";
 import { Avatar } from "../users/Avatar.js";
 import React, { useEffect, useState } from "react";
 import { api } from "../../services/api.js";
@@ -82,18 +84,9 @@ export function LessonDirectory({
     "mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm";
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-xs uppercase tracking-widest text-indigo-600 font-bold">
-          Open learning index
-        </p>
-        <h1 className="text-3xl font-black text-[#070235]">Lesson directory</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Explore topics, summaries, and course syllabuses from all instructors.
-          Search also matches lecture notes. Full lessons follow your
-          learning-path prerequisites.
-        </p>
-      </header>
-      <section className="rounded-2xl border bg-white p-5 grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <PageHeading eyebrow="The learning library" title="Lesson directory"
+        description="Follow your curiosity. Explore topics, discover new perspectives, and find your next lesson." />
+      <section className="ui-panel report-filters grid sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <label className="text-xs font-bold">
           Keyword
           <input
@@ -191,7 +184,7 @@ export function LessonDirectory({
             {data.lessons.map((lesson) => (
               <article
                 key={lesson._id}
-                className="rounded-2xl border bg-white p-6 flex flex-col gap-4"
+                className="lesson-card ui-panel flex flex-col gap-4"
               >
                 <div className="flex flex-wrap justify-between gap-2 text-xs">
                   <span className="rounded-lg bg-indigo-50 px-2 py-1 font-bold text-indigo-700">
@@ -201,6 +194,7 @@ export function LessonDirectory({
                     {lesson.contentType}
                   </span>
                 </div>
+                <div className="lesson-card-icon" aria-hidden="true">{lesson.contentType === "presentation" ? <Presentation size={24} /> : lesson.contentType === "file" ? <FileText size={24} /> : <BookOpen size={24} />}</div>
                 <h2 className="font-bold text-lg text-[#070235]">
                   {lesson.title}
                 </h2>
@@ -214,14 +208,14 @@ export function LessonDirectory({
                   {lesson.orderIndex}
                 </p>
                 <button
-                  className="mt-auto rounded-xl bg-[#070235] px-4 py-2 text-sm font-bold text-white"
+                  className="lesson-card-action"
                   onClick={() =>
                     onOpenLesson
                       ? onOpenLesson(lesson.subject, lesson._id)
                       : onSignIn?.()
                   }
                 >
-                  {onOpenLesson ? "Open learning path" : "Sign in to study"}
+                  {onOpenLesson ? "Open learning path" : "Sign in to study"}<ArrowUpRight size={16} aria-hidden="true" />
                 </button>
               </article>
             ))}
@@ -231,7 +225,7 @@ export function LessonDirectory({
               No lessons match these filters.
             </p>
           )}
-          <nav aria-label="Directory pages" className="flex items-center gap-4">
+          <nav aria-label="Directory pages" className="pagination-row">
             <button
               disabled={Number(filters.page) <= 1 || loading}
               className="rounded-xl border bg-white px-4 py-2 text-sm disabled:opacity-40"

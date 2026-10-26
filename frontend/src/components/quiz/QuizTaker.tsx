@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { api } from "../../services/api.js";
 import { useAuth } from "../../context/AuthContext.js";
 import { Attempt, Quiz, Submission } from "../../types/quiz.js";
-const colors = ["bg-rose-600", "bg-blue-600", "bg-amber-600", "bg-emerald-600"];
 export function QuizTaker({
   quizId,
   onClose,
@@ -266,13 +265,13 @@ export function QuizTaker({
   const answered = answers.filter((a) => a >= 0).length;
   return (
     <div
-      className="fixed inset-0 !m-0 z-50 overflow-y-auto bg-[#070235] text-white"
+      className="quiz-assessment fixed inset-0 !m-0 z-50 overflow-y-auto text-white"
       role="dialog"
       aria-modal="true"
       aria-label="Quiz assessment"
     >
       <div className="mx-auto max-w-5xl p-5 md:p-10 space-y-6">
-        <header className="flex items-center justify-between">
+        <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-indigo-300 text-xs font-bold uppercase tracking-widest">
               Quikz / Assessment
@@ -445,9 +444,9 @@ export function QuizTaker({
                     disabled={busy || remaining <= 0}
                     aria-pressed={answers[position] === index}
                     onClick={() => option(index)}
-                    className={`${colors[index]} min-h-28 rounded-2xl p-5 text-left flex items-center gap-4 font-bold transition-transform hover:scale-[1.01] disabled:opacity-60 ${answers[position] === index ? "ring-4 ring-white ring-offset-4 ring-offset-[#070235]" : ""}`}
+                    className="quiz-answer"
                   >
-                    <span className="text-2xl opacity-80">
+                    <span className="quiz-answer-letter">
                       {["A", "B", "C", "D"][index]}
                     </span>
                     <span>{answer}</span>
@@ -482,7 +481,7 @@ export function QuizTaker({
               >
                 Previous
               </button>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 {position < quiz!.questions.length - 1 && (
                   <button
                     disabled={busy}

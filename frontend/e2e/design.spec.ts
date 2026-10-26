@@ -1,0 +1,87 @@
+import { expect, test } from "@playwright/test";
+
+test("workspace navigation supports keyboard course selection and a compact mobile learning path", async ({ page }) => {
+  await page.goto("/");
+  await page.screenshot({ path: "test-results/design-auth-desktop.png", fullPage: true, animations: 'disabled' });
+  await page.getByRole("button", { name: "Student Demo", exact: true }).click();
+  await page.getByRole("button", { name: "Sign In to Quikz", exact: true }).click();
+  const navigation = page.getByRole("navigation", { name: "Main navigation" });
+  await expect(navigation.getByRole("button", { name: "Learning path", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("article", { name: "CS101 course" })).toBeVisible();
+  await page.screenshot({ path: "test-results/design-catalog-desktop.png", fullPage: true, animations: 'disabled' });
+  await page.getByRole("button", { name: /^Open CS101:/ }).focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("button", { name: "Back to course catalog" })).toBeVisible();
+  await expect(page.locator("#course-modules button:disabled").first()).toBeVisible();
+  await page.screenshot({ path: "test-results/design-reader-desktop.png", fullPage: true, animations: 'disabled' });
+  await page.setViewportSize({ width: 768, height: 1024 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await navigation.getByRole("button", { name: "Learning path", exact: true }).click();
+  await expect(page.getByRole("article", { name: "CS101 course" })).toBeVisible();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: "test-results/design-catalog-mobile.png", fullPage: true, animations: 'disabled' });
+  await page.getByRole("button", { name: /^Open CS101:/ }).click();
+  await expect(page.getByRole("button", { name: "Show course modules" })).toHaveAttribute("aria-expanded", "false");
+  await page.getByRole("button", { name: "Show course modules" }).click();
+  await expect(page.locator("#course-modules button:disabled").first()).toBeVisible();
+  await page.locator("#course-modules button:not(:disabled)").first().click();
+  await expect(page.getByRole("button", { name: "Show course modules" })).toHaveAttribute("aria-expanded", "false");
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await page.screenshot({ path: "test-results/design-reader-mobile.png", fullPage: true, animations: 'disabled' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await navigation.getByRole("button", { name: "Lesson directory", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Lesson directory", exact: true })).toBeVisible();
+  await expect(page.getByText(/lessons? found/)).toBeVisible();
+  await page.screenshot({ path: "test-results/design-directory-mobile.png", fullPage: true, animations: 'disabled' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await navigation.getByRole("button", { name: "My profile", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "My profile", exact: true })).toBeVisible();
+  await page.screenshot({ path: "test-results/design-profile-mobile.png", fullPage: true, animations: 'disabled' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole("button", { name: "Sign Out", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Sign In to Quikz", exact: true })).toBeVisible();
+  await page.screenshot({ path: "test-results/design-auth-mobile.png", fullPage: true, animations: 'disabled' });
+  await page.getByRole("button", { name: "Create Account", exact: true }).click();
+  await page.getByRole("button", { name: /Faculty \/ Professor/ }).focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("button", { name: /Faculty \/ Professor/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("combobox", { name: "Year Level", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: /Student \/ Learner/ }).click();
+  await expect(page.getByRole("combobox", { name: "Year Level", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Complete Account Registration" })).toBeDisabled();
+  await page.screenshot({ path: "test-results/design-register-mobile.png", fullPage: true, animations: 'disabled' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.setViewportSize({ width: 320, height: 740 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test("faculty workspace and account screens retain their responsive page structure", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Faculty Demo", exact: true }).click();
+  await page.getByRole("button", { name: "Sign In to Quikz", exact: true }).click();
+  const navigation = page.getByRole("navigation", { name: "Main navigation" });
+  await expect(page.getByRole("region", { name: "Teaching overview" })).toBeVisible();
+  await page.screenshot({ path: "test-results/design-faculty-desktop.png", fullPage: true, animations: 'disabled' });
+  for (const [label, file] of [["Master gradebook", "gradebook"], ["Lesson directory", "directory"], ["People", "people"], ["My profile", "profile"]]) {
+    await navigation.getByRole("button", { name: label, exact: true }).click();
+    await expect(page.getByRole("heading", { name: label, exact: true })).toBeVisible();
+    if (file === "gradebook") await expect(page.getByLabel("Gradebook subject").locator("option")).not.toHaveCount(1);
+    if (file === "directory") await expect(page.getByText(/lessons? found/)).toBeVisible();
+    if (file === "people") await expect(page.getByRole("article").first()).toBeVisible();
+    await page.screenshot({ path: `test-results/design-${file}-desktop.png`, fullPage: true, animations: 'disabled' });
+  }
+  await page.getByRole("button", { name: "Sign Out", exact: true }).click();
+  await page.getByRole("button", { name: "Admin Demo", exact: true }).click();
+  await page.getByRole("button", { name: "Sign In to Quikz", exact: true }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await navigation.getByRole("button", { name: "User management", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "User management", exact: true })).toBeVisible();
+  await page.screenshot({ path: "test-results/design-users-mobile.png", fullPage: true, animations: 'disabled' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await navigation.getByRole("button", { name: "System health", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "System health & audit", exact: true })).toBeVisible();
+  await expect(page.getByText("Driver connection monitoring", { exact: true })).toBeVisible();
+  await page.screenshot({ path: "test-results/design-health-mobile.png", fullPage: true, animations: 'disabled' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

@@ -186,7 +186,7 @@ export function QuizStudio({
   };
   return (
     <div
-      className="fixed inset-0 !m-0 z-50 overflow-y-auto bg-[#f8f9ff]"
+      className="quiz-studio fixed inset-0 !m-0 z-50 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-label="Quiz Studio"
@@ -195,7 +195,7 @@ export function QuizStudio({
         onSubmit={publish}
         className="mx-auto max-w-5xl p-4 md:p-8 space-y-6"
       >
-        <header className="flex items-center justify-between gap-4">
+        <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-[#6063ee]">
               {subject.code} / Faculty workspace

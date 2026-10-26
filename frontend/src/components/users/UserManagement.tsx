@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+import { PageHeading } from "../ui/PageHeading.js";
 import { useAuth } from "../../context/AuthContext.js";
 import React, { useEffect, useState } from "react";
 import { api } from "../../services/api.js";
@@ -90,27 +92,8 @@ export function UserManagement() {
   };
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-black text-[#070235]">
-            User management
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Create accounts, update roles, reset passwords and manage account
-            access.
-          </p>
-        </div>
-        <button
-          className="rounded-xl bg-[#4648d4] px-4 py-2 font-bold text-white"
-          onClick={() => {
-            setEditing(null);
-            setDraft({ ...blank });
-            setError("");
-          }}
-        >
-          Create user
-        </button>
-      </header>
+      <PageHeading eyebrow="Your community" title="User management" description="Give everyone the right access. Manage accounts, roles and profiles in one place."
+        actions={<button className="ui-button ui-button-primary" onClick={() => { setEditing(null); setDraft({ ...blank }); setError(""); }}><Plus size={17} aria-hidden="true" />Create user</button>} />
       {error && (
         <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-800">
           {error}
@@ -127,7 +110,7 @@ export function UserManagement() {
       {editing !== undefined && (
         <form
           onSubmit={save}
-          className="rounded-2xl border bg-white p-6 grid gap-4 sm:grid-cols-2"
+          className="ui-panel profile-details grid gap-4 sm:grid-cols-2"
         >
           <h2 className="sm:col-span-2 text-xl font-bold">
             {editing ? "Edit user" : "New user"}

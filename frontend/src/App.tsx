@@ -8,7 +8,8 @@ import { Gradebook } from "./components/gradebook/Gradebook.js";
 import { LessonDirectory } from "./components/directory/LessonDirectory.js";
 import { SystemHealth } from "./components/system/SystemHealth.js";
 
-import { Avatar } from "./components/users/Avatar.js";
+import { AppShell } from "./components/layout/AppShell.js";
+import { Brand } from "./components/layout/Brand.js";
 import { Profile } from "./components/users/Profile.js";
 import { People } from "./components/users/People.js";
 import { UserManagement } from "./components/users/UserManagement.js";
@@ -42,11 +43,11 @@ const MainApp: React.FC = () => {
     };
     if (browseCatalog)
       return (
-        <div className="min-h-screen bg-[#f8f9ff] p-6 md:p-10">
-          <div className="mx-auto max-w-7xl space-y-6">
-            <header className="flex justify-between items-center gap-4">
-              <h1 className="text-2xl font-black text-[#070235]">
-                Quikz ·{" "}
+        <div className="public-workspace">
+          <div className="public-content space-y-8">
+            <header className="public-topbar">
+              <Brand onClick={signIn} />
+              <h1 className="public-page-title">
                 {view === "directory"
                   ? "Public lesson directory"
                   : "Public subject catalog"}
@@ -58,16 +59,16 @@ const MainApp: React.FC = () => {
                 Sign in
               </button>
             </header>
-            <nav className="flex gap-3">
+            <nav className="public-tabs" aria-label="Public navigation">
               <button
                 className="rounded-xl border bg-white px-4 py-2"
-                onClick={() => setView("learning")}
+                aria-current={view === "learning" ? "page" : undefined} onClick={() => setView("learning")}
               >
                 Subject catalog
               </button>
               <button
                 className="rounded-xl border bg-white px-4 py-2"
-                onClick={() => setView("directory")}
+                aria-current={view === "directory" ? "page" : undefined} onClick={() => setView("directory")}
               >
                 Lesson directory
               </button>
@@ -109,117 +110,21 @@ const MainApp: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9ff] flex flex-col font-sans selection:bg-[#6063ee] selection:text-white">
-      {/* Top Main Navigation Bar */}
-      <header className="bg-white border-b border-[#c8c5d0]/50 shadow-sm px-6 py-3.5 sticky top-0 z-40 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div
-            onClick={() => {
-              setSelectedSubject(null);
-              setView("learning");
-            }}
-            className="w-10 h-10 rounded-xl bg-[#070235] text-white flex items-center justify-center shadow-md cursor-pointer hover:bg-[#1e1b4b] transition-colors"
-          >
-            <span className="material-symbols-outlined text-[#e3dfff]">
-              school
-            </span>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span
-                onClick={() => {
-                  setSelectedSubject(null);
-                  setView("learning");
-                }}
-                className="text-xl font-black text-[#070235] tracking-tight cursor-pointer"
-              >
-                Quikz
-              </span>
-              <span className="bg-[#eff4ff] text-[#4648d4] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-[#d3e4fe]">
-                {user.role}
-              </span>
-            </div>
-            <p className="text-xs text-[#47464f]">
-              Modular Quiz & Academic Learning Platform
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <button
-            aria-label="Open my profile"
-            onClick={() => setView("profile")}
-          >
-            <Avatar
-              userId={user.id}
-              name={user.fullName}
-              url={user.avatarUrl}
-            />
-          </button>
-          <div className="text-right hidden sm:block">
-            <div className="text-xs font-bold text-[#070235]">
-              {user.fullName}
-            </div>
-            <div className="text-[11px] text-[#47464f]">
-              {user.role === "student"
-                ? `${user.yearLevel} · ${user.section}`
-                : user.email}
-            </div>
-          </div>
-
-          <button
-            onClick={() => {
-              setSelectedSubject(null);
-              setInitialModuleId(undefined);
-              setView("learning");
-              logout();
-            }}
-            className="px-3.5 py-1.5 rounded-xl border border-[#c8c5d0] hover:bg-red-50 hover:text-red-700 hover:border-red-200 text-xs font-semibold text-[#47464f] transition-all flex items-center gap-1.5 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px]">
-              logout
-            </span>
-            <span>Sign Out</span>
-          </button>
-        </div>
-      </header>
-      <nav
-        className="border-b bg-white px-6 py-3 flex flex-wrap gap-2"
-        aria-label="Main navigation"
-      >
-        {[
-          ["learning", "Learning path"],
-          ...(user.role !== "admin"
-            ? [
-                [
-                  "gradebook",
-                  user.role === "faculty" ? "Master gradebook" : "My results",
-                ],
-              ]
-            : []),
-          ["directory", "Lesson directory"],
-          ["people", "People"],
-          ["profile", "My profile"],
-          ...(user.role === "admin"
-            ? [
-                ["system", "System health"],
-                ["users", "User management"],
-              ]
-            : []),
-        ].map(([key, label]) => (
-          <button
-            key={key}
-            aria-current={view === key ? "page" : undefined}
-            onClick={() => setView(key)}
-            className={`rounded-xl px-4 py-2 text-sm font-bold ${view === key ? "bg-[#070235] text-white" : "text-slate-600 hover:bg-indigo-50"}`}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
-
-      {/* Main Body */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+    <AppShell user={user} view={view}
+      onNavigate={(next) => {
+        setView(next);
+        if (next === "learning") {
+          setSelectedSubject(null);
+          setInitialModuleId(undefined);
+        }
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }}
+      onLogout={() => {
+        setSelectedSubject(null);
+        setInitialModuleId(undefined);
+        setView("learning");
+        logout();
+      }}>
         {view === "profile" ? (
           <Profile key={user.id} />
         ) : view === "people" ? (
@@ -252,8 +157,7 @@ const MainApp: React.FC = () => {
             }}
           />
         )}
-      </main>
-    </div>
+    </AppShell>
   );
 };
 
