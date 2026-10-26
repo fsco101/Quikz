@@ -8,6 +8,13 @@ Using typescript as frontend and node fror backend, and mongodb atlas for databa
 - Student **My results** must include only the signed-in student's data, including subject options, summaries, submission history and PDF/Excel exports. Client-supplied student IDs must never override the authenticated identity.
 - Disconnection revokes private lesson and faculty report access while retaining the student's own saved academic history. Existing modules retain their previous public-discovery behavior until their owner changes the audience.
 
+## CSV class roster invitations (2026-10-26)
+
+- Faculty can upload a UTF-8 CSV with required `email` and optional `name` columns to invite up to 500 registered students at once, with a 256 KB file limit.
+- Provide a downloadable template, a preview with no writes, per-row validation/skip reasons, explicit sending, and a spreadsheet-safe downloadable row report. Changing the file invalidates the prior preview.
+- Revalidate accounts and relationships when sending. Skip duplicate emails, invalid/unavailable student accounts, accepted connections and pending requests. Concurrent imports and retries must not create duplicate connections or overwrite requests.
+- Preserve partial successes, report failed rows and support safe retry. Every student still accepts individually; importing never creates accounts, changes profiles, accepts a request or grants immediate lesson/result access. Audit only import counts, not roster content.
+
 ## Original requirements
 
 Create the following:

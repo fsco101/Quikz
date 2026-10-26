@@ -1,0 +1,105 @@
+{
+  "sprintNumber": 9,
+  "sprintName": "CSV Class Roster Invitations",
+  "status": "completed",
+  "startDate": "2026-10-26",
+  "endDate": "2026-10-26",
+  "completedAt": "2026-10-26",
+  "auditedAt": "2026-10-26",
+  "goals": [
+    "Invite a class using a validated CSV preview and explicit send action",
+    "Keep individual student acceptance and existing connection privacy intact",
+    "Provide per-row outcomes and safe retries for mixed or partially failed imports"
+  ],
+  "issues": [
+    {
+      "id": "QUIKZ-33",
+      "githubIssueNumber": 33,
+      "title": "[Connections] Validated CSV roster invitation API and safe retries",
+      "labels": [
+        "sprint:9"
+      ],
+      "status": "closed",
+      "stateReason": "COMPLETED",
+      "implementedAt": "2026-10-26",
+      "auditStatus": "verified",
+      "implementationDetails": "Faculty-only multipart preview/send endpoints accept UTF-8 CSV with required email and optional name, up to 256 KB/500 rows. Parsing handles BOM, CRLF, quoted fields, invalid columns and case-normalized duplicate emails. Preview performs no writes and returns only uploaded labels, not database profiles/IDs. Confirmed send rechecks current accounts and relationships, uses unique-pair upserts in bounded batches, never changes accepted/incoming requests, and reports each partial failure for safe retry. Count-only import auditing excludes file content, names and emails.",
+      "verificationEvidence": [
+        "backend/src/services/rosterInvitations.ts",
+        "backend/src/routes/connectionRoutes.ts",
+        "backend/src/middleware/audit.ts",
+        "backend/src/__tests__/rosterInvitations.test.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-34",
+      "githubIssueNumber": 34,
+      "title": "[Connections] Class roster preview template and row reports",
+      "labels": [
+        "sprint:9"
+      ],
+      "status": "closed",
+      "stateReason": "COMPLETED",
+      "implementedAt": "2026-10-26",
+      "auditStatus": "verified",
+      "implementationDetails": "Faculty Connections includes a collapsible class-invitation panel, downloadable CSV template, file limits, validation preview with counts/status/reasons, explicit sending and per-row result downloads. Selecting a different file clears prior preview. Existing requests are skipped when previewing again; incoming requests still require manual review. Spreadsheet formulas are neutralized in downloaded uploaded fields. Desktop/mobile layouts preserve readable controls and a keyboard-focusable scrolling table. Individual acceptance remains mandatory; an invited but unaccepted classmate is denied private content.",
+      "verificationEvidence": [
+        "frontend/src/components/users/RosterInvitations.tsx",
+        "frontend/src/components/users/Connections.tsx",
+        "frontend/public/student-roster-template.csv",
+        "frontend/src/index.css",
+        "frontend/e2e/roster-invitations.spec.ts",
+        "README.md",
+        "Requirements.md"
+      ]
+    }
+  ],
+  "validation": {
+    "backendTests": {
+      "command": "cd backend && npm test",
+      "passed": 152,
+      "files": 11
+    },
+    "browserTests": {
+      "command": "cd frontend && npm run test:e2e",
+      "passed": 15
+    },
+    "backendBuild": {
+      "command": "cd backend && npm run build",
+      "result": "passed"
+    },
+    "frontendBuild": {
+      "command": "cd frontend && npm run build",
+      "result": "passed"
+    },
+    "finalResponsiveCheck": "The roster browser workflow and both production builds passed again after mobile disclosure and table-scroll hint polish.",
+    "diffCheck": {
+      "command": "git diff --check",
+      "result": "passed"
+    },
+    "visualReview": "Roster preview screenshots inspected at 1440px desktop and 390px mobile. Horizontal overflow stays inside the table. Downloaded template and spreadsheet-safe row report checked in the browser workflow."
+  },
+  "githubVerification": {
+    "verifiedAt": "2026-10-26",
+    "closedIssueNumbers": [
+      33,
+      34
+    ],
+    "state": "CLOSED",
+    "stateReason": "COMPLETED",
+    "openIssueNumbers": []
+  },
+  "integration": {
+    "branch": "feat/csv-roster-invitations",
+    "baseBranch": "feat/faculty-student-connections",
+    "dependsOnPullRequest": 32,
+    "description": "Built on the pending Sprint 8 connection feature; integrate with develop through its parent PR."
+  },
+  "limits": [
+    "Imports invite existing active student accounts inside Quikz; they do not send email, verify mailboxes or create accounts.",
+    "Files must be UTF-8 CSV with email and optional name columns, up to 256 KB and 500 student records.",
+    "Imported names are file labels and do not update profiles. CSV row numbers count records rather than physical lines inside quoted fields.",
+    "Partial failures keep successful invitations; previewing again safely skips existing connections and requests.",
+    "Verification uses Chromium and isolated local MongoDB, not a live Atlas deployment."
+  ]
+}

@@ -2,9 +2,9 @@
   "project": "Quikz",
   "repository": "fsco101/Quikz",
   "updatedAt": "2026-10-26",
-  "totalSprints": 8,
-  "totalIssues": 29,
-  "completedIssues": 29,
+  "totalSprints": 9,
+  "totalIssues": 31,
+  "completedIssues": 31,
   "plannedIssues": 0,
   "sprints": [
     {
@@ -61,6 +61,13 @@
       "name": "Faculty Connections and Student Privacy",
       "file": "sprints/sprint-8-faculty-connections.json",
       "totalIssues": 3,
+      "status": "completed"
+    },
+    {
+      "sprint": 9,
+      "name": "CSV Class Roster Invitations",
+      "file": "sprints/sprint-9-csv-roster-invitations.json",
+      "totalIssues": 2,
       "status": "completed"
     }
   ],

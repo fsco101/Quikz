@@ -650,5 +650,58 @@
       "backend/src/__tests__/connections.test.ts",
       "frontend/e2e/connections.spec.ts"
     ]
+  },
+  "csvRosterInvitationsUpdate": {
+    "date": "2026-10-26",
+    "status": "implemented",
+    "sprint": 9,
+    "issues": [
+      33,
+      34
+    ],
+    "implemented": [
+      "Faculty-only multipart preview/send endpoints accept UTF-8 CSV with required email and optional name, up to 256 KB/500 rows. Parsing handles BOM, CRLF, quoted fields, invalid columns and case-normalized duplicate emails. Preview performs no writes and returns only uploaded labels, not database profiles/IDs. Confirmed send rechecks current accounts and relationships, uses unique-pair upserts in bounded batches, never changes accepted/incoming requests, and reports each partial failure for safe retry. Count-only import auditing excludes file content, names and emails.",
+      "Faculty Connections includes a collapsible class-invitation panel, downloadable CSV template, file limits, validation preview with counts/status/reasons, explicit sending and per-row result downloads. Selecting a different file clears prior preview. Existing requests are skipped when previewing again; incoming requests still require manual review. Spreadsheet formulas are neutralized in downloaded uploaded fields. Desktop/mobile layouts preserve readable controls and a keyboard-focusable scrolling table. Individual acceptance remains mandatory; an invited but unaccepted classmate is denied private content."
+    ],
+    "validation": {
+      "backendTests": {
+        "command": "cd backend && npm test",
+        "passed": 152,
+        "files": 11
+      },
+      "browserTests": {
+        "command": "cd frontend && npm run test:e2e",
+        "passed": 15
+      },
+      "backendBuild": {
+        "command": "cd backend && npm run build",
+        "result": "passed"
+      },
+      "frontendBuild": {
+        "command": "cd frontend && npm run build",
+        "result": "passed"
+      },
+      "finalResponsiveCheck": "The roster browser workflow and both production builds passed again after mobile disclosure and table-scroll hint polish.",
+      "diffCheck": {
+        "command": "git diff --check",
+        "result": "passed"
+      },
+      "visualReview": "Roster preview screenshots inspected at 1440px desktop and 390px mobile. Horizontal overflow stays inside the table. Downloaded template and spreadsheet-safe row report checked in the browser workflow."
+    },
+    "githubVerification": {
+      "verifiedAt": "2026-10-26",
+      "closedIssueNumbers": [
+        33,
+        34
+      ],
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "openIssueNumbers": []
+    },
+    "evidence": [
+      "sprints/sprint-9-csv-roster-invitations.json",
+      "backend/src/__tests__/rosterInvitations.test.ts",
+      "frontend/e2e/roster-invitations.spec.ts"
+    ]
   }
 }

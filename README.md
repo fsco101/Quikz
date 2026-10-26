@@ -36,6 +36,16 @@ Public directory previews contain summaries, not full lecture text, attachment U
 
 Disconnecting immediately ends private lesson access and removes the student from that professor's reports and exports. Previously downloaded material cannot be recalled. Saved quiz history remains available to the student. Faculty can report only on accepted, active students **and** subjects they own. Public learners' results are not disclosed to faculty without an accepted connection. Existing modules retain their previous public-discovery behavior as **Both** until their owner changes the audience. Existing accounts are not automatically connected; only a newly seeded demo pair starts connected, and restarting does not restore a removed demo connection.
 
+## Invite a class from CSV
+
+Faculty can open **Connections → Invite a class from CSV** and download the template. Keep the `email` header, optionally include `name`, and replace the sample rows with registered student emails. Save as UTF-8 CSV, up to **500 student rows / 256 KB**. The optional name is a label from your file; importing never changes student profiles or creates accounts.
+
+Choose the file and select **Preview roster**. The preview does not send anything. Each row shows whether it is ready, invalid, duplicated in the file, unavailable, already connected, or has an incoming/outgoing pending request. Matching trims whitespace and ignores email case. Fix malformed files before continuing; eligible rows can still be invited when other rows need correction. Row numbers count CSV records, including the header as row 1; blank lines are ignored.
+
+Select **Send N invitations** after reviewing the preview. The server rechecks the original CSV and current accounts/connections, and creates pending requests only for eligible students. It never accepts a student request automatically or changes an accepted connection. Each invited student must accept from **Incoming requests** before private lessons or faculty reports become available. Invitations stay inside Quikz; no email is sent.
+
+**Download row report** saves the preview or send results, with a reason for every skipped/failed row. Uploaded values are escaped to prevent spreadsheet formulas. If a request fails or a row needs retry, use **Preview again**; existing invitations are skipped, including those created by another upload. Selecting a different file clears the old preview. Successful rows are retained if another row fails. Import audit events contain counts only, without roster content.
+
 ## Course overview
 
 The subject catalog now shows students how many modules they have mastered in each course, with filters for in-progress, not-started, completed and empty courses. **Start learning** and **Continue learning** open the first unfinished lesson. Opening a course normally also selects that lesson. Progress uses the same recorded completion plus designated-quiz pass evidence as prerequisite checks; historical flags alone never count. Empty courses are not treated as completed.
