@@ -93,7 +93,9 @@
     "branch": "feat/csv-roster-invitations",
     "baseBranch": "feat/faculty-student-connections",
     "dependsOnPullRequest": 32,
-    "description": "Built on the pending Sprint 8 connection feature; integrate with develop through its parent PR."
+    "description": "Built on Sprint 8 in PR #35. After PR #32 and PR #35 merged, the completed CSV changes were merged into develop.",
+    "integratedBranch": "develop",
+    "integratedAt": "2026-10-26"
   },
   "limits": [
     "Imports invite existing active student accounts inside Quikz; they do not send email, verify mailboxes or create accounts.",
