@@ -1,3 +1,5 @@
+import { Download } from "lucide-react";
+import { PageHeading } from "../ui/PageHeading.js";
 import { Avatar } from "../users/Avatar.js";
 import React, { useEffect, useState } from "react";
 import { api } from "../../services/api.js";
@@ -118,37 +120,14 @@ export function Gradebook() {
   };
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap justify-between items-center gap-4">
-        <div>
-          <p className="text-xs uppercase font-bold tracking-widest text-indigo-600">
-            Academic performance
-          </p>
-          <h1 className="text-3xl font-black text-[#070235]">
-            {user?.role === "faculty" ? "Master gradebook" : "My quiz results"}
-          </h1>
-          <p className="text-sm text-slate-600 mt-2">
-            {user?.role === "faculty"
-              ? "Your subjects, separated by year level and section. Every attempt stays visible."
-              : "Your attempt history, scores, and progress toward the faculty-set passing mark."}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {["pdf", "xlsx"].map((format) => (
-            <button
-              key={format}
-              onClick={() => download(format)}
-              disabled={loading || !report?.summary.attempts || !!exporting}
-              className="rounded-xl bg-[#070235] px-4 py-2 text-white text-sm font-bold disabled:opacity-40"
-            >
-              {exporting === format
-                ? "Preparing…"
-                : `Export ${format === "xlsx" ? "Excel" : "PDF"}`}
-            </button>
-          ))}
-        </div>
-      </header>
+      <PageHeading eyebrow="A clearer picture" title={user?.role === "faculty" ? "Master gradebook" : "My quiz results"}
+        description={user?.role === "faculty" ? "See how your students are doing. Explore results by course, year and section." : "Every attempt is part of your progress. Explore your scores and celebrate how far you have come."}
+        actions={<>{["pdf", "xlsx"].map((format) => <button key={format} onClick={() => download(format)}
+          disabled={loading || !report?.summary.attempts || !!exporting} className={`ui-button ${format === "xlsx" ? "ui-button-primary" : "ui-button-secondary"}`}>
+          <Download size={16} aria-hidden="true" />{exporting === format ? "Preparing…" : `Export ${format === "xlsx" ? "Excel" : "PDF"}`}
+        </button>)}</>} />
       <section
-        className="rounded-2xl border bg-white p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        className="ui-panel report-filters grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"
         aria-label="Gradebook filters"
       >
         <label className="text-xs font-bold">
@@ -286,7 +265,7 @@ export function Gradebook() {
               ["Average", `${report.summary.average.toFixed(2)}%`],
               ["Pass rate", `${report.summary.passRate.toFixed(2)}%`],
             ].map(([name, value]) => (
-              <div className="rounded-2xl border bg-white p-5" key={name}>
+              <div className="report-metric" key={name}>
                 <p className="text-xs text-slate-500">{name}</p>
                 <p className="mt-2 text-3xl font-black text-[#070235]">
                   {value}
@@ -353,10 +332,10 @@ export function Gradebook() {
             {report.groups.map((group) => (
               <section
                 key={group.key}
-                className="rounded-2xl border bg-white overflow-hidden"
+                className="ui-panel report-table"
                 aria-label={`${group.key} results`}
               >
-                <header className="p-5 border-b bg-indigo-50 flex flex-wrap gap-2 justify-between">
+                <header className="report-table-heading flex flex-wrap gap-2 justify-between">
                   <h2 className="font-bold text-[#070235]">{group.key}</h2>
                   <p className="text-xs text-slate-600">
                     {group.metrics.attempts} attempts · Average{" "}
@@ -391,7 +370,7 @@ export function Gradebook() {
                       {group.rows.map((row) => (
                         <tr key={row.id} className="border-t hover:bg-slate-50">
                           <td className="p-4">
-                            <p className="font-semibold whitespace-nowrap">
+                            <p className="font-semibold whitespace-nowrap flex items-center gap-2">
                               <Avatar userId={row.studentId} name={row.studentName} size="h-7 w-7" /> {row.studentName}
                             </p>
                             <p className="text-xs text-slate-500">

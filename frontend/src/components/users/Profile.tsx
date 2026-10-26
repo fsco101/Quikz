@@ -1,3 +1,4 @@
+import { PageHeading } from "../ui/PageHeading.js";
 ﻿import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext.js";
 import { api } from "../../services/api.js";
@@ -41,13 +42,8 @@ export function Profile() {
     }
   };
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <header>
-        <h1 className="text-3xl font-black text-[#070235]">My profile</h1>
-        <p className="mt-2 text-slate-600">
-          Update your account and the profile others see in Quikz.
-        </p>
-      </header>
+    <div className="profile-page space-y-6">
+      <PageHeading eyebrow="Make it yours" title="My profile" description="A little about you. Update your profile, personal details and account security." />
       {error && (
         <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-800">
           {error}
@@ -61,7 +57,7 @@ export function Profile() {
           {notice}
         </p>
       )}
-      <section className="rounded-2xl border bg-white p-6 space-y-4">
+      <section className="profile-avatar-panel ui-panel space-y-4">
         <h2 className="text-xl font-bold">Profile avatar</h2>
         <div className="flex flex-wrap items-center gap-4">
           <Avatar
@@ -126,7 +122,7 @@ export function Profile() {
         </div>
       </section>
       <form
-        className="rounded-2xl border bg-white p-6 grid gap-4 sm:grid-cols-2"
+        className="ui-panel profile-details grid gap-5 sm:grid-cols-2"
         onSubmit={(e) => {
           e.preventDefault();
           void perform(async () => {
@@ -216,7 +212,7 @@ export function Profile() {
         </div>
       </form>
       <form
-        className="rounded-2xl border bg-white p-6 space-y-4"
+        className="profile-avatar-panel ui-panel space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
           void perform(async () => {

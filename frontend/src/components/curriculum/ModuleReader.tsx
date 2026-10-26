@@ -1,3 +1,4 @@
+import { ArrowLeft, ChevronDown, CheckCircle2, Lock, PlayCircle } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { QuizStudio } from '../quiz/QuizStudio.js';
@@ -19,6 +20,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
   const [progress, setProgress] = useState<CurriculumProgress>({ totalModules: 0, completedCount: 0 });
   const [activeModule, setActiveModule] = useState<ModuleItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showModules, setShowModules] = useState(false);
   const [editingModule, setEditingModule] = useState<ModuleItem | undefined>();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [studioOpen, setStudioOpen] = useState(false);
@@ -74,15 +76,16 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
       : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="reader-page space-y-6">
       {/* Breadcrumb Navigation & Top Action Bar */}
-      <div className="bg-white rounded-2xl border border-[#c8c5d0]/50 p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="reader-heading flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
+            aria-label="Back to course catalog"
             className="w-9 h-9 rounded-xl border border-[#c8c5d0] hover:bg-[#eff4ff] text-[#47464f] flex items-center justify-center transition-colors shrink-0"
           >
-            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+            <ArrowLeft size={18} aria-hidden="true" />
           </button>
           <div>
             <div className="flex items-center gap-2">
@@ -111,7 +114,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
       </div>
 
       {actionMessage && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between animate-in fade-in">
+        <div role="status" className="reader-notice flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-emerald-600">verified</span>
             <span>{actionMessage}</span>
@@ -123,29 +126,31 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
       )}
 
       {/* Main Reader Layout: Sidebar + Document Canvas */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="reader-layout">
         {/* LEFT SIDEBAR: Course Navigator & Sequential Progression List (4-Cols) */}
-        <div className="lg:col-span-4 bg-white rounded-2xl border border-[#c8c5d0]/50 p-5 shadow-sm space-y-5">
+        <div className="reader-sidebar ui-panel space-y-5">
           {/* Progress Header */}
           <div className="pb-4 border-b border-[#c8c5d0]/30">
             <div className="flex items-center justify-between text-xs font-bold mb-2">
-              <span className="text-[#070235]">Course Completion</span>
-              <span className="text-[#4648d4] font-black">{completionPercentage}%</span>
+              <span className="text-[#070235]">{user?.role === "student" ? "Course Completion" : "Course structure"}</span>
+              <span className="text-[#4648d4] font-black">{user?.role === "student" ? `${completionPercentage}%` : `${modules.length} modules`}</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-[#eff4ff] overflow-hidden">
+            {user?.role === "student" && <div className="w-full h-2 rounded-full bg-[#eff4ff] overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-[#6063ee] to-[#4648d4] transition-all duration-500 rounded-full"
                 style={{ width: `${completionPercentage}%` }}
               ></div>
-            </div>
+            </div>}
             <div className="flex items-center justify-between text-[11px] text-[#47464f] mt-2">
-              <span>{progress.completedCount} of {progress.totalModules} modules mastered</span>
-              <span className="text-emerald-700 font-semibold">Meet each quiz passing mark</span>
+              <span>{user?.role === "student" ? `${progress.completedCount} of ${progress.totalModules} modules mastered` : "A guided path through your subject"}</span>
             </div>
           </div>
 
+          <button className="reader-modules-toggle" aria-expanded={showModules} aria-controls="course-modules" onClick={() => setShowModules((value) => !value)}>
+            {showModules ? "Hide course modules" : "Show course modules"}<ChevronDown size={17} aria-hidden="true" />
+          </button>
           {/* Module List */}
-          <div className="space-y-2">
+          <div id="course-modules" className="reader-module-list space-y-2" data-expanded={showModules}>
             <h3 className="text-xs font-bold text-[#070235] uppercase tracking-wider mb-2">
               Course Learning Path
             </h3>
@@ -163,14 +168,18 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
                 const isCompleted = mod.isCompleted;
 
                 return (
-                  <div
+                  <button
+                    type="button"
+                    disabled={!!isLocked}
+                    aria-current={isActive ? "step" : undefined}
                     key={mod._id}
                     onClick={() => {
                       if (!isLocked) {
                         setActiveModule(mod);
+                        setShowModules(false);
                       }
                     }}
-                    className={`p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 select-none ${
+                    className={`reader-module-button p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 select-none ${
                       isLocked
                         ? 'bg-[#f8f9ff] border-[#c8c5d0]/40 opacity-60 cursor-not-allowed'
                         : isActive
@@ -213,23 +222,14 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
 
                     <div className="shrink-0 pt-0.5">
                       {isLocked ? (
-                        <span
-                          className="material-symbols-outlined text-[#787680] text-[18px]"
-                          title="Locked: Complete previous module to unlock"
-                        >
-                          lock
-                        </span>
+                        <Lock size={16} aria-label="Locked: Complete previous module to unlock" />
                       ) : isCompleted ? (
-                        <span className="material-symbols-outlined text-emerald-600 text-[18px]">
-                          check_circle
-                        </span>
+                        <CheckCircle2 size={17} className="text-emerald-600" aria-label="Mastered" />
                       ) : (
-                        <span className="material-symbols-outlined text-[#4648d4] text-[18px]">
-                          play_circle
-                        </span>
+                        <PlayCircle size={17} className="text-[#4648d4]" aria-hidden="true" />
                       )}
                     </div>
-                  </div>
+                  </button>
                 );
               })
             )}
@@ -237,25 +237,25 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
         </div>
 
         {/* RIGHT CANVAS: Scribd-Style Document Reader (8-Cols) */}
-        <div className="lg:col-span-8 bg-white rounded-2xl border border-[#c8c5d0]/50 shadow-sm p-8 space-y-6">
+        <div className="reader-canvas ui-panel space-y-7">
           {activeModule ? (
             <>
               {/* Executive Summary Card (Requirement 5a) */}
-              <div className="bg-gradient-to-br from-[#eff4ff] to-[#d3e4fe]/40 rounded-2xl border border-[#d3e4fe] p-6 space-y-2">
+              <div className="reader-summary space-y-3">
                 <div className="flex items-center gap-2 text-xs font-bold text-[#4648d4]">
                   <span className="material-symbols-outlined text-[18px]">summarize</span>
                   <span>Executive Topic Summary</span>
                 </div>
-                <h3 className="text-lg font-black text-[#070235] tracking-tight">
+                <h3 className="reader-module-title">
                   {activeModule.title}
                 </h3>
-                <p className="text-xs text-[#0b1c30] leading-relaxed">
+                <p className="reader-summary-copy">
                   {activeModule.summary}
                 </p>
               </div>
 
               {/* Document Reading Viewport */}
-              <div className="border border-[#c8c5d0]/40 rounded-xl p-6 bg-[#f8f9ff] text-xs text-[#0b1c30] leading-relaxed select-text space-y-4 max-h-[500px] overflow-y-auto font-sans">
+              <div className="reader-document select-text space-y-5">
                 {activeModule.textContent ? (
                   <div className="lesson-prose space-y-3 leading-relaxed">
                     <ReactMarkdown>{activeModule.textContent}</ReactMarkdown>
@@ -268,7 +268,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
 
                 {/* File / Presentation Download Attachment */}
                 {activeModule.fileUrl && (
-                  <div className="mt-4 p-4 rounded-xl bg-white border border-[#c8c5d0]/60 flex items-center justify-between">
+                  <div className="reader-attachment">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-[#eff4ff] text-[#4648d4] flex items-center justify-center">
                         <span className="material-symbols-outlined text-[20px]">attachment</span>
@@ -293,7 +293,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
               </div>
 
               {/* End-of-Module Quiz Milestone CTA (Requirement 5 & 6d) */}
-              <div className="p-6 rounded-2xl bg-[#070235] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+              <div className="reader-assessment">
                 <div>
                   <div className="flex items-center gap-2 text-xs text-[#c4c1fb] font-semibold mb-1">
                     <span className="material-symbols-outlined text-[16px]">psychology</span>
@@ -305,7 +305,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="reader-assessment-actions">
                   {user?.role === 'faculty' ? (
                     activeModule.canEdit && !activeModule.quizId ? <button onClick={() => setStudioOpen(true)} className="px-5 py-2.5 rounded-xl bg-[#4648d4] hover:bg-[#3436b8] text-white text-xs font-bold">Create end quiz</button> : <span className="text-xs text-indigo-200">{activeModule.quizId ? `Published: ${activeModule.quizId.title}` : 'Awaiting instructor assessment'}</span>
                   ) : activeModule.quizId && user?.role === 'student' ? (

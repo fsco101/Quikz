@@ -2,9 +2,9 @@
   "project": "Quikz",
   "repository": "fsco101/Quikz",
   "updatedAt": "2026-10-26",
-  "totalSprints": 6,
-  "totalIssues": 24,
-  "completedIssues": 24,
+  "totalSprints": 7,
+  "totalIssues": 26,
+  "completedIssues": 26,
   "plannedIssues": 0,
   "sprints": [
     {
@@ -46,6 +46,13 @@
       "sprint": 6,
       "name": "Course Progress and Assessment Readiness",
       "file": "sprints/sprint-6-course-overview.json",
+      "totalIssues": 2,
+      "status": "completed"
+    },
+    {
+      "sprint": 7,
+      "name": "Interface Design Refresh",
+      "file": "sprints/sprint-7-design-refresh.json",
       "totalIssues": 2,
       "status": "completed"
     }
