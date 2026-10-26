@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext.js";
 import { api } from "../../services/api.js";
 import { Avatar } from "./Avatar.js";
 import { PageHeading } from "../ui/PageHeading.js";
+import { RosterInvitations } from "./RosterInvitations.js";
 
 type Connection = {
   id: string; status: "pending" | "accepted"; incoming: boolean;
@@ -64,6 +65,10 @@ export function Connections() {
           <button className="ui-button ui-button-primary" disabled={!!busy}><Link2 size={16} aria-hidden="true" />{busy === "send" ? "Sending…" : "Send request"}</button></div>
       </form>
     </section>
+    {faculty && <RosterInvitations onImported={(sent) => {
+      if (sent) changeView("outgoing");
+      setRevision((n) => n + 1);
+    }} />}
     {message && <p role="status" className="connection-message">{message}</p>}
     {error && <div role="alert" className="connection-error">{error} <button onClick={() => setRevision((n) => n + 1)} className="underline">Refresh connections</button></div>}
     <section className="space-y-4" aria-label="Connection roster">

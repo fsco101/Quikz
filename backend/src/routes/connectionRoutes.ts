@@ -1,6 +1,8 @@
 import { Router } from "express";
 import mongoose from "mongoose";
-import { authenticateToken, AuthRequest } from "../middleware/auth.js";
+import { authenticateToken, requireRole, AuthRequest } from "../middleware/auth.js";
+import multer from "multer";
+import { MAX_ROSTER_BYTES, previewRoster, sendRoster } from "../services/rosterInvitations.js";
 import { FacultyConnection } from "../models/FacultyConnection.js";
 import { User } from "../models/User.js";
 import { InputError } from "../services/questionBank.js";
@@ -14,6 +16,15 @@ router.use(authenticateToken, (req: AuthRequest, res, next) => {
   if (req.user!.role === "admin") return res.status(403).json({ message: "Connections are for students and faculty." });
   next();
 });
+const rosterUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_ROSTER_BYTES, files: 1, fields: 1, fieldSize: 100 } });
+for (const action of ["preview", "send"] as const) {
+  router.post(`/roster/${action}`, requireRole("faculty"), rosterUpload.single("file"), run(async (req, res) => {
+    if (!req.file || !/\.csv$/i.test(req.file.originalname)) throw new InputError("Choose a .csv roster file.");
+    if (action === "send" && req.body.confirm !== "true") throw new InputError("Preview the roster, then confirm sending invitations.");
+    const result = await (action === "preview" ? previewRoster : sendRoster)(req.file.buffer, req.user!.id);
+    res.json(result);
+  }));
+}
 router.get("/", run(async (req, res) => {
   const user = req.user!;
   const faculty = user.role === "faculty";
