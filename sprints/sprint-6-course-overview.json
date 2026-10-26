@@ -1,0 +1,74 @@
+{
+  "sprintNumber": 6,
+  "sprintName": "Course Progress and Assessment Readiness",
+  "status": "completed",
+  "startDate": "2026-10-26",
+  "endDate": "2026-10-26",
+  "completedAt": "2026-10-26",
+  "auditedAt": "2026-10-26",
+  "goals": [
+    "Expose verified course mastery and next-lesson actions to students",
+    "Help faculty find incomplete end quiz coverage in owned courses",
+    "Improve course selection filters, keyboard access and request error recovery"
+  ],
+  "requirementsReview": "sprints/requirements-review-2026-10-26.json",
+  "issues": [
+    {
+      "id": "QUIKZ-23",
+      "githubIssueNumber": 23,
+      "title": "[Learning] Verified course progress and next-lesson navigation",
+      "labels": ["sprint:6", "cat:curriculum", "sev:high"],
+      "status": "closed",
+      "stateReason": "COMPLETED",
+      "implementedAt": "2026-10-26",
+      "auditStatus": "verified",
+      "implementationDetails": "Authenticated no-store course overview derives mastery from recorded progress plus designated passing submissions. Batch queries share the same verification helper as prerequisite access. The catalog shows mastery totals and progress bars with combined course status, year and search filters. Start/continue actions and ordinary course entry select the first unfinished lesson. Empty courses never count as mastered.",
+      "verificationEvidence": [
+        "backend/src/services/courseOverview.ts",
+        "backend/src/services/progression.ts",
+        "backend/src/routes/subjectRoutes.ts",
+        "frontend/src/components/curriculum/SubjectList.tsx",
+        "frontend/src/components/curriculum/ModuleReader.tsx",
+        "frontend/src/App.tsx",
+        "backend/src/__tests__/courseOverview.test.ts",
+        "frontend/e2e/course-overview.spec.ts"
+      ]
+    },
+    {
+      "id": "QUIKZ-24",
+      "githubIssueNumber": 24,
+      "title": "[Curriculum] Faculty assessment readiness and resilient course catalog",
+      "labels": ["sprint:6", "cat:curriculum", "sev:medium"],
+      "status": "closed",
+      "stateReason": "COMPLETED",
+      "implementedAt": "2026-10-26",
+      "auditStatus": "verified",
+      "implementationDetails": "Faculty overview is restricted to owned subjects. Valid end quiz coverage requires a referenced quiz belonging to the same course and module; missing, deleted and mismatched references are flagged. Course filters and review actions locate modules needing attention. Catalog errors offer retry; overview failures leave course browsing usable and disable unavailable status filters. Semantic course buttons support keyboard activation; mobile checks cover a 390px viewport.",
+      "verificationEvidence": [
+        "backend/src/services/courseOverview.ts",
+        "frontend/src/components/curriculum/SubjectList.tsx",
+        "backend/src/__tests__/courseOverview.test.ts",
+        "frontend/e2e/course-overview.spec.ts"
+      ]
+    }
+  ],
+  "validation": {
+    "backendTests": { "command": "cd backend && npm test", "passed": 128, "files": 9 },
+    "backendBuild": { "command": "cd backend && npm run build", "result": "passed" },
+    "frontendBuild": { "command": "cd frontend && npm run build", "result": "passed" },
+    "browserTests": { "command": "cd frontend && npm run test:e2e", "passed": 11 },
+    "diffCheck": { "command": "git diff --check", "result": "passed" },
+    "visualReview": "Faculty mobile course overview screenshot inspected; no clipping or horizontal overflow."
+  },
+  "githubVerification": {
+    "verifiedAt": "2026-10-26",
+    "closedIssueNumbers": [23, 24],
+    "state": "CLOSED",
+    "stateReason": "COMPLETED",
+    "openIssueNumbers": []
+  },
+  "limits": [
+    "Database checks use isolated local MongoDB; live Atlas was not exercised.",
+    "Readiness measures quiz linkage, not the pedagogical quality of its questions."
+  ]
+}

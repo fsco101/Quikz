@@ -246,7 +246,10 @@ const MainApp: React.FC = () => {
           />
         ) : (
           <SubjectList
-            onSelectSubject={(subject) => setSelectedSubject(subject)}
+            onSelectSubject={(subject, moduleId) => {
+              setSelectedSubject(subject);
+              setInitialModuleId(moduleId);
+            }}
           />
         )}
       </main>

@@ -1,0 +1,69 @@
+{
+  "reviewedAt": "2026-10-26",
+  "requirementsSource": "Requirements.md",
+  "baselineCommit": "2be5a50",
+  "scope": "Requirements coverage and focused improvements to existing learning and authoring workflows. Existing sprint 1-5 GitHub states were verified closed before work began.",
+  "requirements": [
+    {
+      "items": [1],
+      "status": "implemented",
+      "findings": "GitHub issues 1-22 and five local sprint plans already existed. Sprint 6 adds tracked enhancement issues 23-24.",
+      "evidence": ["sprints/sprints-overview.json", "sprints/sprint-audit.json"]
+    },
+    {
+      "items": [2, 3],
+      "status": "implemented",
+      "findings": "React/TypeScript frontend, Node/Express/TypeScript backend, MongoDB persistence, username/email login, registration, mandatory consent and student/faculty roles. Administrators, editable profiles and avatars were added in prior commits.",
+      "evidence": ["backend/src/controllers/authController.ts", "backend/src/middleware/auth.ts", "frontend/src/components/auth/TermsModal.tsx", "backend/src/__tests__/auth.test.ts", "backend/src/__tests__/accounts.test.ts"]
+    },
+    {
+      "items": [4],
+      "status": "implemented",
+      "findings": "Subjects have name, unique normalized code, term and year level. Faculty-owned subject/module creation and a public catalog already exist. Catalog had no personalized progress or assessment coverage overview.",
+      "improvement": "Add verified student mastery, course status, next-lesson actions and faculty-owned assessment readiness to the catalog.",
+      "evidence": ["backend/src/controllers/subjectController.ts", "frontend/src/components/curriculum/SubjectList.tsx", "backend/src/services/courseOverview.ts"]
+    },
+    {
+      "items": [5, "5a"],
+      "status": "implemented",
+      "findings": "Ordered modules provide summaries, Markdown lecture text and authenticated file/presentation downloads. Progression requires a recorded completion and a passing submission on the designated assessment. Opening a course previously selected the first unlocked lesson even when it was already mastered.",
+      "improvement": "Use the shared verified completion rules in a batched overview and open the first unfinished lesson. Faculty can locate the first module missing assessment coverage.",
+      "evidence": ["backend/src/controllers/moduleController.ts", "backend/src/services/progression.ts", "frontend/src/components/curriculum/ModuleReader.tsx", "backend/src/__tests__/courseOverview.test.ts"]
+    },
+    {
+      "items": [6, "6a", "6b", "6c", "6d", "6e"],
+      "status": "implemented_with_existing_configuration_extensions",
+      "findings": "Manual authoring, JSON/CSV/Aiken bank imports and lecture text/file extraction already feed a reviewed question bank. Server-controlled attempts save drafts, shuffle questions/options, grade and persist results, and unlock prerequisite progression. Earlier committed settings allow faculty-set passing marks (default 75%) and per-question timing; this intentionally exceeds the original fixed 75% and 10-20 minute wording and is retained.",
+      "evidence": ["backend/src/controllers/quizController.ts", "backend/src/services/questionBank.ts", "backend/src/services/questionGenerator.ts", "backend/src/services/documentText.ts", "backend/src/__tests__/quiz.test.ts", "frontend/e2e/sprint3.spec.ts"]
+    },
+    {
+      "items": [7, "7a", 8],
+      "status": "implemented",
+      "findings": "Student-only result summaries and faculty-owned gradebooks include surname/score/date sorting, search, year/section/subject/status/score filters, mandatory separate cohort tables, and PDF/Excel exports. Reports count all matching attempts, including retakes. This sprint preserves those semantics.",
+      "evidence": ["backend/src/services/gradebook.ts", "backend/src/services/reportExport.ts", "frontend/src/components/gradebook/Gradebook.tsx", "backend/src/__tests__/reporting.test.ts", "frontend/e2e/sprints4-5.spec.ts"]
+    },
+    {
+      "items": [9],
+      "status": "implemented",
+      "findings": "A public searchable lesson directory already exposes metadata, summaries and syllabuses, with full lesson content protected by authenticated prerequisite checks. The public subject catalog remains available without personalized progress.",
+      "evidence": ["backend/src/routes/directoryRoutes.ts", "frontend/src/components/directory/LessonDirectory.tsx", "backend/src/__tests__/system.test.ts"]
+    }
+  ],
+  "selectedSprint": {
+    "number": 6,
+    "name": "Course Progress and Assessment Readiness",
+    "issues": [23, 24],
+    "reason": "Make earned progress and missing assessment coverage visible at course selection, while improving catalog error recovery and keyboard access.",
+    "databaseMigration": "None. Overview is derived from existing subjects, modules, quizzes, progress and submissions."
+  },
+  "analysisMethod": {
+    "sources": "Requirements, README, sprint plans, direct source review, GitHub issue states, service graph, backend integration tests and browser workflows.",
+    "graphScope": "backend/src/services only: 9 files, 40 nodes, 56 edges; structural extraction used zero LLM tokens.",
+    "graphLimitation": "The scoped extraction reported 36 dangling edges to symbols outside the service corpus. It is incomplete for cross-layer relationships; controllers, models, routes and frontend flows were inspected directly instead of inferring those connections."
+  },
+  "verificationLimits": [
+    "Automated checks use isolated local MongoDB, not a live MongoDB Atlas deployment.",
+    "Readiness indicates valid quiz linkage, not pedagogical review or publication approval.",
+    "Course progress reflects the current designated quiz and existing recorded completion evidence; it is not an enrollment roster."
+  ]
+}

@@ -473,7 +473,7 @@
     "Local sprint statuses do not synchronize GitHub issues.",
     "Live Atlas deployment and failover were not exercised against an external cluster. Health and write/read probes are implemented and tested against local MongoDB.",
     "Report selections are limited to 10,000 attempts and can be narrowed by subject.",
-    "System-wide audit access requires explicitly configured trusted faculty account IDs."
+    "System-wide audit access requires the admin role."
   ],
   "facultyQuizSettingsUpdate": {
     "date": "2026-10-22",
@@ -512,6 +512,39 @@
       "backend/src/services/adminAccess.ts",
       "frontend/src/components/users",
       "README.md"
+    ]
+  },
+  "courseOverviewUpdate": {
+    "date": "2026-10-26",
+    "status": "implemented",
+    "requirementsReview": "sprints/requirements-review-2026-10-26.json",
+    "sprint": 6,
+    "issues": [
+      23,
+      24
+    ],
+    "implemented": [
+      "Student catalog mastery summaries, progress bars and next unfinished lesson navigation",
+      "Shared batched verification of recorded progress and designated passing submissions",
+      "Faculty-owned assessment readiness, missing quiz counts and review links",
+      "Combined course status/year/search filters and keyboard course buttons",
+      "Explicit catalog error recovery and partial availability when overview fails"
+    ],
+    "validation": "128 backend tests, 11 browser tests, both production builds and git diff --check passed. Mobile screenshot reviewed at 390px.",
+    "githubVerification": {
+      "verifiedAt": "2026-10-26",
+      "closedIssueNumbers": [
+        23,
+        24
+      ],
+      "stateReason": "COMPLETED",
+      "openIssueNumbers": [],
+      "allRepositoryIssuesClosed": 24
+    },
+    "evidence": [
+      "sprints/sprint-6-course-overview.json",
+      "backend/src/__tests__/courseOverview.test.ts",
+      "frontend/e2e/course-overview.spec.ts"
     ]
   }
 }

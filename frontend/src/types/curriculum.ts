@@ -10,6 +10,16 @@ export interface Subject {
   createdAt: string;
 }
 
+export interface CourseOverview {
+  subjectId: string;
+  totalModules: number;
+  completedCount?: number;
+  readyQuizCount?: number;
+  missingQuizCount?: number;
+  status: "empty" | "completed" | "in-progress" | "not-started" | "needs-quizzes" | "ready";
+  nextModule: { id: string; title: string } | null;
+}
+
 export interface ModuleItem {
   _id: string;
   subjectId: string;

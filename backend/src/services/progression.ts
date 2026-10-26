@@ -8,28 +8,39 @@ export async function verifiedCompletionIds(
   subjectId: unknown,
   modules: { _id: unknown; quizId?: any }[],
 ) {
-  const progress = await StudentProgress.findOne({ studentId, subjectId });
-  const recorded = new Set(progress?.completedModuleIds.map(String) || []);
-  const designated = new Map(
-    modules
-      .filter((m) => m.quizId)
-      .map((m) => [String(m._id), String(m.quizId._id || m.quizId)]),
-  );
-  const passes = await QuizSubmission.find({
+  return verifiedCourseCompletionIds(
     studentId,
-    subjectId,
-    passed: true,
-  }).select("moduleId quizId");
-  // Legacy completion flags from the old bypass never grant access on their own.
-  return new Set(
-    passes
-      .filter(
-        (s) =>
-          recorded.has(String(s.moduleId)) &&
-          designated.get(String(s.moduleId)) === String(s.quizId),
-      )
-      .map((s) => String(s.moduleId)),
+    modules.map((m) => ({ _id: m._id, quizId: m.quizId, subjectId })),
   );
+}
+
+// Shared by course access and the catalog. Batch evidence across courses instead
+// of issuing progress and submission queries separately for every catalog card.
+export async function verifiedCourseCompletionIds(
+  studentId: string,
+  modules: { _id: unknown; subjectId: unknown; quizId?: any }[],
+) {
+  if (!modules.length) return new Set<string>();
+  const subjectIds = [...new Set(modules.map((m) => String(m.subjectId)))];
+  const [progress, passes] = await Promise.all([
+    StudentProgress.find({ studentId, subjectId: { $in: subjectIds } })
+      .select("subjectId completedModuleIds").lean(),
+    QuizSubmission.find({ studentId, subjectId: { $in: subjectIds }, passed: true })
+      .select("subjectId moduleId quizId").lean(),
+  ]);
+  const recorded = new Map(progress.map((p) => [
+    String(p.subjectId), new Set(p.completedModuleIds.map(String)),
+  ]));
+  const designated = new Map(modules.filter((m) => m.quizId).map((m) => [
+    String(m._id), { subjectId: String(m.subjectId), quizId: String(m.quizId._id || m.quizId) },
+  ]));
+  // Legacy completion flags never count without a pass on the designated quiz.
+  return new Set(passes.filter((s) => {
+    const module = designated.get(String(s.moduleId));
+    return module?.subjectId === String(s.subjectId) &&
+      module.quizId === String(s.quizId) &&
+      recorded.get(String(s.subjectId))?.has(String(s.moduleId));
+  }).map((s) => String(s.moduleId)));
 }
 export async function requireModuleAccess(studentId: string, moduleId: string) {
   const module = await Module.findById(moduleId);
