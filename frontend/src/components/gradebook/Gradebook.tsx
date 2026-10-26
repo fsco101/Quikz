@@ -121,7 +121,7 @@ export function Gradebook() {
   return (
     <div className="space-y-6">
       <PageHeading eyebrow="A clearer picture" title={user?.role === "faculty" ? "Master gradebook" : "My quiz results"}
-        description={user?.role === "faculty" ? "See how your students are doing. Explore results by course, year and section." : "Every attempt is part of your progress. Explore your scores and celebrate how far you have come."}
+        description={user?.role === "faculty" ? "Results from your connected students in courses you own. Disconnecting removes their records from your reports and exports." : "Your quiz attempts, scores and exports. Only results belonging to your signed-in account appear here."}
         actions={<>{["pdf", "xlsx"].map((format) => <button key={format} onClick={() => download(format)}
           disabled={loading || !report?.summary.attempts || !!exporting} className={`ui-button ${format === "xlsx" ? "ui-button-primary" : "ui-button-secondary"}`}>
           <Download size={16} aria-hidden="true" />{exporting === format ? "Preparing…" : `Export ${format === "xlsx" ? "Excel" : "PDF"}`}

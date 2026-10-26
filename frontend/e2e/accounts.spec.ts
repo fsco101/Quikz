@@ -32,7 +32,7 @@ test("faculty edits owned modules/quizzes and shared avatars are visible to anot
           title: "Owned topic",
           summary: "Topic summary",
           textContent: "Original lesson",
-          contentType: "text",
+          audience: "both", contentType: "text",
         },
       })
     ).json()

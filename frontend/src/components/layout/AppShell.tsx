@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { BookOpen, BarChart3, Library, Users, UserCircle, Activity, ShieldCheck, LogOut, ChevronRight, ArrowUpRight } from "lucide-react";
+import { BookOpen, BarChart3, Library, Users, UserCircle, Activity, ShieldCheck, LogOut, ChevronRight, ArrowUpRight, Link2 } from "lucide-react";
 import { User } from "../../types/auth.js";
 import { Avatar } from "../users/Avatar.js";
 import { Brand } from "./Brand.js";
@@ -11,6 +11,7 @@ export function AppShell({ user, view, onNavigate, onLogout, children }: {
     { key: "learning", label: "Learning path", icon: BookOpen },
     ...(user.role === "admin" ? [] : [{ key: "gradebook", label: user.role === "faculty" ? "Master gradebook" : "My results", icon: BarChart3 }]),
     { key: "directory", label: "Lesson directory", icon: Library },
+    ...(user.role === "admin" ? [] : [{ key: "connections", label: "Connections", icon: Link2 }]),
     { key: "people", label: "People", icon: Users },
     { key: "profile", label: "My profile", icon: UserCircle },
     ...(user.role === "admin" ? [

@@ -1,5 +1,15 @@
 Using typescript as frontend and node fror backend, and mongodb atlas for database:
 
+## Student–faculty connections and result privacy (2026-10-26)
+
+- Students and faculty/professors can request a connection using the other person's registered email. The recipient must accept; pending requests grant no access. Support multiple professors, request decline/cancellation, search, paginated rosters and disconnection.
+- Faculty choose a module audience: connected students only, public, or both. New uploads default to connected students only. Apply permissions to lecture content, uploaded attachments, public directory/syllabus metadata, course progress and module assessments.
+- Faculty can view student profiles and academic results only for accepted, active connections. Reports additionally require ownership of the subject. Keep unconnected students out of faculty totals, cohorts and exports.
+- Student **My results** must include only the signed-in student's data, including subject options, summaries, submission history and PDF/Excel exports. Client-supplied student IDs must never override the authenticated identity.
+- Disconnection revokes private lesson and faculty report access while retaining the student's own saved academic history. Existing modules retain their previous public-discovery behavior until their owner changes the audience.
+
+## Original requirements
+
 Create the following:
 
 1. Push github issues for the necessary functionalities, create the sprints in json form stored in @sprints folder.

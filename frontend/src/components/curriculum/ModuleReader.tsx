@@ -32,6 +32,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
       setLoading(true);
       const res = await api.getSubjectModules(subject._id);
       setModules(res.modules);
+      if (!res.modules.length) setActiveModule(null);
       if (res.progress) {
         setProgress(res.progress);
       }
@@ -51,6 +52,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
         });
       }
     } catch (err) {
+      setModules([]); setActiveModule(null); setProgress({ totalModules: 0, completedCount: 0 });
       setActionMessage(err instanceof Error ? err.message : 'Failed to load modules');
     } finally {
       setLoading(false);
@@ -246,6 +248,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
                   <span className="material-symbols-outlined text-[18px]">summarize</span>
                   <span>Executive Topic Summary</span>
                 </div>
+                <p className="text-xs text-slate-500 mb-3">{activeModule.audience === 'connected' ? 'Connected students only' : activeModule.audience === 'public' ? 'Public lesson' : 'Shared with connected students and public learners'}</p>
                 <h3 className="reader-module-title">
                   {activeModule.title}
                 </h3>

@@ -21,6 +21,7 @@ export interface CourseOverview {
 }
 
 export interface ModuleItem {
+  audience?: "connected" | "public" | "both";
   _id: string;
   subjectId: string;
   canEdit?: boolean;

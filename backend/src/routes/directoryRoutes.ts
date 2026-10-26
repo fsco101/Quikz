@@ -4,6 +4,7 @@ import { Module } from "../models/Module.js";
 import { Subject } from "../models/Subject.js";
 import { queryText, YEARS } from "../services/gradebook.js";
 import { InputError } from "../services/questionBank.js";
+import { publicModules, hiddenSubjectIds } from "../services/connections.js";
 const router = Router();
 router.get("/", async (req, res, next) => {
   try {
@@ -25,7 +26,7 @@ router.get("/", async (req, res, next) => {
       throw new InputError("Invalid directory ID.");
     if (contentType && !["text", "file", "presentation"].includes(contentType))
       throw new InputError("Invalid content type.");
-    const all = await Subject.find()
+    const all = await Subject.find({ _id: { $nin: await hiddenSubjectIds() } })
       .select("name code term yearLevel facultyId facultyName description")
       .sort({ code: 1 })
       .lean();
@@ -36,7 +37,7 @@ router.get("/", async (req, res, next) => {
         (!facultyId || String(s.facultyId) === facultyId) &&
         (!subjectId || String(s._id) === subjectId),
     );
-    const match: any = { subjectId: { $in: selected.map((s) => s._id) } };
+    const match: any = { ...publicModules, subjectId: { $in: selected.map((s) => s._id) } };
     if (contentType) match.contentType = contentType;
     const subjectMap = new Map(selected.map((s) => [String(s._id), s]));
     // Literal matching prevents query operators or pathological regular expressions.
@@ -66,7 +67,7 @@ router.get("/", async (req, res, next) => {
         .lean(),
     ]);
     const syllabuses = await Module.aggregate([
-      { $match: { subjectId: { $in: selected.map((s) => s._id) } } },
+      { $match: { ...publicModules, subjectId: { $in: selected.map((s) => s._id) } } },
       { $sort: { orderIndex: 1 } },
       {
         $group: {

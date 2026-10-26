@@ -4,6 +4,7 @@ import { User } from "../models/User.js";
 import { QuizSubmission } from "../models/QuizSubmission.js";
 import { AuthRequest } from "../middleware/auth.js";
 import { InputError } from "./questionBank.js";
+import { connectedUserIds } from "./connections.js";
 
 export const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 export const SECTIONS = ["Section A", "Section B", "Section C", "Section D"];
@@ -56,6 +57,8 @@ export function metrics(rows: GradeRow[]) {
   };
 }
 export async function buildGradebook(req: AuthRequest) {
+  if (!req.user || !["student", "faculty"].includes(req.user.role))
+    throw new InputError("Student or faculty access required.", 403);
   const subjectId = queryText(req.query.subjectId, "subject ID");
   if (subjectId && !mongoose.isValidObjectId(subjectId))
     throw new InputError("Invalid subject ID.");
@@ -93,17 +96,20 @@ export async function buildGradebook(req: AuthRequest) {
   )
     throw new InputError("Score range must be between 0 and 100.");
   const search = queryText(req.query.search, "search");
+  const ownResultSubjects = req.user.role === "student"
+    ? await QuizSubmission.distinct("subjectId", { studentId: req.user.id }) : [];
   const subjects = await Subject.find(
-    req.user!.role === "faculty" ? { facultyId: req.user!.id } : {},
+    req.user!.role === "faculty" ? { facultyId: req.user!.id } : { _id: { $in: ownResultSubjects } },
   )
     .select("name code term yearLevel facultyName")
     .sort({ code: 1 })
     .lean();
   if (subjectId && !subjects.some((s) => String(s._id) === subjectId))
     throw new InputError("Subject is not available to this gradebook.", 403);
+  const connectedStudents = req.user.role === "faculty" ? await connectedUserIds(req.user) : [];
   const base: any =
     req.user!.role === "faculty"
-      ? { subjectId: { $in: subjects.map((s) => s._id) } }
+      ? { subjectId: { $in: subjects.map((s) => s._id) }, studentId: { $in: connectedStudents } }
       : { studentId: req.user!.id };
   if (subjectId) base.subjectId = subjectId;
   // Keep cohort navigation available even when a score/search filter has no matches.
@@ -112,6 +118,7 @@ export async function buildGradebook(req: AuthRequest) {
       $match: {
         ...(req.user!.role === "faculty"
           ? {
+              studentId: { $in: connectedStudents },
               subjectId: {
                 $in: subjects
                   .filter((s) => !subjectId || String(s._id) === subjectId)

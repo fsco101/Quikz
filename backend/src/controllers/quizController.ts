@@ -8,6 +8,7 @@ import { Subject } from "../models/Subject.js";
 import { User } from "../models/User.js";
 import { AuditEvent } from "../models/AuditEvent.js";
 import { AuthRequest } from "../middleware/auth.js";
+import { readableModules, requireAudienceAccess } from "../services/connections.js";
 import { generateQuestionsFromContent } from "../services/questionGenerator.js";
 import { extractDocumentText } from "../services/documentText.js";
 import {
@@ -30,6 +31,11 @@ function id(value: string) {
 async function quizFor(req: AuthRequest) {
   const quiz = await Quiz.findById(id(req.params.id));
   if (!quiz) throw new InputError("Quiz not found.", 404);
+  if (quiz.moduleId && req.user!.role !== "student") {
+    const module = await Module.findById(quiz.moduleId);
+    if (!module) throw new InputError("Module not found.", 404);
+    await requireAudienceAccess(req.user!, module);
+  }
   if (req.user!.role === "student" && quiz.moduleId) {
     const module = await requireModuleAccess(
       req.user!.id,
@@ -226,7 +232,10 @@ export const generateQuestions = async (req: AuthRequest, res: Response) => {
   });
 };
 export const getQuizzesBySubject = async (req: AuthRequest, res: Response) => {
-  const quizzes = await Quiz.find({ subjectId: id(req.params.subjectId) }).sort(
+  const visible = await Module.find({ $and: [{ subjectId: id(req.params.subjectId) }, await readableModules(req.user)] }).select("_id");
+  const quizzes = await Quiz.find({ subjectId: req.params.subjectId,
+    $or: [{ moduleId: { $in: visible.map((m) => m._id) } }, { moduleId: { $exists: false } }, { moduleId: null }],
+  }).sort(
     { createdAt: -1 },
   );
   // List only metadata; locked assessment questions are never sent in catalogs.
@@ -618,6 +627,21 @@ async function ownAttempt(req: AuthRequest) {
     sessionToken: req.body.sessionToken,
   });
   if (!attempt) throw new InputError("Quiz session not found.", 404);
+  // Recheck the current lesson audience on every mutation, including resumed
+  // snapshot attempts after a connection is removed or visibility is changed.
+  const moduleId = (attempt.quizSnapshot as any)?.moduleId;
+  if (moduleId) {
+    const module = await Module.findById(moduleId);
+    if (!module) throw new InputError("Module not found.", 404);
+    await requireAudienceAccess(req.user!, module);
+  } else {
+    const quiz = await Quiz.findById(attempt.quizId).select("moduleId");
+    if (quiz?.moduleId) {
+      const module = await Module.findById(quiz.moduleId);
+      if (!module) throw new InputError("Module not found.", 404);
+      await requireAudienceAccess(req.user!, module);
+    }
+  }
   return attempt;
 }
 function validateAnswers(answers: unknown, count: number): number[] {

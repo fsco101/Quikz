@@ -38,7 +38,7 @@ export function People() {
   }, [search, page]);
   return (
     <div className="space-y-6">
-      <PageHeading eyebrow="Better, together" title="People" description="Meet the minds behind the lessons. Find faculty, fellow learners and the people who make Quikz." />
+      <PageHeading eyebrow="Better, together" title="People" description="Discover faculty profiles and the people connected to you. Student profiles are visible only to themselves, their connected professors and administrators." />
       <input
         aria-label="Search people"
         placeholder="Search name or username"

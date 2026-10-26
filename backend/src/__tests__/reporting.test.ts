@@ -5,6 +5,7 @@ import { PDFParse } from "pdf-parse";
 import { mkdir, writeFile } from "node:fs/promises";
 import app from "../server.js";
 import { connectDB, disconnectDB } from "../config/db.js";
+import { FacultyConnection } from "../models/FacultyConnection.js";
 import { Subject } from "../models/Subject.js";
 import { Quiz } from "../models/Quiz.js";
 import { QuizSubmission } from "../models/QuizSubmission.js";
@@ -61,6 +62,10 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
       }
       if (name === "peer") peerId = user.id;
     }
+    await FacultyConnection.create([studentId, peerId].map((id) => ({
+      facultyId, studentId: id, requestedBy: facultyId, status: "accepted", acceptedAt: new Date(),
+    })));
+    await FacultyConnection.create({ facultyId: otherFacultyId, studentId: peerId, requestedBy: otherFacultyId, status: "accepted", acceptedAt: new Date() });
     const subject = await Subject.create({
       name: "Reporting course",
       code: "REPORT101",

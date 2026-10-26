@@ -12,7 +12,10 @@ export function auditRequests(
   const start = performance.now();
   const route = req.path;
   let action = "";
-  if (req.method === "POST" && route === "/api/auth/login")
+  if (req.method === "POST" && route === "/api/connections") action = "connection.requested";
+  else if (req.method === "POST" && /^\/api\/connections\/[^/]+\/accept$/.test(route)) action = "connection.accepted";
+  else if (req.method === "DELETE" && /^\/api\/connections\/[^/]+$/.test(route)) action = "connection.removed";
+  else if (req.method === "POST" && route === "/api/auth/login")
     action = "auth.login";
   else if (req.method === "POST" && route === "/api/auth/register")
     action = "auth.register";

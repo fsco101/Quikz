@@ -13,6 +13,7 @@ import { Brand } from "./components/layout/Brand.js";
 import { Profile } from "./components/users/Profile.js";
 import { People } from "./components/users/People.js";
 import { UserManagement } from "./components/users/UserManagement.js";
+import { Connections } from "./components/users/Connections.js";
 const MainApp: React.FC = () => {
   const { user, logout, loading } = useAuth();
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
@@ -129,10 +130,12 @@ const MainApp: React.FC = () => {
           <Profile key={user.id} />
         ) : view === "people" ? (
           <People />
+        ) : view === "connections" && user.role !== "admin" ? (
+          <Connections key={user.id} />
         ) : view === "users" && user.role === "admin" ? (
           <UserManagement />
         ) : view === "gradebook" && user.role !== "admin" ? (
-          <Gradebook />
+          <Gradebook key={user.id} />
         ) : view === "system" && user.role === "admin" ? (
           <SystemHealth />
         ) : view === "directory" ? (
