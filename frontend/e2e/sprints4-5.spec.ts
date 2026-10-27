@@ -228,7 +228,7 @@ test("student sees only personal attempts and can return to a lesson from direct
 test("guests search the directory and admins inspect the live health and audit dashboards", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/login");
   await page
     .getByRole("button", {
       name: "Browse the public lesson directory",

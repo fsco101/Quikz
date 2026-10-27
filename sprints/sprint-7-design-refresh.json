@@ -5,7 +5,7 @@
   "startDate": "2026-10-26",
   "endDate": "2026-10-26",
   "completedAt": "2026-10-26",
-  "auditedAt": "2026-10-26",
+  "auditedAt": "2026-10-27",
   "goals": [
     "Give learning and teaching a consistent visual identity",
     "Improve navigation and lesson readability across desktop and mobile",
@@ -77,7 +77,7 @@
     "backend": "No backend code changes; backend unit suite was not rerun for this design sprint."
   },
   "githubVerification": {
-    "verifiedAt": "2026-10-26",
+    "verifiedAt": "2026-10-27",
     "closedIssueNumbers": [
       26,
       27
@@ -88,5 +88,64 @@
   },
   "limits": [
     "Browser checks use Chromium and isolated local MongoDB; external Atlas and other browser engines were not exercised."
-  ]
+  ],
+  "followUp": {
+    "date": "2026-10-27",
+    "name": "Public landing page and account experience",
+    "status": "completed",
+    "implementationDetails": [
+      "Added a responsive landing page using the existing Quikz brand and indigo, navy, and lavender palette, with an interactive learning preview, sample quiz feedback, student/faculty perspectives, FAQs, and working public/account navigation.",
+      "Added shareable hash routes for login, signup, public catalog and lesson directory with browser history support and public-page titles.",
+      "Refined login and signup with password visibility, confirmation validation, inline guidance, error focus, and preserved real authentication and role-specific profiles.",
+      "Made the terms gate a native modal dialog with keyboard scrolling, focus containment/restoration, Escape dismissal and preserved scroll/consent requirements."
+    ],
+    "verificationEvidence": [
+      "frontend/src/components/landing/LandingPage.tsx",
+      "frontend/src/components/landing/landing.css",
+      "frontend/src/components/auth/AuthPage.tsx",
+      "frontend/src/components/auth/TermsModal.tsx",
+      "frontend/src/App.tsx",
+      "frontend/e2e/landing-auth.spec.ts"
+    ],
+    "validation": {
+      "frontendBuild": {
+        "command": "cd frontend && npm run build",
+        "result": "passed"
+      },
+      "initialFullBrowserSuite": {
+        "command": "cd frontend && npm run test:e2e",
+        "passed": 17,
+        "failed": 3,
+        "resolution": "Two new registration checks found missing terms-dialog focus restoration; one new responsive check found decorative orbit overflow at 320px. Both causes were fixed."
+      },
+      "finalAffectedBrowserSuite": {
+        "command": "cd frontend && npx playwright test e2e/landing-auth.spec.ts e2e/design.spec.ts e2e/sprint3.spec.ts",
+        "passed": 10,
+        "failed": 0,
+        "result": "passed after final focus, overflow and navigation polish; the other ten regression scenarios passed in the initial full run"
+      },
+      "visualReview": "Reviewed desktop and mobile landing, login and signup screenshots; overflow assertions pass at 320, 390 and 768 pixels. Reduced-motion preference is exercised.",
+      "diffCheck": {
+        "command": "git diff --check",
+        "result": "passed"
+      },
+      "backend": "No backend changes. Browser checks exercised the real local API and isolated MongoDB, including student and faculty registration.",
+      "finalFullBrowserSuite": {
+        "command": "cd frontend && npm run test:e2e",
+        "passed": 20,
+        "failed": 0,
+        "result": "passed after final fixes, including unchanged authenticated-home scenarios"
+      }
+    },
+    "githubVerification": {
+      "verifiedAt": "2026-10-27",
+      "closedIssueNumbers": [
+        26,
+        27
+      ],
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "note": "Both Sprint 7 issues were already closed as completed and were reverified; no additional GitHub issues were created or closed."
+    }
+  }
 }

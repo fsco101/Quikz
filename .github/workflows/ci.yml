@@ -1,0 +1,45 @@
+name: Verify deployment
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      MONGOMS_DISABLE_POSTINSTALL: "1"
+      MONGOMS_VERSION: "7.0.14"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+      - run: npm ci --include=dev
+        working-directory: backend
+      - run: npm ci --include=dev
+        working-directory: frontend
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: backend
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: frontend
+      - run: npm test
+        working-directory: backend
+      - run: npm run build
+        working-directory: backend
+      - run: npm run test:production
+        working-directory: backend
+      - run: npm run build
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: npm run test:e2e
+        working-directory: frontend

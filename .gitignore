@@ -2,6 +2,10 @@ node_modules/
 dist/
 .env
 .env.local
+.env.*
+!.env.example
+.vercel/
+stitch_modular_quiz_learning_platform/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

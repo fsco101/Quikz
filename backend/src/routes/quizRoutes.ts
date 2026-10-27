@@ -5,6 +5,7 @@ import {
   updateQuiz,
   importQuestions,
   generateQuestions,
+  generateQuestionsFromModule,
   getQuizzesBySubject,
   getQuizById,
   startAttempt,
@@ -39,6 +40,7 @@ router.post(
   run(generateQuestions),
 );
 router.get("/subject/:subjectId", run(getQuizzesBySubject));
+router.post('/generate/module/:moduleId', requireRole('faculty'), run(generateQuestionsFromModule));
 router.get("/submissions", requireRole("student"), run(getStudentSubmissions));
 router.patch("/:id", requireRole("faculty"), run(updateQuiz));
 router.get("/:id", run(getQuizById));

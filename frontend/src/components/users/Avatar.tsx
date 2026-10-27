@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
+import { apiUrl } from '../../services/apiUrl.js';
 export function Avatar({
   userId,
   name,
@@ -10,7 +11,8 @@ export function Avatar({
   url?: string;
   size?: string;
 }) {
-  const src = url || (userId ? `/api/users/${userId}/avatar` : undefined);
+  const resource = url || (userId ? `/api/users/${userId}/avatar` : undefined);
+  const src = resource ? apiUrl(resource) : undefined;
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [src]);
   return (

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { LandingPage } from "./components/landing/LandingPage.js";
 import { AuthProvider, useAuth } from "./context/AuthContext.js";
 import { AuthPage } from "./components/auth/AuthPage.js";
 import { SubjectList } from "./components/curriculum/SubjectList.js";
@@ -17,9 +18,36 @@ import { Connections } from "./components/users/Connections.js";
 const MainApp: React.FC = () => {
   const { user, logout, loading } = useAuth();
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [browseCatalog, setBrowseCatalog] = useState(false);
+  const [publicPage, setPublicPage] = useState(() => window.location.hash.slice(2) || "home");
   const [view, setView] = useState("learning");
   const [initialModuleId, setInitialModuleId] = useState<string | undefined>();
+
+  useEffect(() => {
+    const syncPage = () => {
+      if (window.location.hash && !window.location.hash.startsWith("#/")) return;
+      setPublicPage(window.location.hash.slice(2) || "home");
+      setSelectedSubject(null);
+      window.scrollTo({ top: 0, behavior: "instant" });
+    };
+    window.addEventListener("hashchange", syncPage);
+    return () => window.removeEventListener("hashchange", syncPage);
+  }, []);
+
+  const navigatePublic = (page: string) => {
+    window.location.hash = page === "home" ? "/" : `/${page}`;
+    setPublicPage(page);
+    setSelectedSubject(null);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+
+  useEffect(() => {
+    if (!user) {
+      const titles: Record<string, string> = { login: "Log in", signup: "Create an account", catalog: "Subject catalog", lessons: "Lesson directory" };
+      document.title = `${titles[publicPage] || "A little progress, every day"} | Quikz`;
+      // Move keyboard focus with public-page navigation, without opening a mobile keyboard.
+      document.querySelector<HTMLElement>("main")?.focus({ preventScroll: true });
+    } else document.title = "Quikz | Learning workspace";
+  }, [publicPage, user, loading]);
 
   if (loading) {
     return (
@@ -38,18 +66,18 @@ const MainApp: React.FC = () => {
 
   if (!user) {
     const signIn = () => {
-      setBrowseCatalog(false);
+      navigatePublic("login");
       setSelectedSubject(null);
       setView("learning");
     };
-    if (browseCatalog)
+    if (publicPage === "catalog" || publicPage === "lessons")
       return (
         <div className="public-workspace">
           <div className="public-content space-y-8">
             <header className="public-topbar">
-              <Brand onClick={signIn} />
+              <Brand onClick={() => navigatePublic("home")} />
               <h1 className="public-page-title">
-                {view === "directory"
+                {publicPage === "lessons"
                   ? "Public lesson directory"
                   : "Public subject catalog"}
               </h1>
@@ -63,18 +91,18 @@ const MainApp: React.FC = () => {
             <nav className="public-tabs" aria-label="Public navigation">
               <button
                 className="rounded-xl border bg-white px-4 py-2"
-                aria-current={view === "learning" ? "page" : undefined} onClick={() => setView("learning")}
+                aria-current={publicPage === "catalog" ? "page" : undefined} onClick={() => navigatePublic("catalog")}
               >
                 Subject catalog
               </button>
               <button
                 className="rounded-xl border bg-white px-4 py-2"
-                aria-current={view === "directory" ? "page" : undefined} onClick={() => setView("directory")}
+                aria-current={publicPage === "lessons" ? "page" : undefined} onClick={() => navigatePublic("lessons")}
               >
                 Lesson directory
               </button>
             </nav>
-            {view === "directory" ? (
+            {publicPage === "lessons" ? (
               <LessonDirectory onSignIn={signIn} />
             ) : (
               <>
@@ -96,16 +124,16 @@ const MainApp: React.FC = () => {
           </div>
         </div>
       );
+    if (publicPage !== "login" && publicPage !== "signup") return <LandingPage
+      onLogin={() => navigatePublic("login")} onSignup={() => navigatePublic("signup")}
+      onBrowse={() => navigatePublic("catalog")} onBrowseLessons={() => navigatePublic("lessons")} />;
     return (
       <AuthPage
-        onBrowse={() => {
-          setView("learning");
-          setBrowseCatalog(true);
-        }}
-        onBrowseLessons={() => {
-          setView("directory");
-          setBrowseCatalog(true);
-        }}
+        mode={publicPage === "signup" ? "register" : "login"}
+        onModeChange={(mode) => navigatePublic(mode === "register" ? "signup" : "login")}
+        onHome={() => navigatePublic("home")}
+        onBrowse={() => navigatePublic("catalog")}
+        onBrowseLessons={() => navigatePublic("lessons")}
       />
     );
   }
@@ -124,6 +152,7 @@ const MainApp: React.FC = () => {
         setSelectedSubject(null);
         setInitialModuleId(undefined);
         setView("learning");
+        navigatePublic("login");
         logout();
       }}>
         {view === "profile" ? (

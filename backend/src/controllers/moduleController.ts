@@ -2,7 +2,7 @@ import { Response } from "express";
 import mongoose from "mongoose";
 import path from "node:path";
 import fs from "node:fs";
-import { fileURLToPath } from "node:url";
+import { UPLOADS_DIR } from "../config/storage.js";
 import { Module } from "../models/Module.js";
 import { Subject } from "../models/Subject.js";
 import { QuizSubmission } from "../models/QuizSubmission.js";
@@ -156,12 +156,8 @@ export const downloadModuleFile = async (req: AuthRequest, res: Response) => {
         : await Module.findById(req.params.id);
     if (!module?.fileUrl) throw new InputError("Lesson file not found.", 404);
     await requireAudienceAccess(req.user!, module);
-    const dir = path.resolve(
-      path.dirname(fileURLToPath(import.meta.url)),
-      "../../uploads",
-    );
     res.download(
-      path.join(dir, path.basename(module.fileUrl)),
+      path.join(UPLOADS_DIR, path.basename(module.fileUrl)),
       module.fileName || "lesson",
       (err) => {
         if (err && !res.headersSent)

@@ -26,14 +26,24 @@ import { AuditEvent } from "./models/AuditEvent.js";
 import mongoose from "mongoose";
 import connectionRoutes from "./routes/connectionRoutes.js";
 import { FacultyConnection } from "./models/FacultyConnection.js";
+import { corsOptions, CorsOriginError } from "./config/cors.js";
+import { disconnectDB } from "./config/db.js";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT || 5000);
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) throw new Error('PORT must be a valid TCP port.');
 
 // Middleware
-app.use(cors());
+app.disable('x-powered-by');
+if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
+app.use(cors(corsOptions()));
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  next();
+});
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(auditRequests);
@@ -71,7 +81,7 @@ app.use(
     next: express.NextFunction,
   ) => {
     const status =
-      err instanceof InputError
+      err instanceof CorsOriginError ? 403 : err instanceof InputError
         ? err.status
         : err.code === 11000 ? 409
         : err instanceof multer.MulterError
@@ -92,6 +102,7 @@ app.use(
 
 // Healthcheck endpoint
 app.get("/api/health", (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
   res.status(mongoose.connection.readyState === 1 ? 200 : 503).json({
     status: mongoose.connection.readyState === 1 ? "ok" : "unavailable",
     system: "Quikz Modular Quiz Learning Platform",
@@ -110,22 +121,44 @@ export const startServer = async () => {
     FacultyConnection.init(),
   ]);
   if (process.env.NODE_ENV !== 'production' || process.env.SEED_DEMO_DATA === 'true') await seedDatabase();
+  const server = app.listen(PORT, '0.0.0.0');
+  await new Promise<void>((resolve, reject) => {
+    server.once('listening', resolve);
+    server.once('error', reject);
+  });
+  console.log(`[Quikz Server] Listening on 0.0.0.0:${PORT}`);
   const sweep = setInterval(() => {
     void finalizeExpiredAttempts().catch((err) =>
       console.error("Quiz expiry sweep failed:", err),
     );
   }, 15000);
   sweep.unref();
-  const server = app.listen(PORT, () => {
-    console.log(`[Quikz Server] Running on http://localhost:${PORT}`);
-  });
   server.on("close", () => clearInterval(sweep));
   return server;
 };
 
 if (process.env.NODE_ENV !== "test") {
-  startServer().catch((err) => {
-    console.error("Failed to start server:", err);
+  startServer().then((server) => {
+    let stopping = false;
+    const shutdown = () => {
+      if (stopping) return;
+      stopping = true;
+      console.log('[Quikz Server] Draining requests before shutdown.');
+      const deadline = setTimeout(() => process.exit(1), 25000);
+      deadline.unref();
+      server.close((error) => {
+        void disconnectDB().then(() => {
+          clearTimeout(deadline);
+          process.exitCode = error ? 1 : 0;
+        }).catch(() => { process.exitCode = 1; });
+      });
+    };
+    process.once('SIGTERM', shutdown);
+    process.once('SIGINT', shutdown);
+  }).catch(async (err) => {
+    console.error('Failed to start server:', err instanceof Error ? err.message : 'Unknown startup error');
+    await disconnectDB().catch(() => {});
+    process.exitCode = 1;
   });
 }
 

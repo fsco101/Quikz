@@ -5,6 +5,7 @@ import { QuizStudio } from '../quiz/QuizStudio.js';
 import { QuizTaker } from '../quiz/QuizTaker.js';
 import { Subject, ModuleItem, CurriculumProgress } from '../../types/curriculum.js';
 import { api } from '../../services/api.js';
+import { apiUrl } from '../../services/apiUrl.js';
 import { useAuth } from '../../context/AuthContext.js';
 import { CreateModuleModal } from './CreateModuleModal.js';
 
@@ -65,7 +66,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
 
   const download = async (module: ModuleItem) => {
     try {
-      const response = await fetch(module.fileUrl!, { headers: { Authorization: `Bearer ${api.getToken()}` } });
+      const response = await fetch(apiUrl(module.fileUrl!), { headers: { Authorization: `Bearer ${api.getToken()}` } });
       if (!response.ok) throw new Error('Unable to download this lesson. Check prerequisites and try again.');
       const url = URL.createObjectURL(await response.blob());
       const link = document.createElement('a'); link.href = url; link.download = module.fileName || 'lesson'; link.click(); URL.revokeObjectURL(url);

@@ -3,6 +3,7 @@ import { PageHeading } from "../ui/PageHeading.js";
 import { Avatar } from "../users/Avatar.js";
 import React, { useEffect, useState } from "react";
 import { api } from "../../services/api.js";
+import { apiUrl } from '../../services/apiUrl.js';
 import { useAuth } from "../../context/AuthContext.js";
 
 type Row = {
@@ -101,7 +102,7 @@ export function Gradebook() {
     setExporting(format);
     setError("");
     try {
-      const res = await fetch(`/api/gradebook/export/${format}?${query}`, {
+      const res = await fetch(apiUrl(`/api/gradebook/export/${format}?${query}`), {
         headers: { Authorization: `Bearer ${api.getToken()}` },
       });
       if (!res.ok)

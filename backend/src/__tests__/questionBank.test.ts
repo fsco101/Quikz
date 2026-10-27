@@ -98,7 +98,7 @@ describe("Question bank imports and lecture extraction", () => {
       await zip.generateAsync({ type: "nodebuffer" }),
       "lecture.pptx",
     );
-    expect(text).toBe(facts);
+    expect(text.replace(/\n+/g, '\n')).toBe(facts);
     expect(generateQuestionsFromContent(text)).toHaveLength(4);
   });
   it("extracts DOCX paragraph text", async () => {

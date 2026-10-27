@@ -10,6 +10,21 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    dialog?.showModal();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      dialog?.close();
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus({ preventScroll: true });
+    };
+  }, [isOpen]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -37,8 +52,8 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#070235]/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#ffffff] border border-[#c8c5d0] rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <dialog ref={dialogRef} className="terms-dialog" aria-labelledby="terms-title" onCancel={(event) => { event.preventDefault(); onClose(); }}>
+      <div className="bg-[#ffffff] border border-[#c8c5d0] rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-[#c8c5d0]/50 bg-[#f8f9ff] flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -46,8 +61,8 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
               <span className="material-symbols-outlined text-[20px]">policy</span>
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#070235]">Academic Integrity & Legal Policy Gate</h3>
-              <p className="text-xs text-[#47464f]">Mandatory institutional compliance protocol before account initialization</p>
+              <h3 id="terms-title" className="text-base font-bold text-[#070235]">Academic Honor Code & Terms</h3>
+              <p className="text-xs text-[#47464f]">Read to the end, then confirm your agreement.</p>
             </div>
           </div>
           {hasScrolledToBottom ? (
@@ -66,6 +81,8 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
         {/* Scrollable Content */}
         <div
           ref={scrollRef}
+          tabIndex={0}
+          aria-label="Academic Honor Code and Terms content"
           onScroll={handleScroll}
           className="p-6 overflow-y-auto space-y-4 max-h-[440px] bg-white text-[#0b1c30] text-sm leading-relaxed border-b border-[#c8c5d0]/40 select-text"
         >
@@ -171,6 +188,6 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };

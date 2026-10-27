@@ -1,7 +1,7 @@
 {
   "project": "Quikz",
   "repository": "fsco101/Quikz",
-  "updatedAt": "2026-10-26",
+  "updatedAt": "2026-10-27",
   "totalSprints": 9,
   "totalIssues": 31,
   "completedIssues": 31,
@@ -26,7 +26,16 @@
       "name": "Kahoot-Hybrid Quiz Maker Studio & Execution Engine",
       "file": "sprints/sprint-3-quiz-maker.json",
       "totalIssues": 7,
-      "status": "completed"
+      "status": "completed",
+      "latestFollowUp": {
+        "date": "2026-10-27",
+        "name": "Reuse saved module attachments in quiz generation",
+        "status": "completed",
+        "githubIssueNumbers": [
+          9,
+          14
+        ]
+      }
     },
     {
       "sprint": 4,
@@ -40,7 +49,16 @@
       "name": "Global Lesson Directory, Production Hardening & System Telemetry",
       "file": "sprints/sprint-5-production-hardening.json",
       "totalIssues": 2,
-      "status": "completed"
+      "status": "completed",
+      "latestFollowUp": {
+        "date": "2026-10-27",
+        "name": "Render and Vercel deployment readiness",
+        "status": "completed",
+        "githubIssueNumbers": [
+          21,
+          22
+        ]
+      }
     },
     {
       "sprint": 6,
@@ -54,7 +72,16 @@
       "name": "Interface Design Refresh",
       "file": "sprints/sprint-7-design-refresh.json",
       "totalIssues": 2,
-      "status": "completed"
+      "status": "completed",
+      "latestFollowUp": {
+        "date": "2026-10-27",
+        "name": "Public landing page and account experience",
+        "status": "completed",
+        "githubIssueNumbers": [
+          26,
+          27
+        ]
+      }
     },
     {
       "sprint": 8,

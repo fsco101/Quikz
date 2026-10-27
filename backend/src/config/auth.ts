@@ -1,4 +1,10 @@
 ﻿import 'dotenv/config';
 import { randomBytes } from 'node:crypto';
-if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) throw new Error('JWT_SECRET is required in production.');
-export const JWT_SECRET = process.env.JWT_SECRET || randomBytes(48).toString('hex');
+export function jwtSecret(env: NodeJS.ProcessEnv = process.env): string {
+  const secret = env.JWT_SECRET?.trim();
+  if (env.NODE_ENV === 'production' && (!secret || secret.length < 32)) {
+    throw new Error('JWT_SECRET must contain at least 32 characters in production.');
+  }
+  return secret || randomBytes(48).toString('hex');
+}
+export const JWT_SECRET = jwtSecret();

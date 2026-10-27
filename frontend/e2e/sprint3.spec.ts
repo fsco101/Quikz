@@ -7,7 +7,7 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("dialog", (dialog) => dialog.accept());
-  await page.goto("/");
+  await page.goto("/#/login");
   await page.getByRole("button", { name: "Faculty Demo" }).click();
   await page.getByRole("button", { name: "Sign In to Quikz" }).click();
   const unique = `BIO${Date.now()}`;
@@ -44,11 +44,23 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
   await page.getByLabel("Time unit", { exact: true }).selectOption("minutes");
   await page.getByLabel("Passing percentage").fill("80");
   await page.getByRole("tab", { name: "Generate from lecture" }).click();
+  await expect(page.getByRole('radio', { name: 'Use module attachment', exact: true })).toBeDisabled();
+  await expect(page.getByRole('radio', { name: 'Use notes or another file', exact: true })).toBeChecked();
   await page.getByRole("button", { name: "Generate preview" }).click();
   await expect(
     page.getByText("Loaded 4 questions.", { exact: false }),
   ).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Generation source analysis' })).toContainText('4 usable facts');
+  await expect(page.getByLabel('Question 1 explanation', { exact: true })).toHaveValue(/Source: Lecture notes/);
+  await page.getByLabel('Draft question limit', { exact: true }).fill('2');
+  await page.getByLabel('Question style', { exact: true }).selectOption('terms');
+  await page.getByRole('button', { name: 'Generate preview', exact: true }).click();
+  await expect(page.getByText('Loaded 2 questions.', { exact: false })).toBeVisible();
+  await expect(page.getByLabel('Question 1 text', { exact: true })).toHaveValue(/Which term matches/);
+  await expect(page.getByRole('region', { name: 'Generation source analysis' })).toContainText('2 term identifications');
+  await page.screenshot({ path: 'test-results/generation-source-analysis.png', fullPage: true });
   await page.getByRole("tab", { name: "Import question bank" }).click();
+  await expect(page.getByRole('region', { name: 'Generation source analysis' })).toHaveCount(0);
   await page.getByLabel("Question bank file").setInputFiles({
     name: "invalid.json",
     mimeType: "application/json",
@@ -159,7 +171,7 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
 test("public catalog and mandatory terms gate remain accessible", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/login");
   await page
     .getByRole("button", { name: "Browse the public subject catalog" })
     .click();
@@ -244,7 +256,7 @@ test("advances timed questions and submits saved answers when the final question
       })
     ).status(),
   ).toBe(201);
-  await page.goto("/");
+  await page.goto("/#/login");
   await page.getByRole("button", { name: "Student Demo" }).click();
   await page.getByRole("button", { name: "Sign In to Quikz" }).click();
   await page.getByText(unique, { exact: true }).click();

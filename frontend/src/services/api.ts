@@ -1,7 +1,7 @@
 import { AuthResponse, LoginPayload, RegisterPayload, User } from '../types/auth.js';
 import { CourseOverview } from '../types/curriculum.js';
 
-const API_BASE = '/api';
+import { apiUrl } from './apiUrl.js';
 
 export const api = {
   getToken: () => localStorage.getItem('quikz_token'),
@@ -22,7 +22,7 @@ export const api = {
       headers['Content-Type'] = 'application/json';
     }
 
-    const res = await fetch(`${API_BASE}${endpoint}`, {
+    const res = await fetch(apiUrl(`/api${endpoint}`), {
       ...options,
       headers
     });

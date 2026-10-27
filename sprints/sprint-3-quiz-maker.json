@@ -153,7 +153,7 @@
       "implementedAt": "2026-10-22"
     }
   ],
-  "auditedAt": "2026-10-22",
+  "auditedAt": "2026-10-27",
   "auditReport": "sprints/sprint-audit.json",
   "completedAt": "2026-10-22",
   "scopeUpdate": {
@@ -166,5 +166,155 @@
     "date": "2026-10-22",
     "status": "implemented",
     "details": "User-requested owner-only edits, admin-only health/user management, editable self profiles and shared avatars supersede historical immutable-quiz and faculty-operator acceptance text. Existing GitHub issue titles and statuses remain historical records. See sprint-audit.json accountAndOwnershipUpdate for current rules and validation."
+  },
+  "scriptGenerationFollowUp": {
+    "date": "2026-10-27",
+    "status": "completed",
+    "scope": "Improve local rule-based lecture extraction and quiz drafts without AI services or usage charges.",
+    "implementationDetails": [
+      "Recognizes colon/equal/spaced-dash definitions, is/are/refers-to descriptions, two-column tables, heading-description pairs, wrapped lines and factual sentences using a documented set of predicates.",
+      "Generates description matching, term identification and source-preserving cloze questions. Faculty choose mixed/description/term style and a 1?20 question limit. Long lectures are sampled across their length; target evaluation is bounded at 100 candidate facts.",
+      "Deduplicates descriptions and acronym aliases, flags repeated terms with differing descriptions, and excludes answer-revealing or near-identical descriptions. Distractors are ranked by lexical overlap, source label and comparable length.",
+      "Adds source-line/slide evidence to explanations and preview diagnostics for usable facts, duplicates, skipped lines, question mix and review warnings.",
+      "PowerPoint extraction follows presentation relationships instead of physical filenames, parses XML namespaces/entities/run text and line breaks, preserves two-column table associations, and omits hidden slides and speaker notes.",
+      "Bounds PowerPoint expansion (500 slides, 5000 archive entries, 4 MB per XML part, 20 MB expanded XML, 250000 extracted characters), rejects DTDs/malformed XML/broken slide relationships, and retains TXT/MD/PDF/DOCX support."
+    ],
+    "verificationEvidence": [
+      "backend/src/services/questionGenerator.ts",
+      "backend/src/services/documentText.ts",
+      "backend/src/services/officeText.ts",
+      "backend/src/__tests__/questionGeneration.test.ts",
+      "backend/src/__tests__/generationApi.test.ts",
+      "frontend/src/components/quiz/QuizStudio.tsx",
+      "frontend/e2e/sprint3.spec.ts"
+    ],
+    "validation": {
+      "backendBuild": {
+        "command": "cd backend && npm run build",
+        "result": "passed"
+      },
+      "frontendBuild": {
+        "command": "cd frontend && npm run build",
+        "result": "passed"
+      },
+      "backendTests": {
+        "command": "cd backend && npm test",
+        "passed": 169,
+        "failed": 0
+      },
+      "finalTargetedBackendTests": {
+        "command": "cd backend && npx vitest run src/__tests__/questionGeneration.test.ts src/__tests__/questionBank.test.ts src/__tests__/generationApi.test.ts",
+        "passed": 23,
+        "failed": 0,
+        "note": "Passed after final work-bound and Node stream typing adjustment."
+      },
+      "browserTests": {
+        "command": "cd frontend && npm run test:e2e",
+        "passed": 20,
+        "failed": 0
+      },
+      "compiledProductionSmoke": {
+        "command": "cd backend && npm run test:production",
+        "result": "passed"
+      },
+      "productionDependencyAudit": {
+        "command": "cd backend && npm audit --omit=dev",
+        "vulnerabilities": 0
+      },
+      "visualReview": "Reviewed Quiz Studio source-analysis screenshot with count/style controls, generated mix and warning text.",
+      "diffCheck": {
+        "command": "git diff --check",
+        "result": "passed"
+      }
+    },
+    "githubVerification": {
+      "verifiedAt": "2026-10-27",
+      "closedIssueNumbers": [
+        9,
+        14
+      ],
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "note": "Existing Sprint 3 generator/authoring issues were already closed as completed and were reverified; no new issues created or closed."
+    },
+    "limits": [
+      "Generation remains English-oriented rule-based recall, not semantic reasoning or factual verification. Faculty must review the supplied facts and all answer choices.",
+      "No OCR, image/diagram understanding, speaker-note parsing, or automatic module creation is included.",
+      "More complex tables and prose outside supported patterns can be skipped; similarity filtering may return fewer than the requested number of questions."
+    ]
+  },
+  "moduleAttachmentGenerationFollowUp": {
+    "date": "2026-10-27",
+    "status": "completed",
+    "implementationDetails": [
+      "Quiz Studio defaults to the supported existing module attachment in Generate from lecture, with a separate notes/other-file option. No second upload is performed; the request contains JSON settings and the opened module version.",
+      "POST /api/quizzes/generate/module/:moduleId reuses the shared local document extractor and question generator. It checks subject/module ownership, supports legacy creator fallback, confines file reads to UPLOAD_DIR, caps reads at 25 MB, and rejects missing/unsupported sources.",
+      "Module versions and stored file references are checked before and after parsing to reject stale or concurrently changed sources. Generation returns a draft and source filename/version metadata without creating or binding a quiz.",
+      "The existing faculty review and explicit publication step persists the generated questions and evidence. Source switching does not replace the module attachment."
+    ],
+    "verificationEvidence": [
+      "backend/src/services/moduleLecture.ts",
+      "backend/src/controllers/quizController.ts",
+      "backend/src/routes/quizRoutes.ts",
+      "backend/src/__tests__/generationApi.test.ts",
+      "frontend/src/components/quiz/QuizStudio.tsx",
+      "frontend/e2e/module-attachment-generation.spec.ts",
+      "backend/scripts/check-production.mjs"
+    ],
+    "validation": {
+      "backendBuild": {
+        "command": "cd backend && npm run build",
+        "result": "passed"
+      },
+      "frontendBuild": {
+        "command": "cd frontend && npm run build",
+        "result": "passed"
+      },
+      "backendTests": {
+        "command": "cd backend && npm test",
+        "passed": 174,
+        "failed": 0
+      },
+      "targetedBrowserTests": {
+        "command": "cd frontend && npx playwright test e2e/module-attachment-generation.spec.ts e2e/sprint3.spec.ts",
+        "passed": 4,
+        "failed": 0
+      },
+      "compiledProductionSmoke": {
+        "command": "cd backend && npm run test:production",
+        "result": "passed",
+        "note": "Generates questions from an attachment after an API restart using a custom production UPLOAD_DIR."
+      },
+      "apiCoverage": [
+        "Private PowerPoint reuse and slide evidence",
+        "No automatic quiz publication",
+        "Unauthenticated/student/other-faculty rejection",
+        "Legacy creator fallback",
+        "Missing, oversized, unsupported and invalid-path handling",
+        "No client-controlled file path",
+        "Outside-root resolution rejection",
+        "Stale version and concurrent-edit rejection"
+      ],
+      "visualReview": "Reviewed desktop and 390px mobile source selector; overflow assertion passed with a long attachment filename.",
+      "diffCheck": {
+        "command": "git diff --check",
+        "result": "passed"
+      }
+    },
+    "githubVerification": {
+      "verifiedAt": "2026-10-27",
+      "closedIssueNumbers": [
+        9,
+        14
+      ],
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "note": "Existing Sprint 3 issues already closed as completed and reverified; no new issues were created or closed."
+    },
+    "limits": [
+      "Supports the same TXT/MD/PDF/DOCX/PPTX formats and local rule-based generation limits as direct uploads.",
+      "An attachment missing from the server must be uploaded again; unsupported files must be converted or another source selected.",
+      "Generation is a preview; faculty review and explicit publication remain required."
+    ]
   }
 }
