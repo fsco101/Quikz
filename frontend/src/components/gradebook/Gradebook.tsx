@@ -1,3 +1,4 @@
+import { SECTIONS } from "../../constants/sections.js";
 import { Download } from "lucide-react";
 import { PageHeading } from "../ui/PageHeading.js";
 import { Avatar } from "../users/Avatar.js";
@@ -185,7 +186,7 @@ export function Gradebook() {
             onChange={(e) => update("section", e.target.value)}
           >
             <option value="">All sections</option>
-            {["Section A", "Section B", "Section C", "Section D"].map((s) => (
+            {SECTIONS.map((s) => (
               <option key={s}>{s}</option>
             ))}
           </select>

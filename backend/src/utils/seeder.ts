@@ -45,7 +45,7 @@ export const seedDatabase = async () => {
         fullName: 'Alex Dela Cruz',
         surname: 'Dela Cruz',
         yearLevel: '3rd Year',
-        section: 'Section A',
+        section: 'BSIT-S-1A',
         termsAccepted: true,
         termsAcceptedAt: new Date()
       });

@@ -7,7 +7,7 @@ import { InputError } from "./questionBank.js";
 import { connectedUserIds } from "./connections.js";
 
 export const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
-export const SECTIONS = ["Section A", "Section B", "Section C", "Section D"];
+export const SECTIONS = ["BSIT-S-1A", "BSIT-S-1B", "BSIT-S-2A", "BSIT-S-2B", "BSIT-S-3A", "BSIT-S-3B", "BSIT-S-4A", "BSIT-NS-4A"];
 export function queryText(value: unknown, name: string, max = 200): string {
   if (value === undefined || value === "") return "";
   if (typeof value !== "string" || value.length > max)

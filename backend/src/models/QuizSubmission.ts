@@ -53,7 +53,7 @@ const QuizSubmissionSchema = new Schema<IQuizSubmission>({
   },
   studentSection: {
     type: String,
-    default: "Section A",
+    default: "BSIT-S-1A",
   },
   subjectId: {
     type: Schema.Types.ObjectId,

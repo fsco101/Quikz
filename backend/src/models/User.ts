@@ -70,7 +70,7 @@ const UserSchema = new Schema<IUser>({
   },
   section: {
     type: String,
-    default: 'Section A'
+    default: 'BSIT-S-1A'
   },
   termsAccepted: {
     type: Boolean,

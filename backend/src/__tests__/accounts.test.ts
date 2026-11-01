@@ -267,7 +267,7 @@ describe("Owned editing, admin permissions, profile updates and shared avatars",
           fullName: `Updated ${role}`,
           bio: "My public bio",
           yearLevel: "2nd Year",
-          section: "Section C",
+          section: "BSIT-S-3A",
         });
       expect(updated.status).toBe(200);
       expect(updated.body.user.fullName).toBe(`Updated ${role}`);

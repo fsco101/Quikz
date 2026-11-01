@@ -43,7 +43,7 @@ describe('Sprint 1 - Authentication & Academic Honor Gate', () => {
         surname: 'Santos',
         role: 'student',
         yearLevel: '2nd Year',
-        section: 'Section B',
+        section: 'BSIT-S-2B',
         termsAccepted: true
       });
 
@@ -99,7 +99,7 @@ describe('Sprint 1 - Authentication & Academic Honor Gate', () => {
     expect(meRes.body.user).not.toHaveProperty('passwordHash');
   });
   it('requires literal consent and valid academic profile values', async () => {
-    const payload = { username: 'invalid_profile', email: 'invalid@test.edu', password: 'Password123!', fullName: 'Invalid Profile', surname: 'Profile', role: 'student', yearLevel: '2nd Year', section: 'Section B', termsAccepted: true };
+    const payload = { username: 'invalid_profile', email: 'invalid@test.edu', password: 'Password123!', fullName: 'Invalid Profile', surname: 'Profile', role: 'student', yearLevel: '2nd Year', section: 'BSIT-S-2B', termsAccepted: true };
     expect((await request(app).post('/api/auth/register').send({ ...payload, termsAccepted: 'false' })).status).toBe(400);
     expect((await request(app).post('/api/auth/register').send({ ...payload, yearLevel: '5th Year' })).status).toBe(400);
     expect((await request(app).post('/api/auth/register').send({ ...payload, role: 'admin' })).status).toBe(400);

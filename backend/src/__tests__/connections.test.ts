@@ -26,7 +26,7 @@ describe("Student-professor connections, audience permissions and personal resul
     await Promise.all([User.init(), FacultyConnection.init(), QuizAttempt.init(), QuizSubmission.init(), AuditEvent.init()]);
     const hash = await bcrypt.hash("Password123!", 10);
     for (const name of ["faculty", "otherFaculty", "student", "peer", "admin"]) {
-      users[name] = await User.create({ username: name, email: `${name.toLowerCase()}@connect.edu`, role: name === "otherFaculty" ? "faculty" : name === "peer" ? "student" : name, fullName: `${name} PrivateName`, surname: name, passwordHash: hash, termsAccepted: true, yearLevel: name === "peer" ? "4th Year" : "1st Year", section: name === "peer" ? "Section D" : "Section A" });
+      users[name] = await User.create({ username: name, email: `${name.toLowerCase()}@connect.edu`, role: name === "otherFaculty" ? "faculty" : name === "peer" ? "student" : name, fullName: `${name} PrivateName`, surname: name, passwordHash: hash, termsAccepted: true, yearLevel: name === "peer" ? "4th Year" : "1st Year", section: name === "peer" ? "BSIT-S-4A" : "BSIT-S-1A" });
       const res = await request(app).post("/api/auth/login").send({ loginIdentifier: users[name].email, password: "Password123!" });
       expect(res.status).toBe(200); tokens[name] = res.body.token;
     }
@@ -161,7 +161,7 @@ describe("Student-professor connections, audience permissions and personal resul
     expect(people.body.users.map((u: any) => u.id)).not.toContain(String(users.peer._id));
     const report = await request(app).get("/api/gradebook").set(auth("faculty"));
     expect(report.body.summary.students).toBe(1);
-    expect(report.body.cohorts).toEqual([{ yearLevel: "1st Year", section: "Section A" }]);
+    expect(report.body.cohorts).toEqual([{ yearLevel: "1st Year", section: "BSIT-S-1A" }]);
     expect(JSON.stringify(report.body)).not.toContain(users.peer.fullName);
     expect((await request(app).get("/api/gradebook").set(auth("otherFaculty"))).body.summary.attempts).toBe(0);
     const workbook = new ExcelJS.Workbook(); await workbook.xlsx.load((await binary("/api/gradebook/export/xlsx", "faculty")).body);

@@ -11,8 +11,8 @@ test.beforeAll(async ({ request }) => {
   });
   facultyToken = (await login.json()).token;
   for (const [name, yearLevel, section] of [
-    ["alpha", "2nd Year", "Section A"],
-    ["beta", "3rd Year", "Section B"],
+    ["alpha", "2nd Year", "BSIT-S-1A"],
+    ["beta", "3rd Year", "BSIT-S-2B"],
   ]) {
     const result = await request.post(`${server}/api/auth/register`, {
       data: {
@@ -125,25 +125,29 @@ test("faculty filters separated cohorts and downloads both report formats", asyn
   await page
     .getByRole("button", { name: "Master gradebook", exact: true })
     .click();
+  await expect(page.getByLabel("Gradebook section").locator("option")).toHaveText([
+    "All sections", "BSIT-S-1A", "BSIT-S-1B", "BSIT-S-2A", "BSIT-S-2B",
+    "BSIT-S-3A", "BSIT-S-3B", "BSIT-S-4A", "BSIT-NS-4A",
+  ]);
   await page.getByLabel("Gradebook subject").selectOption(subjectId);
   await expect(
-    page.getByRole("region", { name: "2nd Year - Section A results" }),
+    page.getByRole("region", { name: "2nd Year - BSIT-S-1A results" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("region", { name: "3rd Year - Section B results" }),
+    page.getByRole("region", { name: "3rd Year - BSIT-S-2B results" }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "3rd Year - Section B", exact: true })
+    .getByRole("button", { name: "3rd Year - BSIT-S-2B", exact: true })
     .click();
   await expect(
-    page.getByRole("region", { name: "2nd Year - Section A results" }),
+    page.getByRole("region", { name: "2nd Year - BSIT-S-1A results" }),
   ).toHaveCount(0);
   await expect(
     page.getByRole("cell", { name: "Zoe Beta Beta", exact: false }),
   ).toBeVisible();
   await page.getByLabel("Result status").selectOption("passed");
   await expect(
-    page.getByRole("region", { name: "3rd Year - Section B results" }),
+    page.getByRole("region", { name: "3rd Year - BSIT-S-2B results" }),
   ).toBeVisible();
   for (const format of ["Excel", "PDF"]) {
     const download = page.waitForEvent("download");
@@ -164,11 +168,11 @@ test("faculty filters separated cohorts and downloads both report formats", asyn
   await page.getByLabel("Result status").selectOption("all");
   await page.getByLabel("Search results").fill("Ada");
   await expect(
-    page.getByRole("region", { name: "3rd Year - Section B results" }),
+    page.getByRole("region", { name: "3rd Year - BSIT-S-2B results" }),
   ).toHaveCount(0);
   await page.getByLabel("Search results").fill("");
   await expect(
-    page.getByRole("region", { name: "3rd Year - Section B results" }),
+    page.getByRole("region", { name: "3rd Year - BSIT-S-2B results" }),
   ).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({

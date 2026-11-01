@@ -37,7 +37,7 @@ describe("Sprint 5 — public lesson discovery, audit and actual database health
           fullName: `System ${name}`,
           surname: name,
           yearLevel: "1st Year",
-          section: "Section A",
+          section: "BSIT-S-1A",
           termsAccepted: true,
         });
       expect(result.status).toBe(201);

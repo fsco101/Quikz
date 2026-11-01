@@ -1,3 +1,4 @@
+import { SECTIONS } from "../../constants/sections.js";
 import { ValidatedForm } from "../ui/ValidatedForm.js";
 import { PageHeading } from "../ui/PageHeading.js";
 ﻿import React, { useState } from "react";
@@ -18,7 +19,7 @@ export function Profile() {
     email: user!.email,
     bio: user!.bio || "",
     yearLevel: user!.yearLevel || "1st Year",
-    section: user!.section || "Section A",
+    section: user!.section || SECTIONS[0],
   });
   const [file, setFile] = useState<File | null>(null);
   const [passwords, setPasswords] = useState({
@@ -203,7 +204,7 @@ export function Profile() {
                 value={draft.section}
                 onChange={(e) => change("section", e.target.value)}
               >
-                {["Section A", "Section B", "Section C", "Section D"].map(
+                {SECTIONS.map(
                   (section) => (
                     <option key={section}>{section}</option>
                   ),

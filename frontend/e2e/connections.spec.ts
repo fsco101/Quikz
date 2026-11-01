@@ -7,7 +7,7 @@ test("email acceptance controls private uploads, roster privacy and student-spec
   for (const [name, role] of [["professor", "faculty"], ["student", "student"], ["peer", "student"]]) {
     const response = await request.post(`${api}/auth/register`, { data: {
       username: `${name}${code}`, email: `${name}${code}@connection.edu`, password: "Password123!", role,
-      fullName: `${name} ${code}`, surname: name, yearLevel: "1st Year", section: "Section A", termsAccepted: true,
+      fullName: `${name} ${code}`, surname: name, yearLevel: "1st Year", section: "BSIT-S-1A", termsAccepted: true,
     } });
     expect(response.status()).toBe(201); users[name] = await response.json();
   }
