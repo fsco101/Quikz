@@ -9,6 +9,7 @@ import { Subject } from "../models/Subject.js";
 import { InputError } from "../services/questionBank.js";
 import { profileFields, userDTO, validatePassword } from "../services/users.js";
 import { connectedUserIds } from "../services/connections.js";
+import { uploadAvatar, cleanupCloudAvatar } from "../services/avatarStorage.js";
 const router = Router();
 const run = (fn: any) => (req: any, res: any, next: any) =>
   Promise.resolve(fn(req, res)).catch(next);
@@ -19,10 +20,11 @@ router.get(
     if (!mongoose.isValidObjectId(req.params.id))
       throw new InputError("Invalid user ID.");
     const user = await User.findById(req.params.id).select(
-      "+avatarData active",
+      "+avatarData +avatarCloudUrl active",
     );
-    if (!user?.avatarData || user.active === false)
+    if (!user || user.active === false || (!user.avatarData && !user.avatarCloudUrl))
       throw new InputError("Avatar not found.", 404);
+    if (user.avatarCloudUrl) return res.redirect(302, user.avatarCloudUrl);
     res
       .set({
         "Content-Type": "image/webp",
@@ -92,6 +94,9 @@ router.patch(
         "passwordHash",
         "authVersion",
         "avatarData",
+        "avatarCloudUrl",
+        "avatarPublicId",
+        "avatarUpdatedAt",
         "termsAccepted",
       ].some((key) => key in req.body)
     )
@@ -172,22 +177,39 @@ router.post(
         "Upload a valid PNG, JPEG or WebP image (up to 25 megapixels).",
       );
     }
-    const user = await User.findByIdAndUpdate(
-      req.user!.id,
-      { avatarData: data, avatarUpdatedAt: new Date() },
-      { new: true },
-    );
+    const previous = await User.findById(req.user!.id).select("+avatarPublicId");
+    if (!previous) throw new InputError("User not found.", 404);
+    const stored = await uploadAvatar(data);
+    let user;
+    try {
+      user = await User.findOneAndUpdate(
+        { _id: previous._id, avatarUpdatedAt: previous.avatarUpdatedAt ?? null },
+        stored
+          ? { $set: { avatarCloudUrl: stored.url, avatarPublicId: stored.publicId, avatarUpdatedAt: new Date() }, $unset: { avatarData: 1 } }
+          : { $set: { avatarData: data, avatarUpdatedAt: new Date() }, $unset: { avatarCloudUrl: 1, avatarPublicId: 1 } },
+        { new: true },
+      );
+      if (!user) throw new InputError("Avatar changed elsewhere. Please retry.", 409);
+    } catch (error) {
+      await cleanupCloudAvatar(stored?.publicId);
+      throw error;
+    }
+    await cleanupCloudAvatar(previous.avatarPublicId);
     res.json({ user: userDTO(user) });
   }),
 );
 router.delete(
   "/me/avatar",
   run(async (req: AuthRequest, res: any) => {
-    const user = await User.findByIdAndUpdate(
-      req.user!.id,
-      { $unset: { avatarData: 1, avatarUpdatedAt: 1 } },
+    const previous = await User.findById(req.user!.id).select("+avatarPublicId");
+    if (!previous) throw new InputError("User not found.", 404);
+    const user = await User.findOneAndUpdate(
+      { _id: previous._id, avatarUpdatedAt: previous.avatarUpdatedAt ?? null },
+      { $unset: { avatarData: 1, avatarUpdatedAt: 1, avatarCloudUrl: 1, avatarPublicId: 1 } },
       { new: true },
     );
+    if (!user) throw new InputError("Avatar changed elsewhere. Please retry.", 409);
+    await cleanupCloudAvatar(previous.avatarPublicId);
     res.json({ user: userDTO(user) });
   }),
 );

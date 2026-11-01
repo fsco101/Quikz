@@ -54,12 +54,12 @@ export function RosterInvitations({ onImported }: { onImported: (sent: number) =
     <div className="roster-import-body space-y-5">
       <p className="roster-help">Use an <strong>email</strong> column and an optional <strong>name</strong> column. Replace the template examples with registered student emails. Names help you review the file and do not change student profiles.</p>
       <div className="roster-file-controls">
-        <label>Class roster CSV<input type="file" accept=".csv,text/csv" disabled={!!busy} onChange={choose} /></label>
+        <label>Class roster CSV<input aria-invalid={!file && !!error} aria-describedby={error ? "roster-file-error" : undefined} type="file" accept=".csv,text/csv" disabled={!!busy} onChange={choose} /></label>
         <a className="ui-button ui-button-secondary" href="/student-roster-template.csv" download><Download size={16} aria-hidden="true" />Download CSV template</a>
         <button className="ui-button ui-button-primary" disabled={!file || !!busy} onClick={() => upload("preview")}>{busy === "preview" ? "Checking roster…" : result ? "Preview again" : "Preview roster"}</button>
       </div>
       <p className="roster-help">UTF-8 CSV, up to 256 KB and 500 student rows. Existing connections, pending requests and duplicate emails are skipped. Invitations appear inside Quikz. Each student must accept before private lessons or faculty reports become available.</p>
-      {error && <p role="alert" className="connection-error">{error}</p>}
+      {error && <p id="roster-file-error" role="alert" className="connection-error">{error}</p>}
       {busy && <p role="status">{busy === "send" ? "Sending invitations. Keep this page open for the results…" : "Validating rows and checking existing connections…"}</p>}
       {result && <section aria-label={result.phase === "preview" ? "Roster preview" : "Roster invitation results"} className="space-y-4">
         <div className="roster-metrics">

@@ -35,6 +35,7 @@ test('landing preview, perspectives, FAQs and public navigation work without an 
 test('account entry supports password visibility, errors, recovery and real login', async ({ page }) => {
   await page.goto('/');
   await page.locator('header').getByRole('button', { name: 'Log in', exact: true }).click();
+  await expect(page.getByRole('button', { name: /Demo/ })).toHaveCount(0);
   await page.getByLabel('Username or Email', { exact: true }).fill('student@quikz.edu');
   await page.getByLabel('Password', { exact: true }).fill('incorrect-password');
   await page.getByRole('button', { name: 'Show password', exact: true }).click();
@@ -42,8 +43,8 @@ test('account entry supports password visibility, errors, recovery and real logi
   await page.getByRole('button', { name: 'Hide password', exact: true }).click();
   await page.getByRole('button', { name: 'Sign In to Quikz' }).click();
   await expect(page.getByRole('alert')).toBeFocused();
-  await page.getByRole('button', { name: 'Student Demo', exact: true }).click();
-  await expect(page.getByRole('alert')).toHaveCount(0);
+  await page.getByLabel("Username or Email", { exact: true }).fill("student@quikz.edu");
+  await page.getByLabel("Password", { exact: true }).fill("Student@123");
   await page.getByRole('button', { name: 'Sign In to Quikz' }).click();
   await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible();
   await page.getByRole('button', { name: 'Sign Out', exact: true }).click();

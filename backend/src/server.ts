@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import draftRoutes from "./routes/draftRoutes.js";
+import { EditorDraft } from "./models/EditorDraft.js";
 import { bootstrapAdmin } from "./services/users.js";
 import authRoutes from "./routes/authRoutes.js";
 import subjectRoutes from "./routes/subjectRoutes.js";
@@ -65,6 +67,7 @@ app.get("/api/modules/:id/file", authenticateToken, downloadModuleFile);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/drafts", draftRoutes);
 app.use("/api/connections", connectionRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/subjects", subjectRoutes);
@@ -119,6 +122,7 @@ export const startServer = async () => {
     StudentProgress.init(),
     AuditEvent.init(),
     FacultyConnection.init(),
+    EditorDraft.init(),
   ]);
   if (process.env.NODE_ENV !== 'production' || process.env.SEED_DEMO_DATA === 'true') await seedDatabase();
   const server = app.listen(PORT, '0.0.0.0');

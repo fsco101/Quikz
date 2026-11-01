@@ -113,8 +113,32 @@ try {
   const fileUrl = `${origin}/api/modules/${module._id}/file`;
   assert.equal((await fetch(fileUrl)).status, 401);
 
+  const draftUrl = `${origin}/api/drafts/${encodeURIComponent(`module:${subject._id}:${module._id}`)}`;
+  const draftHeaders = { Origin: frontendOrigin, Authorization: `Bearer ${account.token}`, 'Content-Type': 'application/json' };
+  for (const method of ['PUT', 'DELETE']) {
+    const options = await fetch(draftUrl, { method: 'OPTIONS', headers: { Origin: frontendOrigin, 'Access-Control-Request-Method': method, 'Access-Control-Request-Headers': 'authorization,content-type' } });
+    assert.equal(options.status, 204);
+    assert.equal(options.headers.get('access-control-allow-origin'), frontendOrigin);
+    assert.ok(options.headers.get('access-control-allow-methods').includes(method));
+  }
+  const editorData = { title: 'Unpublished deployment draft', summary: '', contentType: 'text', textContent: 'Recover this from MongoDB after restart', audience: 'connected', removeFile: false, attachmentName: '' };
+  const autosaved = await fetch(draftUrl, { method: 'PUT', headers: draftHeaders, body: JSON.stringify({ version: 0, revision: '0', data: editorData }) });
+  assert.equal(autosaved.status, 200);
+  assert.equal(autosaved.headers.get('access-control-allow-origin'), frontendOrigin);
+  assert.equal((await fetch(draftUrl)).status, 401);
+
   await stopServer();
   await start();
+  const recovered = await fetch(draftUrl, { headers: draftHeaders });
+  assert.equal(recovered.status, 200, 'Account drafts must survive backend restarts in MongoDB');
+  assert.equal(recovered.headers.get('cache-control'), 'no-store');
+  const recoveredDraft = await recovered.json();
+  assert.equal(recoveredDraft.version, 1);
+  assert.deepEqual(recoveredDraft.draft.data, editorData);
+  const discarded = await fetch(draftUrl, { method: 'DELETE', headers: draftHeaders, body: JSON.stringify({ version: 1 }) });
+  assert.deepEqual(await discarded.json(), { version: 2, draft: null });
+  const delayed = await fetch(draftUrl, { method: 'PUT', headers: draftHeaders, body: JSON.stringify({ version: 1, revision: '0', data: editorData }) });
+  assert.equal(delayed.status, 409, 'Delayed autosave must not restore a discarded draft');
   const download = await fetch(fileUrl, { headers: { Origin: frontendOrigin, Authorization: `Bearer ${account.token}` } });
   assert.equal(download.status, 200, 'Records, signing secret, and attachment path must survive a restart');
   assert.equal(await download.text(), stored);
@@ -127,7 +151,7 @@ try {
   assert.equal(draft.count, 2);
   assert.equal(draft.report.source.fileName, 'probe.txt');
   assert.equal(draft.report.source.moduleId, module._id);
-  console.log('Production smoke check passed: compiled startup, health, CORS/preflight, registration, protected upload, persistence across restart, and generation from a saved module attachment.');
+  console.log('Production smoke check passed: compiled startup, health, CORS/preflight, registration, protected upload, persistent account drafts across restart, draft deletion/version protection, and generation from a saved module attachment.');
 } finally {
   await stopServer();
   await database?.stop();

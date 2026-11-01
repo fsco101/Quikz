@@ -253,7 +253,8 @@ test("guests search the directory and admins inspect the live health and audit d
     fullPage: true,
   });
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await page.getByRole("button", { name: /Admin Demo/ }).click();
+  await page.getByLabel("Username or Email", { exact: true }).fill("admin@quikz.edu");
+  await page.getByLabel("Password", { exact: true }).fill("Admin@123");
   await page.getByRole("button", { name: /Sign In to Quikz/ }).click();
   await page
     .getByRole("button", { name: "System health", exact: true })

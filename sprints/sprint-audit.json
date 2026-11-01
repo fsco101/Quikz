@@ -382,7 +382,7 @@
     "moduleOwnership": "Persist createdBy on new modules; for legacy modules use subject facultyId. Only the owning faculty may edit; admins do not bypass content ownership.",
     "accountManagement": "Administrators create/edit users, manage roles, reset passwords, and disable/reactivate accounts without deleting academic records. Self-disable/demotion is blocked; serialized account writes protect against concurrent mutual demotions.",
     "profilePrivacy": "All roles can edit their own profile. Signed-in people directory exposes name, username, role, bio and avatar only; avatar pixels are public for display, while email, academic cohort and results remain private.",
-    "avatarStorage": "Decode PNG/JPEG/WebP up to 5 MB and 25 megapixels; resize to 256x256 and re-encode WebP without original metadata, stored in MongoDB."
+    "avatarStorage": "Decode PNG/JPEG/WebP up to 5 MB and 25 megapixels; resize to 256x256 and re-encode WebP without original metadata. Signed Cloudinary uploads when all three backend credentials are configured; MongoDB fallback when all are blank. Stable public API URLs preserve legacy images and redirect for Cloudinary avatars. Replacement/removal attempts Cloudinary asset cleanup with invalidation."
   },
   "verification": {
     "backendTests": {
@@ -703,5 +703,153 @@
       "backend/src/__tests__/rosterInvitations.test.ts",
       "frontend/e2e/roster-invitations.spec.ts"
     ]
+  },
+  "accountAvatarFollowUp": {
+    "date": "2026-11-01",
+    "name": "Remove login demo shortcuts and prepare Cloudinary avatar uploads",
+    "status": "completed",
+    "implementation": [
+      "Login and signup no longer display demo account buttons, embedded credential fillers, or demo email placeholders. Browser suites sign in through the regular form.",
+      "Authenticated avatar uploads retain PNG/JPEG/WebP validation, 5 MB and 25 megapixel limits, and sanitized 256x256 WebP output.",
+      "Set all three backend CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET variables to enable signed Cloudinary uploads. With all blank, MongoDB storage remains available. Partial configuration returns 503.",
+      "Existing shared avatar API URLs serve legacy MongoDB images or redirect to HTTPS Cloudinary images. Replacement/removal cleans up cloud assets with invalidation; failed saves clean up the new asset. Cleanup failures are logged for operator follow-up.",
+      "Cloud storage metadata stays out of account responses and cannot be set through profile edits."
+    ],
+    "validation": {
+      "backend": "26 tests passed: accounts.test.ts and deployment.test.ts, including mocked Cloudinary upload/replacement/removal, provider failure, incomplete configuration and failed database save cleanup.",
+      "browser": "15 scenarios passed across accounts, design, landing-auth, sprint3 and sprints4-5; desktop login screenshot reviewed.",
+      "builds": "Backend and frontend production builds passed.",
+      "liveCloudinary": "Not exercised; provider calls were mocked. Backend credentials are required for a live upload.",
+      "diffCheck": "git diff --check passed"
+    },
+    "githubVerification": {
+      "verifiedAt": "2026-11-01",
+      "closedIssueNumbers": [
+        22,
+        26,
+        27
+      ],
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "newlyClosedIssueNumbers": [],
+      "note": "Related Sprint 5 and Sprint 7 issues were already closed as completed and reverified on GitHub."
+    }
+  },
+  "formValidationFollowUp": {
+    "date": "2026-11-01",
+    "name": "Application-wide form validation",
+    "status": "completed",
+    "affectedSprints": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9
+    ],
+    "githubIssueNumbers": [
+      1,
+      2,
+      4,
+      5,
+      8,
+      9,
+      14,
+      15,
+      18,
+      21,
+      26,
+      27,
+      29,
+      34
+    ],
+    "implementation": [
+      "Shared login/signup checks, normalized registration and API account validation.",
+      "Subject and module field checks; conditional required attachments and upload size checks.",
+      "Quiz numeric and distinct-answer checks, available-bank count bounds and independent preview validation.",
+      "Preflight score ranges and cross-field bounds; invalid filters block requests and exports.",
+      "Directory keyword length bounded to the API search limit.",
+      "Shared accessible validation across forms, admin/profile account checks and avatar preflight; first-invalid focus and correction feedback.",
+      "Email invitation format/required checks with accessible field feedback.",
+      "Roster file errors associated with their input; existing CSV file and row validation retained."
+    ],
+    "validation": {
+      "backend": "30 tests passed across auth.test.ts and accounts.test.ts, including invalid and normalized registration plus account/avatar regressions.",
+      "browser": "Full Playwright suite: 27 passed, including six new form-validation scenarios covering invalid request prevention, corrections, focus, dependent fields, files, quiz preview/publication, gradebook and admin consent.",
+      "builds": "Backend TypeScript build and frontend TypeScript/Vite production build passed.",
+      "visualReview": "Login required-field feedback screenshot reviewed.",
+      "diffCheck": "git diff --check passed."
+    },
+    "githubVerification": {
+      "verifiedAt": "2026-11-01",
+      "closedIssueNumbers": [
+        1,
+        2,
+        4,
+        5,
+        8,
+        9,
+        14,
+        15,
+        18,
+        21,
+        26,
+        27,
+        29,
+        34
+      ],
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "newlyClosedIssueNumbers": [],
+      "note": "All corresponding issues were already closed as completed; GitHub REST states and completion reasons were reverified. Existing sprint status totals remain unchanged."
+    }
+  },
+  "autosaveFollowUp": {
+    "date": "2026-11-01",
+    "name": "Persistent module and quiz draft autosave for Vercel and Render",
+    "status": "completed",
+    "affectedSprints": [
+      2,
+      3,
+      5,
+      7
+    ],
+    "githubIssueNumbers": [
+      5,
+      9,
+      22,
+      27
+    ],
+    "implementation": [
+      "Private authenticated faculty draft API persists module and quiz editor snapshots in MongoDB; resource ownership is checked for reads, writes and deletion.",
+      "Debounced autosave uses the existing VITE_API_URL origin, captures the account token for pending requests and retains a per-account/per-editor browser fallback for network failures.",
+      "Fresh devices recover account drafts. Initial loads wait for current server data; failed quiz loads preserve existing drafts. Incomplete form values, question banks, answers, explanations and source choices are recoverable.",
+      "Newer published revisions and conflicting device drafts pause autosave/publication until the author chooses a copy. Atomic version checks and retained deletion versions prevent stale overwrites and resurrection.",
+      "Successful publication clears drafts; explicit discard resets the editor. Network failures during discard keep the draft for retry. Draft payloads are limited to 1 MB; file names are remembered but binary attachments must be reselected.",
+      "Existing Vercel API-origin, Render CORS and persistent MONGODB_URI settings support deployment; drafts do not use the Render filesystem. README and environment examples document setup."
+    ],
+    "validation": {
+      "backend": "6 draft API integration tests and 4 deployment tests passed.",
+      "production": "Compiled production smoke check passed with exact frontend-origin CORS/preflights, private draft save/recovery across an API restart using the same MongoDB, and stale-write rejection after deletion.",
+      "browser": "Full browser regression suite: 35 passed. Final affected quiz/attachment checks passed; final autosave suite including failed-load protection: 9 passed. One earlier Chromium ERR_NO_BUFFER_SPACE network failure passed in isolation and in the clean final autosave rerun.",
+      "builds": "Backend TypeScript and frontend TypeScript/Vite production builds passed.",
+      "deploymentLimit": "No live Vercel/Render deployment was performed; tests use isolated local MongoDB and production configuration.",
+      "diffCheck": "git diff --check passed"
+    },
+    "githubVerification": {
+      "verifiedAt": "2026-11-01",
+      "closedIssueNumbers": [
+        5,
+        9,
+        22,
+        27
+      ],
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "newlyClosedIssueNumbers": [],
+      "note": "All four related issues were already closed as completed and reverified on GitHub."
+    }
   }
 }

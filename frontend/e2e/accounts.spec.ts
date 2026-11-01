@@ -58,7 +58,8 @@ test("faculty edits owned modules/quizzes and shared avatars are visible to anot
     ).status(),
   ).toBe(201);
   await page.goto("/#/login");
-  await page.getByRole("button", { name: /Faculty Demo/ }).click();
+  await page.getByLabel("Username or Email", { exact: true }).fill("faculty@quikz.edu");
+  await page.getByLabel("Password", { exact: true }).fill("Faculty@123");
   await page.getByRole("button", { name: "Sign In to Quikz" }).click();
   await expect(
     page.getByRole("button", { name: "System health", exact: true }),
@@ -151,7 +152,8 @@ test("admin manages users, edits own profile and has exclusive health navigation
 }) => {
   const unique = `managed_${Date.now()}`;
   await page.goto("/#/login");
-  await page.getByRole("button", { name: "Admin Demo", exact: true }).click();
+  await page.getByLabel("Username or Email", { exact: true }).fill("admin@quikz.edu");
+  await page.getByLabel("Password", { exact: true }).fill("Admin@123");
   await page.getByRole("button", { name: "Sign In to Quikz" }).click();
   await expect(
     page.getByRole("button", { name: "System health", exact: true }),

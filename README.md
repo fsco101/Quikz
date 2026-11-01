@@ -10,7 +10,7 @@ In `backend`, copy `.env.example` to `.env`, set a private `JWT_SECRET`, and opt
 
 In `frontend`, run `npm run dev` and open http://localhost:3000. Without a MongoDB URI, the backend uses an ephemeral local MongoDB instance; that data disappears when the server stops. Atlas persistence requires a working URI.
 
-Demo accounts: `faculty@quikz.edu` / `Faculty@123` and `student@quikz.edu` / `Student@123`. Local development also seeds `admin@quikz.edu` / `Admin@123`; all demo credential buttons are available in development only. The CS101 demo includes three linked end quizzes. Guests can browse the public subject catalog from the landing or login page.
+Demo accounts: `faculty@quikz.edu` / `Faculty@123` and `student@quikz.edu` / `Student@123`. Local development also seeds `admin@quikz.edu` / `Admin@123`; the login page does not display demo accounts or credential shortcuts. The CS101 demo includes three linked end quizzes. Guests can browse the public subject catalog from the landing or login page.
 
 ## Landing page and account entry
 
@@ -92,6 +92,30 @@ Summary averages, pass rates, and score distributions count all matching attempt
 
 Only administrators can open **System health** or access `/api/system/health` and `/api/system/audit`. The dashboard shows database ping, actual write/read/delete verification, observed connection-pool events, topology changes, latency, and the system-wide audit trail, refreshed every 15 seconds. The former `SYSTEM_ADMIN_USER_IDS` faculty allowlist no longer grants access. `/api/health` remains a minimal liveness endpoint for deployment checks.
 
+## Module and quiz draft autosave
+
+Module creation/editing and Quiz Studio autosave text, settings, question banks, answers, explanations and source choices after a short pause. Drafts are private to the signed-in faculty account and editor. Autosave never publishes or changes the live lesson/quiz; the existing publish/save action and version checks remain required. Successful publication or an explicit discard clears the draft.
+
+Drafts sync through authenticated `GET`, `PUT` and `DELETE /api/drafts/:scope` endpoints into the `EditorDraft` MongoDB collection. They remain available after API restarts and from another device or frontend domain after signing in. Wait for **Draft synced to your account** before switching devices. Draft payloads are limited to 1 MB of JSON; incomplete/invalid form values can be saved, while publication still requires form validation. Binary attachments are not autosaved. Recovered editors identify files that must be reselected; **Forget unuploaded file** explicitly abandons that pending upload.
+
+A browser copy saves during connection failures. **Retry sync** and the browser's online event resume synchronization. Editors wait for saved account drafts before enabling editing, and recover matching revisions automatically. A newer published revision or a different device's draft pauses autosave and publication until you restore the saved copy, keep the current editor copy, or discard the saved draft. Version-checked writes and deletion markers prevent delayed requests from overwriting a newer draft or resurrecting a discarded one. A failed discard keeps the draft available for retry.
+
+For **Vercel frontend + Render backend**, use the existing deployment configuration:
+
+- Vercel: set `VITE_API_URL=https://<your-api>.onrender.com` (no `/api` suffix), then rebuild/redeploy the frontend.
+- Render: set `CORS_ORIGINS` to the exact Vercel/custom frontend origin(s), and `MONGODB_URI` to a persistent MongoDB/Atlas database. Keep the existing `JWT_SECRET` and production settings.
+- Deploy the backend containing the draft routes before the new frontend. No separate autosave service, browser secrets, new paid storage integration, or filesystem mount is needed for drafts. Existing lesson attachment uploads continue to use their configured persistent `UPLOAD_DIR`.
+
+`npm --prefix backend run test:production` checks the compiled API with production configuration, cross-origin draft preflights, authenticated save/recovery across a backend restart, and stale-write protection after discard. This uses an isolated local MongoDB; it does not deploy to or certify a live Render/Vercel project.
+
+## Form validation
+
+All submit forms use shared validation for required fields (including whitespace-only text), email format, username rules, lengths, numeric bounds, confirmations and file uploads. Errors identify each field, mark it for assistive technology, and focus the first invalid control when submitted. Feedback updates as touched fields are corrected, and error-summary links return focus to the affected input. Server errors remain visible.
+
+Registration, profile and admin account edits use 3?40 character usernames (letters, numbers, dots, underscores and hyphens), names up to 120 characters, and emails up to 254 characters. New passwords require at least 6 characters, a non-space character and at most 72 UTF-8 bytes; blank optional administrator reset passwords retain the existing password. Registration enforces the same rules on the API and trims account fields. Passwords are never trimmed.
+
+Avatar files are checked for PNG/JPEG/WebP and 5 MB; module attachments and quiz source files are checked for 25 MB, with supported extensions enforced for quiz imports/generation. Server decoding and content validation still apply. Roster CSV validation retains its 256 KB / 500-row limits. Quiz preview actions validate only their source settings, while publication validates the reviewed bank, distinct answer options and questions-per-attempt count. Gradebook score filters reject values outside 0?100 and inverted ranges before fetching or exporting.
+
 ## Administrators, profiles and avatars
 
 For the initial production administrator, set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and optionally `ADMIN_USERNAME` and `ADMIN_FULL_NAME` before starting the backend. Bootstrap creates one administrator only when none exists; it never promotes an existing account or resets an existing admin’s password. Remove the bootstrap password from the environment after provisioning. Production never seeds the development admin account.
@@ -99,6 +123,8 @@ For the initial production administrator, set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, a
 Admins open **User management** to search/filter accounts, create students/faculty/admins, edit details and roles, reset passwords, and disable/reactivate accounts. Creation requires confirmation that the user accepted the Terms and Honor Code. Disabling preserves ownership and grade history. Role changes take effect on the next API request; deactivation and password changes revoke old sessions. Admins cannot disable or demote themselves. Public registration offers only student and faculty roles.
 
 Every user can open **My profile** to update name, surname, username, email, bio, student year/section, avatar and password. Password changes require the current password and sign out existing sessions. Avatars accept PNG/JPEG/WebP up to 5 MB and 25 megapixels, then are decoded, resized to 256×256 and re-encoded as WebP without the original metadata. Others see avatars in course cards, the lesson directory, gradebooks, and the signed-in **People** directory. People profiles expose only display name, username, role, bio and avatar; email and academic records remain private. Avatar pixels themselves are publicly readable for display.
+
+To enable Cloudinary avatar storage, set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` on the **backend** (Render Environment or `backend/.env`) and restart the API. Use the credentials from your Cloudinary product environment; keep the API secret off the frontend. No unsigned upload preset is required. Signed server uploads use the Cloudinary Node SDK: https://cloudinary.com/documentation/node_image_and_video_upload. Leave all three variables blank for MongoDB storage; partial configuration rejects uploads with a helpful error. Existing MongoDB avatars continue to display and move to Cloudinary on their next upload. The shared avatar API redirects to the stored HTTPS Cloudinary image, so existing screens continue to work across API origins. Replacing or removing an avatar cleans up its Cloudinary asset with CDN invalidation; cleanup failures are logged and may leave an unused asset for operator cleanup. Lesson attachments still use `UPLOAD_DIR`.
 
 Audit events cover registration/consent, login successes and failures, curriculum/quiz publication, quiz sessions, focus warnings, persisted results (including abandoned expired sessions), and exports. Credentials, tokens, answer keys, submitted answers, and lecture content are excluded. If an audit write fails after processing a mutation, the API reports that failure; check the result before retrying. The health dashboard exposes audit-write failures.
 

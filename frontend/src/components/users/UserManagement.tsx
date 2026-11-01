@@ -1,3 +1,4 @@
+import { ValidatedForm } from "../ui/ValidatedForm.js";
 import { Plus } from "lucide-react";
 import { PageHeading } from "../ui/PageHeading.js";
 import { useAuth } from "../../context/AuthContext.js";
@@ -108,7 +109,8 @@ export function UserManagement() {
         </p>
       )}
       {editing !== undefined && (
-        <form
+        <ValidatedForm
+          key={editing || "new"}
           onSubmit={save}
           className="ui-panel profile-details grid gap-4 sm:grid-cols-2"
         >
@@ -129,6 +131,8 @@ export function UserManagement() {
                 className={field}
                 aria-label={`User ${label.toLowerCase()}`}
                 type={key === "email" ? "email" : "text"}
+                data-validate={key === "username" ? "username" : undefined}
+                maxLength={key === "email" ? 254 : key === "username" ? 40 : 120}
                 required
                 value={draft[key]}
                 onChange={(e) => change(key, e.target.value)}
@@ -242,12 +246,13 @@ export function UserManagement() {
               Cancel
             </button>
           </div>
-        </form>
+        </ValidatedForm>
       )}
       <section className="rounded-2xl border bg-white p-5 space-y-4">
         <div className="grid gap-3 sm:grid-cols-3">
           <input
             aria-label="Search users"
+            maxLength={120}
             placeholder="Search name, username or email"
             className={field}
             value={search}

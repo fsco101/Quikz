@@ -1,4 +1,6 @@
-﻿import { beforeAll, beforeEach, afterAll, describe, it, expect } from "vitest";
+import { v2 as cloudinary } from "cloudinary";
+import { Writable } from "node:stream";
+import { beforeAll, beforeEach, afterAll, afterEach, describe, it, expect, vi } from "vitest";
 import request from "supertest";
 import bcrypt from "bcryptjs";
 import sharp from "sharp";
@@ -40,7 +42,9 @@ describe("Owned editing, admin permissions, profile updates and shared avatars",
       AuditEvent.init(),
     ]);
   });
+  afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
   beforeEach(async () => {
+    for (const key of ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"]) vi.stubEnv(key, "");
     await Promise.all([
       User.deleteMany({}),
       Subject.deleteMany({}),
@@ -374,6 +378,74 @@ describe("Owned editing, admin permissions, profile updates and shared avatars",
     expect((await request(app).get(uploaded.body.user.avatarUrl)).status).toBe(
       404,
     );
+  });
+  function mockCloudinary(fail = false) {
+    vi.stubEnv("CLOUDINARY_CLOUD_NAME", "quikz-test");
+    vi.stubEnv("CLOUDINARY_API_KEY", "test-key");
+    vi.stubEnv("CLOUDINARY_API_SECRET", "test-secret");
+    let count = 0;
+    const pixels: Buffer[] = [];
+    const upload = vi.spyOn(cloudinary.uploader, "upload_stream").mockImplementation((options: any, callback: any): any => {
+      const chunks: Buffer[] = [];
+      return new Writable({
+        write(chunk, _encoding, done) { chunks.push(Buffer.from(chunk)); done(); },
+        final(done) {
+          pixels.push(Buffer.concat(chunks));
+          count++;
+          callback(fail ? new Error("private provider details") : undefined, {
+            secure_url: `https://res.cloudinary.com/quikz-test/image/upload/v${count}/avatar.webp`,
+            public_id: `quikz/avatars/test-${count}`,
+          });
+          done();
+        },
+      });
+    });
+    const destroy = vi.spyOn(cloudinary.uploader, "destroy").mockResolvedValue({ result: "ok" });
+    return { upload, destroy, pixels };
+  }
+  const avatarPng = () => sharp({ create: { width: 12, height: 20, channels: 3, background: "#4648d4" } }).png().toBuffer();
+  const postAvatar = (png: Buffer) => request(app).post("/api/users/me/avatar").set(auth(tokens.faculty)).attach("avatar", png, "avatar.png");
+
+  it("stores sanitized avatars in Cloudinary, serves shared URLs, and cleans up replacements and removals", async () => {
+    const cloud = mockCloudinary();
+    const png = await avatarPng();
+    const uploaded = await postAvatar(png);
+    expect(uploaded.status).toBe(200);
+    expect(cloud.upload).toHaveBeenCalledWith(expect.objectContaining({ cloud_name: "quikz-test", folder: "quikz/avatars", resource_type: "image" }), expect.any(Function));
+    expect(await sharp(cloud.pixels[0]).metadata()).toMatchObject({ format: "webp", width: 256, height: 256 });
+    const stored = await User.findById(users.faculty._id).select("+avatarData +avatarCloudUrl +avatarPublicId");
+    expect(stored?.avatarData).toBeUndefined();
+    expect(stored?.avatarPublicId).toBe("quikz/avatars/test-1");
+    const shared = await request(app).get(uploaded.body.user.avatarUrl);
+    expect(shared.status).toBe(302);
+    expect(shared.headers.location).toBe(stored?.avatarCloudUrl);
+    const people = await request(app).get("/api/users?search=faculty").set(auth(tokens.student));
+    expect(people.body.users[0].avatarUrl).toBe(uploaded.body.user.avatarUrl);
+    expect(JSON.stringify(people.body)).not.toMatch(/avatarCloudUrl|avatarPublicId|test-secret/);
+    expect((await postAvatar(png)).status).toBe(200);
+    expect(cloud.destroy).toHaveBeenCalledWith("quikz/avatars/test-1", expect.objectContaining({ invalidate: true }));
+    expect((await request(app).delete("/api/users/me/avatar").set(auth(tokens.faculty))).status).toBe(200);
+    expect(cloud.destroy).toHaveBeenCalledWith("quikz/avatars/test-2", expect.objectContaining({ invalidate: true }));
+    expect((await request(app).get(uploaded.body.user.avatarUrl)).status).toBe(404);
+  });
+  it("keeps the existing avatar on Cloudinary failure or incomplete configuration", async () => {
+    const png = await avatarPng();
+    const original = await postAvatar(png);
+    const cloud = mockCloudinary(true);
+    const failed = await postAvatar(png);
+    expect(failed.status).toBe(503);
+    expect(JSON.stringify(failed.body)).not.toContain("private provider details");
+    expect((await request(app).get(original.body.user.avatarUrl)).status).toBe(200);
+    expect(cloud.destroy).not.toHaveBeenCalled();
+    vi.stubEnv("CLOUDINARY_API_SECRET", "");
+    expect((await postAvatar(png)).status).toBe(503);
+    expect(cloud.upload).toHaveBeenCalledTimes(1);
+  });
+  it("cleans up a new cloud asset if saving the avatar fails", async () => {
+    const cloud = mockCloudinary();
+    vi.spyOn(User, "findOneAndUpdate").mockRejectedValueOnce(new Error("database unavailable"));
+    expect((await postAvatar(await avatarPng())).status).toBe(500);
+    expect(cloud.destroy).toHaveBeenCalledWith("quikz/avatars/test-1", expect.objectContaining({ invalidate: true }));
   });
   it("rejects malformed, vector and oversized avatars", async () => {
     for (const input of [

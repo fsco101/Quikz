@@ -3,7 +3,8 @@ import { expect, test } from "@playwright/test";
 test("workspace navigation supports keyboard course selection and a compact mobile learning path", async ({ page }) => {
   await page.goto("/#/login");
   await page.screenshot({ path: "test-results/design-auth-desktop.png", fullPage: true, animations: 'disabled' });
-  await page.getByRole("button", { name: "Student Demo", exact: true }).click();
+  await page.getByLabel("Username or Email", { exact: true }).fill("student@quikz.edu");
+  await page.getByLabel("Password", { exact: true }).fill("Student@123");
   await page.getByRole("button", { name: "Sign In to Quikz", exact: true }).click();
   const navigation = page.getByRole("navigation", { name: "Main navigation" });
   await expect(navigation.getByRole("button", { name: "Learning path", exact: true })).toHaveAttribute("aria-current", "page");
@@ -58,7 +59,8 @@ test("workspace navigation supports keyboard course selection and a compact mobi
 
 test("faculty workspace and account screens retain their responsive page structure", async ({ page }) => {
   await page.goto("/#/login");
-  await page.getByRole("button", { name: "Faculty Demo", exact: true }).click();
+  await page.getByLabel("Username or Email", { exact: true }).fill("faculty@quikz.edu");
+  await page.getByLabel("Password", { exact: true }).fill("Faculty@123");
   await page.getByRole("button", { name: "Sign In to Quikz", exact: true }).click();
   const navigation = page.getByRole("navigation", { name: "Main navigation" });
   await expect(page.getByRole("region", { name: "Teaching overview" })).toBeVisible();
@@ -72,7 +74,8 @@ test("faculty workspace and account screens retain their responsive page structu
     await page.screenshot({ path: `test-results/design-${file}-desktop.png`, fullPage: true, animations: 'disabled' });
   }
   await page.getByRole("button", { name: "Sign Out", exact: true }).click();
-  await page.getByRole("button", { name: "Admin Demo", exact: true }).click();
+  await page.getByLabel("Username or Email", { exact: true }).fill("admin@quikz.edu");
+  await page.getByLabel("Password", { exact: true }).fill("Admin@123");
   await page.getByRole("button", { name: "Sign In to Quikz", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await navigation.getByRole("button", { name: "User management", exact: true }).click();

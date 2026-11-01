@@ -137,5 +137,17 @@
     "source": "User-requested faculty quiz settings",
     "status": "implemented",
     "details": "Original issue titles and acceptance text are retained as historical GitHub records. Fixed 10–20 minute total timing and 75% passing rules are superseded: new quizzes use faculty-set time per question in seconds/minutes, passing percentages from 1–100%, and 1–100 questions per attempt up to bank size. Runtime, progression, and reports use these settings; historical quizzes/results retain their prior timing and grading."
+  },
+  "formValidationFollowUp": {
+    "date": "2026-11-01",
+    "status": "completed",
+    "details": "Preflight score ranges and cross-field bounds; invalid filters block requests and exports.",
+    "githubIssueNumbers": [
+      18
+    ],
+    "githubVerifiedAt": "2026-11-01",
+    "githubState": "CLOSED",
+    "githubStateReason": "COMPLETED",
+    "validationEvidence": "sprints/sprint-audit.json:formValidationFollowUp"
   }
 }

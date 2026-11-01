@@ -63,11 +63,12 @@ export function validatePassword(
 ): asserts password is string {
   if (
     typeof password !== "string" ||
+    !password.trim() ||
     password.length < 6 ||
     Buffer.byteLength(password) > 72
   )
     throw new InputError(
-      "Password must be at least 6 characters and at most 72 bytes.",
+      "Password must be at least 6 characters, contain a non-space character, and be at most 72 bytes.",
     );
 }
 export async function bootstrapAdmin() {

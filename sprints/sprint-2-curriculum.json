@@ -88,5 +88,30 @@
     }
   ],
   "auditedAt": "2026-10-22",
-  "auditReport": "sprints/sprint-audit.json"
+  "auditReport": "sprints/sprint-audit.json",
+  "formValidationFollowUp": {
+    "date": "2026-11-01",
+    "status": "completed",
+    "details": "Subject and module field checks; conditional required attachments and upload size checks.",
+    "githubIssueNumbers": [
+      4,
+      5
+    ],
+    "githubVerifiedAt": "2026-11-01",
+    "githubState": "CLOSED",
+    "githubStateReason": "COMPLETED",
+    "validationEvidence": "sprints/sprint-audit.json:formValidationFollowUp"
+  },
+  "autosaveFollowUp": {
+    "date": "2026-11-01",
+    "name": "Persistent module and quiz draft autosave for Vercel and Render",
+    "status": "completed",
+    "githubIssueNumbers": [
+      5
+    ],
+    "githubVerifiedAt": "2026-11-01",
+    "githubState": "CLOSED",
+    "githubStateReason": "COMPLETED",
+    "validationEvidence": "sprints/sprint-audit.json:autosaveFollowUp"
+  }
 }

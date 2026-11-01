@@ -41,6 +41,7 @@ export function People() {
       <PageHeading eyebrow="Better, together" title="People" description="Discover faculty profiles and the people connected to you. Student profiles are visible only to themselves, their connected professors and administrators." />
       <input
         aria-label="Search people"
+            maxLength={120}
         placeholder="Search name or username"
         className="w-full max-w-md rounded-xl border px-4 py-3"
         value={search}

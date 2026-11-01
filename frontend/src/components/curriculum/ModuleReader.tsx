@@ -331,10 +331,11 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
         </div>
       </div>
 
-      {studioOpen && activeModule && <QuizStudio subject={subject} module={activeModule} onClose={() => setStudioOpen(false)} onPublished={() => { setStudioOpen(false); setActionMessage('End quiz published. Assessment saved successfully.'); void fetchModules(); }} />}
+      {studioOpen && activeModule && <QuizStudio key={activeModule._id} subject={subject} module={activeModule} onClose={() => setStudioOpen(false)} onPublished={() => { setStudioOpen(false); setActionMessage('End quiz published. Assessment saved successfully.'); void fetchModules(); }} />}
       {takingQuiz && <QuizTaker quizId={takingQuiz} onClose={() => { setTakingQuiz(null); void fetchModules(); }} />}
       {/* Add Module Modal */}
       {isAddModalOpen && <CreateModuleModal
+        key={`${subject._id}:${editingModule?._id || 'new'}`}
         isOpen={isAddModalOpen}
         subjectId={subject._id}
         module={editingModule}

@@ -109,5 +109,21 @@ describe('Sprint 1 - Authentication & Academic Honor Gate', () => {
     expect(await User.countDocuments({ email: 'faculty@quikz.edu' })).toBe(1);
     expect(await User.countDocuments({ email: 'student@quikz.edu' })).toBe(1);
   });
+  it('validates and normalizes registration using the same account rules as profile edits', async () => {
+    const payload = { username: 'validation_user', email: 'validation@test.edu', password: 'Password123!', fullName: 'Validation User', surname: 'User', role: 'faculty', termsAccepted: true };
+    for (const patch of [
+      { username: 'a' }, { username: 'invalid name' }, { email: 'user@invalid' },
+      { fullName: ' ' }, { surname: 'x'.repeat(121) }, { password: 'short' },
+      { password: 'é'.repeat(37) }, { password: 'a'.repeat(73) },
+    ]) {
+      const response = await request(app).post('/api/auth/register').send({ ...payload, ...patch });
+      expect(response.status).toBe(400);
+      expect(response.body.token).toBeUndefined();
+    }
+    expect(await User.exists({ username: payload.username })).toBeNull();
+    const response = await request(app).post('/api/auth/register').send({ ...payload, username: ' validation_user ', email: ' VALIDATION@test.edu ', fullName: ' Validation User ' });
+    expect(response.status).toBe(201);
+    expect(response.body.user).toMatchObject({ username: 'validation_user', email: 'validation@test.edu', fullName: 'Validation User' });
+  });
 
 });

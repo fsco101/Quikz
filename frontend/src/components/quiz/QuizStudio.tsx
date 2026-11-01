@@ -1,7 +1,12 @@
+import { ValidatedForm } from "../ui/ValidatedForm.js";
 import React, { useState, useEffect } from "react";
 import { api } from "../../services/api.js";
 import { ModuleItem, Subject } from "../../types/curriculum.js";
 import { Quiz, Question } from "../../types/quiz.js";
+import { useAuth } from "../../context/AuthContext.js";
+import { useLocalDraft } from "../../hooks/useLocalDraft.js";
+import { isQuizDraft, QuizDraft } from "../../services/draftData.js";
+import { DraftStatus } from "../ui/DraftStatus.js";
 const blank = (): Question => ({
   questionText: "",
   options: ["", "", "", ""],
@@ -29,6 +34,7 @@ export function QuizStudio({
   onClose: () => void;
   onPublished: () => void;
 }) {
+  const { user } = useAuth();
   const [title, setTitle] = useState(`${module.title} — End Quiz`);
   const [duration, setDuration] = useState(30);
   const [timeUnit, setTimeUnit] = useState("seconds");
@@ -52,6 +58,25 @@ export function QuizStudio({
   const [busy, setBusy] = useState(!!module.quizId);
   const [version, setVersion] = useState<number>();
   const [legacyTotal, setLegacyTotal] = useState(false);
+  const [ready, setReady] = useState(!module.quizId);
+  const [missingAttachment, setMissingAttachment] = useState("");
+  const [formKey, setFormKey] = useState(0);
+  const draft = useLocalDraft<QuizDraft>({
+    ownerId: user?.id,
+    scope: `quiz:${module._id}`,
+    revision: `${module.__v ?? 0}:${module.quizId?._id || 'new'}:${version ?? 'new'}`,
+    ready,
+    value: { title, duration, timeUnit, passingPercentage, questionCount, questions: questions.map(q => ({ questionText: q.questionText, options: q.options, correctIndex: q.correctIndex, explanation: q.explanation || "" })), mode, content,
+      draftLimit, questionStyle, lectureSource, legacyTotal, attachmentName: file?.name || missingAttachment },
+    validate: isQuizDraft,
+    restore: data => {
+      setTitle(data.title); setDuration(data.duration); setTimeUnit(data.timeUnit);
+      setPassingPercentage(data.passingPercentage); setQuestionCount(data.questionCount); setQuestions(data.questions);
+      setMode(data.mode); setContent(data.content); setDraftLimit(data.draftLimit); setQuestionStyle(data.questionStyle);
+      setLectureSource(data.lectureSource === 'module' && !supportedAttachment ? 'other' : data.lectureSource); setLegacyTotal(data.legacyTotal); setFile(null);
+      setMissingAttachment(data.attachmentName); setGenerationReport(null); setFormKey(value => value + 1);
+    },
+  });
   useEffect(() => {
     if (!module.quizId) return;
     let cancelled = false;
@@ -69,6 +94,7 @@ export function QuizStudio({
         setLegacyTotal(!quiz.timePerQuestionSeconds);
         setDuration(quiz.timePerQuestionSeconds ?? quiz.timeLimitMinutes);
         setTimeUnit(quiz.timePerQuestionSeconds ? "seconds" : "minutes");
+        setReady(true);
         setNotice(
           "Editing this quiz. Active attempts and saved results keep their original grading settings.",
         );
@@ -150,7 +176,7 @@ export function QuizStudio({
   };
   const publish = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!valid) return;
+    if (!valid) { setError("Provide between 1 and 100 questions, valid settings, and four distinct answers for each question."); return; }
     setBusy(true);
     setError("");
     try {
@@ -172,6 +198,7 @@ export function QuizStudio({
           }),
         },
       );
+      await draft.complete();
       onPublished();
     } catch (err: any) {
       setError(err.message);
@@ -210,6 +237,13 @@ export function QuizStudio({
     link.click();
     URL.revokeObjectURL(url);
   };
+  if (!ready || draft.loading) return <div className="quiz-studio fixed inset-0 z-50 overflow-y-auto p-8" role="dialog" aria-modal="true" aria-label="Quiz Studio">
+    <section className="mx-auto max-w-xl rounded-2xl bg-white p-6 space-y-4">
+      <h1 className="text-2xl font-bold">Quiz Studio</h1>
+      {error && !ready ? <p role="alert">{error} Close and reopen the studio to retry.</p> : <p role="status">Loading the current quiz and your account draft...</p>}
+      <button type="button" className={button} onClick={onClose}>Close studio</button>
+    </section>
+  </div>;
   return (
     <div
       className="quiz-studio fixed inset-0 !m-0 z-50 overflow-y-auto"
@@ -217,7 +251,8 @@ export function QuizStudio({
       aria-modal="true"
       aria-label="Quiz Studio"
     >
-      <form
+      <ValidatedForm
+        key={formKey}
         onSubmit={publish}
         className="mx-auto max-w-5xl p-4 md:p-8 space-y-6"
       >
@@ -240,6 +275,8 @@ export function QuizStudio({
             Close studio
           </button>
         </header>
+        {ready && <DraftStatus draft={draft} busy={busy} attachmentName={missingAttachment} onForgetAttachment={() => setMissingAttachment('')} />}
+        <fieldset disabled={draft.working} className="min-w-0 space-y-6">
         {legacyTotal && (
           <p className="rounded-xl border bg-white p-4 text-sm">
             This existing quiz uses a total timer.{" "}
@@ -313,7 +350,7 @@ export function QuizStudio({
               aria-label="Questions per attempt"
               type="number"
               min="1"
-              max="100"
+              max={questions.length}
               step="1"
               required
               className={`${field} mt-2`}
@@ -349,6 +386,7 @@ export function QuizStudio({
                 onClick={() => {
                   setMode(value);
                   setFile(null);
+                  setMissingAttachment("");
                   setError("");
                   setGenerationReport(null);
                 }}
@@ -390,7 +428,7 @@ export function QuizStudio({
               <fieldset className="space-y-3 rounded-xl border border-indigo-100 bg-indigo-50/40 p-4">
                 <legend className="px-1 text-sm font-bold">Lecture source</legend>
                 <label className="flex items-start gap-3 text-sm">
-                  <input className="mt-1" type="radio" name="lecture-source" value="module" aria-label="Use module attachment" disabled={busy || !supportedAttachment} checked={lectureSource === 'module'} onChange={() => { setLectureSource('module'); setError(''); }} />
+                  <input className="mt-1" type="radio" name="lecture-source" value="module" aria-label="Use module attachment" disabled={busy || !supportedAttachment} checked={lectureSource === 'module'} onChange={() => { setLectureSource('module'); setFile(null); setMissingAttachment(''); setError(''); }} />
                   <span className="min-w-0"><strong>Use module attachment</strong>
                     <span className="mt-1 block break-all text-xs text-slate-600">{hasModuleAttachment ? module.fileName : 'No attachment on this module yet.'}</span>
                     <span className="mt-1 block text-xs text-slate-600">{supportedAttachment ? 'Generate from the saved file. No second upload needed.' : hasModuleAttachment ? 'Convert this file to TXT, MD, PDF, DOCX, or PPTX and replace the module attachment first.' : 'Add a supported file in Edit module, or use notes below.'}</span>
@@ -403,7 +441,7 @@ export function QuizStudio({
               </fieldset>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="text-sm font-bold">Draft question limit
-                  <input className={`${field} mt-2`} aria-label="Draft question limit" type="number" min={1} max={20} value={draftLimit} onChange={event => setDraftLimit(Number(event.target.value))} />
+                  <input className={`${field} mt-2`} data-validation-scope="preview" required step={1} aria-label="Draft question limit" type="number" min={1} max={20} value={draftLimit} onChange={event => setDraftLimit(Number(event.target.value))} />
                 </label>
                 <label className="text-sm font-bold">Question style
                   <select className={`${field} mt-2`} aria-label="Question style" value={questionStyle} onChange={event => setQuestionStyle(event.target.value)}>
@@ -417,6 +455,9 @@ export function QuizStudio({
                 Lecture notes
                 <textarea
                   aria-label="Lecture notes"
+                  data-validation-scope="preview"
+                  required={!file && !missingAttachment}
+                  maxLength={250000}
                   className={`${field} mt-2`}
                   rows={5}
                   value={content}
@@ -434,6 +475,9 @@ export function QuizStudio({
             <div className="flex flex-wrap items-center gap-4">
               {(mode === 'import' || lectureSource === 'other') && <input
                 key={mode}
+                data-validation-scope="preview"
+                required={mode === "import" || !!missingAttachment}
+                data-max-bytes={25 * 1024 * 1024}
                 aria-label={
                   mode === "import" ? "Question bank file" : "Lecture file"
                 }
@@ -444,11 +488,12 @@ export function QuizStudio({
                     ? ".json,.csv,.aiken,.txt"
                     : ".txt,.md,.pdf,.docx,.pptx"
                 }
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                onChange={(e) => { setFile(e.target.files?.[0] || null); setMissingAttachment(""); }}
               />}
               <button
                 type="button"
-                disabled={busy || (mode === 'lecture' && (!Number.isInteger(draftLimit) || draftLimit < 1 || draftLimit > 20))}
+                disabled={busy || draft.conflict || draft.working || !ready}
+                data-validate-scope="preview"
                 onClick={load}
                 className={button}
               >
@@ -548,6 +593,7 @@ export function QuizStudio({
                     <input
                       required
                       aria-label={`Question ${i + 1} option ${"ABCD"[index]}`}
+                      data-error={option.trim() && q.options.some((other, otherIndex) => otherIndex !== index && other.trim().toLowerCase() === option.trim().toLowerCase()) ? "Each answer option must be distinct." : undefined}
                       className="w-full bg-transparent text-sm p-1 outline-none"
                       value={option}
                       onChange={(e) =>
@@ -579,7 +625,7 @@ export function QuizStudio({
               ? "Ready for faculty review and publication."
               : "Complete all fields, provide 1–100 questions and valid quiz settings and four distinct options each."}
           </p>
-          <button type="submit" disabled={!valid || busy} className={button}>
+          <button type="submit" disabled={busy || draft.conflict || draft.working || !ready} className={button}>
             {busy
               ? "Working…"
               : module.quizId
@@ -587,7 +633,8 @@ export function QuizStudio({
                 : "Publish module quiz"}
           </button>
         </footer>
-      </form>
+        </fieldset>
+      </ValidatedForm>
     </div>
   );
 }
