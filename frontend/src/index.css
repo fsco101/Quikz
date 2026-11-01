@@ -353,7 +353,7 @@
 .person-card:nth-child(3n+3) { border-top-color: #eadcc7; }
 .person-card h2 { font-size: 14px; color: #503b60; }
 .person-card > p { color: #76617f; font-size: 12px; line-height: 1.8; padding-top: 14px; border-top: 1px solid #f0eaf5; }
-.profile-page { max-width: 950px; }
+.profile-page { max-width: 950px; margin-inline: auto; }
 .profile-avatar-panel { padding: 27px; border-top: 5px solid #d4c4e3; }
 .profile-details { padding: 27px; }
 .profile-page h2 { font-size: 17px; color: #5a426b; }
