@@ -2,12 +2,16 @@
   "name": "quikz-backend",
   "version": "1.0.0",
   "description": "Quikz Modular Quiz Learning Platform Backend API",
-  "main": "src/server.ts",
+  "main": "dist/server.js",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:production": "node scripts/check-production.mjs"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -25,6 +29,7 @@
     "mongoose": "^8.3.1",
     "multer": "^1.4.5-lts.1",
     "pdf-parse": "^2.4.5",
+    "saxes": "^6.0.0",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
@@ -40,5 +45,11 @@
     "typescript": "^5.4.5",
     "vitest": "^1.5.0"
   },
-  "type": "module"
+  "type": "module",
+  "overrides": {
+    "exceljs": {
+      "uuid": "^11.1.1"
+    },
+    "follow-redirects": "1.16.2"
+  }
 }

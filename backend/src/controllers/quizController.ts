@@ -9,8 +9,10 @@ import { User } from "../models/User.js";
 import { AuditEvent } from "../models/AuditEvent.js";
 import { AuthRequest } from "../middleware/auth.js";
 import { readableModules, requireAudienceAccess } from "../services/connections.js";
-import { generateQuestionsFromContent } from "../services/questionGenerator.js";
-import { extractDocumentText } from "../services/documentText.js";
+import { generateQuestionDraft } from "../services/questionGenerator.js";
+import { extractDocument } from "../services/documentText.js";
+import type { ExtractedDocument } from '../services/officeText.js';
+import { readModuleLecture, ensureModuleLectureCurrent } from '../services/moduleLecture.js';
 import {
   InputError,
   importQuestionBank,
@@ -218,18 +220,33 @@ export const importQuestions = async (req: AuthRequest, res: Response) => {
   );
   res.json({ questions, count: questions.length });
 };
-export const generateQuestions = async (req: AuthRequest, res: Response) => {
-  const content = req.file
-    ? await extractDocumentText(req.file.buffer, req.file.originalname)
-    : req.body.content;
+function generationPreview(content: unknown, document: ExtractedDocument | undefined, settings: Record<string, any>) {
   if (typeof content !== "string" || !content.trim() || content.length > 250000)
     throw new InputError("Provide lecture text up to 250,000 characters.");
-  const questions = generateQuestionsFromContent(content);
-  res.json({
+  const { questions, report } = generateQuestionDraft(content, {
+    limit: settings.questionLimit === undefined ? 20 : Number(settings.questionLimit),
+    style: settings.questionStyle ?? 'mixed',
+    sections: document?.sections,
+  });
+  return {
     questions,
     count: questions.length,
+    report: { ...report, warnings: [...(document?.warnings || []), ...report.warnings] },
     message: "Review and edit generated questions before publishing.",
-  });
+  };
+}
+export const generateQuestions = async (req: AuthRequest, res: Response) => {
+  const document = req.file ? await extractDocument(req.file.buffer, req.file.originalname) : undefined;
+  res.json(generationPreview(document?.text ?? req.body.content, document, req.body));
+};
+export const generateQuestionsFromModule = async (req: AuthRequest, res: Response) => {
+  const settings = req.body || {};
+  const source = await readModuleLecture(req.params.moduleId, req.user!.id, settings.moduleVersion);
+  const preview = generationPreview(source.document.text, source.document, settings);
+  await ensureModuleLectureCurrent(source, req.user!.id);
+  res.json({ ...preview, report: { ...preview.report, source: {
+    type: 'module-attachment', moduleId: source.moduleId, moduleVersion: source.version, fileName: source.fileName,
+  } } });
 };
 export const getQuizzesBySubject = async (req: AuthRequest, res: Response) => {
   const visible = await Module.find({ $and: [{ subjectId: id(req.params.subjectId) }, await readableModules(req.user)] }).select("_id");

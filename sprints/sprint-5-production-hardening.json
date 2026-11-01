@@ -55,11 +55,110 @@
     }
   ],
   "completedAt": "2026-10-22",
-  "auditedAt": "2026-10-22",
+  "auditedAt": "2026-10-27",
   "auditReport": "sprints/sprint-audit.json",
   "accountOwnershipAmendment": {
     "date": "2026-10-22",
     "status": "implemented",
     "details": "User-requested owner-only edits, admin-only health/user management, editable self profiles and shared avatars supersede historical immutable-quiz and faculty-operator acceptance text. Existing GitHub issue titles and statuses remain historical records. See sprint-audit.json accountAndOwnershipUpdate for current rules and validation."
+  },
+  "deploymentReadinessFollowUp": {
+    "date": "2026-10-27",
+    "status": "completed",
+    "scope": "Local production readiness for Render backend and Vercel frontend; no cloud resources created or deployed.",
+    "implementationDetails": [
+      "Root Render Blueprint provisions a Node 22 API with compiled build/start commands, health check, generated JWT secret, manual MongoDB/CORS/bootstrap secrets and a paid persistent upload disk.",
+      "Vercel frontend configuration and public VITE_API_URL support separate frontend/API origins for JSON requests, avatars, lesson downloads and report exports; Vercel builds reject missing, malformed or non-HTTPS API origins.",
+      "Production startup requires persistent upload configuration, exact CORS origins, MongoDB and a signing secret of at least 32 characters. Added port binding, shutdown draining and failing startup exit status.",
+      "Shared upload storage configuration keeps attachment writes and reads on the same mounted directory.",
+      "Removed unused frontend PDF/spreadsheet/router dependencies; patched body-parser and scoped ExcelJS uuid override. Production dependency audits are clean.",
+      "Added GitHub verification workflow, deployment guide, configuration tests and compiled production smoke check.",
+      "Ignored and untracked all 13 Stitch reference files while retaining local copies.",
+      "Production frontend hides development demo credentials; compiled login and signup were checked in Chromium."
+    ],
+    "verificationEvidence": [
+      "render.yaml",
+      "frontend/vercel.json",
+      "docs/DEPLOYMENT.md",
+      ".github/workflows/ci.yml",
+      "backend/src/__tests__/deployment.test.ts",
+      "backend/scripts/check-production.mjs",
+      "frontend/src/services/apiUrl.ts"
+    ],
+    "validation": {
+      "backendBuild": {
+        "command": "cd backend && npm run build",
+        "result": "passed"
+      },
+      "frontendBuild": {
+        "command": "cd frontend && npm run build",
+        "result": "passed"
+      },
+      "backendTests": {
+        "command": "cd backend && npm test",
+        "passed": 156,
+        "failed": 0
+      },
+      "crossOriginBrowserTests": {
+        "command": "cd frontend && npm run test:e2e",
+        "environment": {
+          "VITE_API_URL": "http://127.0.0.1:5100",
+          "CORS_ORIGINS": "http://127.0.0.1:3100"
+        },
+        "passed": 20,
+        "failed": 0
+      },
+      "compiledProductionSmoke": {
+        "command": "cd backend && npm run test:production",
+        "result": "passed",
+        "checks": [
+          "Production startup with isolated MongoDB and generated credentials",
+          "Database readiness health response and no-store header",
+          "Allowed and rejected origins and authenticated preflight",
+          "Real account and subject creation",
+          "Authenticated file upload and download",
+          "Records, token validity and attachment persistence after process restart",
+          "Production demo seeding remains disabled"
+        ]
+      },
+      "productionDependencyAudit": {
+        "command": "npm audit --omit=dev in backend and frontend",
+        "backendVulnerabilities": 0,
+        "frontendVulnerabilities": 0
+      },
+      "hostingSchemas": {
+        "render": "valid against https://render.com/schema/render.yaml.json",
+        "vercel": "config validates against https://openapi.vercel.sh/vercel.json; vendor metaschema precheck skipped because unused function definitions mix schema dialects"
+      },
+      "vercelBuildGuard": "Missing origin, /api suffix and HTTP origin rejected; valid HTTPS backend origin accepted.",
+      "ignoredReferenceFolder": "git check-ignore passes, tracked file count is zero and local files remain present.",
+      "diffCheck": {
+        "command": "git diff --check",
+        "result": "passed"
+      },
+      "compiledFrontendSmoke": {
+        "result": "passed",
+        "checks": [
+          "Compiled login renders",
+          "Compiled signup renders",
+          "No demo credential buttons in production"
+        ]
+      }
+    },
+    "githubVerification": {
+      "verifiedAt": "2026-10-27",
+      "closedIssueNumbers": [
+        21,
+        22
+      ],
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "note": "Existing Sprint 5 issues already closed as completed and reverified; no new issues created or closed."
+    },
+    "limits": [
+      "Live Render/Vercel deployment and Atlas connectivity require the owner to configure hosting accounts, domains and secrets.",
+      "The disk-backed Blueprint uses a paid single-instance Render service. Shared object storage is needed before horizontal scaling.",
+      "Development-tool audit advisories remain outside the deployed production runtime; no claim of a complete security audit is made."
+    ]
   }
 }

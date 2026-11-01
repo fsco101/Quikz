@@ -12,6 +12,12 @@ const field =
   "w-full rounded-xl border border-[#c8c5d0] bg-white px-3 py-2 text-sm focus:border-[#6063ee] focus:outline-none";
 const button =
   "rounded-xl bg-[#4648d4] px-4 py-2 text-sm font-bold text-white disabled:opacity-40";
+type GenerationReport = {
+  factsFound: number; duplicatesRemoved: number; skippedLines: number;
+  questionTypes: { definition: number; identification: number; cloze: number };
+  warnings: string[];
+  source?: { type: 'module-attachment'; moduleId: string; moduleVersion: number; fileName: string };
+};
 export function QuizStudio({
   subject,
   module,
@@ -35,6 +41,12 @@ export function QuizStudio({
   const [mode, setMode] = useState("manual");
   const [content, setContent] = useState(module.textContent || "");
   const [file, setFile] = useState<File | null>(null);
+  const [draftLimit, setDraftLimit] = useState(20);
+  const [questionStyle, setQuestionStyle] = useState('mixed');
+  const [generationReport, setGenerationReport] = useState<GenerationReport | null>(null);
+  const hasModuleAttachment = !!(module.fileName && module.fileUrl);
+  const supportedAttachment = hasModuleAttachment && /\.(txt|md|pdf|docx|pptx)$/i.test(module.fileName!);
+  const [lectureSource, setLectureSource] = useState<'module' | 'other'>(supportedAttachment ? 'module' : 'other');
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(!!module.quizId);
@@ -102,16 +114,30 @@ export function QuizStudio({
     setBusy(true);
     setError("");
     setNotice("");
+    setGenerationReport(null);
     try {
-      const data = new FormData();
-      if (file) data.append("file", file);
-      else if (mode === "lecture") data.append("content", content);
-      else throw new Error("Select a question bank file.");
-      const result = await api.request<{ questions: Question[] }>(
-        `/quizzes/${mode === "import" ? "import" : "generate"}`,
-        { method: "POST", body: data },
+      let endpoint: string;
+      let options: RequestInit;
+      if (mode === 'lecture' && lectureSource === 'module') {
+        endpoint = `/quizzes/generate/module/${encodeURIComponent(module._id)}`;
+        options = { method: 'POST', body: JSON.stringify({ questionLimit: draftLimit, questionStyle, moduleVersion: module.__v }) };
+      } else {
+        const data = new FormData();
+        if (file) data.append("file", file);
+        else if (mode === "lecture") data.append("content", content);
+        else throw new Error("Select a question bank file.");
+        if (mode === 'lecture') {
+          data.append('questionLimit', String(draftLimit));
+          data.append('questionStyle', questionStyle);
+        }
+        endpoint = `/quizzes/${mode === 'import' ? 'import' : 'generate'}`;
+        options = { method: 'POST', body: data };
+      }
+      const result = await api.request<{ questions: Question[]; report?: GenerationReport }>(
+        endpoint, options,
       );
       setQuestions(result.questions);
+      setGenerationReport(result.report || null);
       setQuestionCount(result.questions.length);
       setNotice(
         `Loaded ${result.questions.length} questions. Review the answer keys and explanations below before publishing.`,
@@ -319,10 +345,12 @@ export function QuizStudio({
                 aria-selected={mode === value}
                 key={value}
                 type="button"
+                disabled={busy}
                 onClick={() => {
                   setMode(value);
                   setFile(null);
                   setError("");
+                  setGenerationReport(null);
                 }}
                 className={`rounded-xl px-4 py-2 text-sm font-bold ${mode === value ? "bg-[#070235] text-white" : "bg-slate-100"}`}
               >
@@ -354,12 +382,38 @@ export function QuizStudio({
           {mode === "lecture" && (
             <>
               <p className="text-sm text-slate-600">
-                Use at least four distinct definitions, such as “Photosynthesis:
-                the process plants use to convert light into energy.” Generated
-                questions use other lecture definitions as distractors. Review
-                all wording and keys.
+                Include at least four distinct terms or facts. Use definitions,
+                term-description tables, or clear sentences such as “DNA stores
+                genetic information in cells.” Questions use your lecture text
+                and include source references for review.
               </p>
-              <label className="block text-sm font-bold">
+              <fieldset className="space-y-3 rounded-xl border border-indigo-100 bg-indigo-50/40 p-4">
+                <legend className="px-1 text-sm font-bold">Lecture source</legend>
+                <label className="flex items-start gap-3 text-sm">
+                  <input className="mt-1" type="radio" name="lecture-source" value="module" aria-label="Use module attachment" disabled={busy || !supportedAttachment} checked={lectureSource === 'module'} onChange={() => { setLectureSource('module'); setError(''); }} />
+                  <span className="min-w-0"><strong>Use module attachment</strong>
+                    <span className="mt-1 block break-all text-xs text-slate-600">{hasModuleAttachment ? module.fileName : 'No attachment on this module yet.'}</span>
+                    <span className="mt-1 block text-xs text-slate-600">{supportedAttachment ? 'Generate from the saved file. No second upload needed.' : hasModuleAttachment ? 'Convert this file to TXT, MD, PDF, DOCX, or PPTX and replace the module attachment first.' : 'Add a supported file in Edit module, or use notes below.'}</span>
+                  </span>
+                </label>
+                <label className="flex items-start gap-3 text-sm">
+                  <input className="mt-1" type="radio" name="lecture-source" value="other" aria-label="Use notes or another file" disabled={busy} checked={lectureSource === 'other'} onChange={() => { setLectureSource('other'); setError(''); }} />
+                  <span><strong>Use notes or another file</strong><span className="mt-1 block text-xs text-slate-600">Paste text or upload a different lecture for this draft.</span></span>
+                </label>
+              </fieldset>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="text-sm font-bold">Draft question limit
+                  <input className={`${field} mt-2`} aria-label="Draft question limit" type="number" min={1} max={20} value={draftLimit} onChange={event => setDraftLimit(Number(event.target.value))} />
+                </label>
+                <label className="text-sm font-bold">Question style
+                  <select className={`${field} mt-2`} aria-label="Question style" value={questionStyle} onChange={event => setQuestionStyle(event.target.value)}>
+                    <option value="mixed">Mixed recall questions</option>
+                    <option value="definitions">Match descriptions</option>
+                    <option value="terms">Identify terms</option>
+                  </select>
+                </label>
+              </div>
+              {lectureSource === 'other' && <><label className="block text-sm font-bold">
                 Lecture notes
                 <textarea
                   aria-label="Lecture notes"
@@ -371,29 +425,30 @@ export function QuizStudio({
               </label>
               <p className="text-xs text-slate-500">
                 Or upload TXT, MD, PDF, DOCX, or PPTX (25 MB max). An attached
-                file takes precedence over pasted text. Scanned PDFs require
-                OCR.
-              </p>
+                file takes precedence over pasted text. Visible PowerPoint slide
+                text is read in deck order. Scanned images require OCR.
+              </p></>}
             </>
           )}
           {mode !== "manual" && (
             <div className="flex flex-wrap items-center gap-4">
-              <input
+              {(mode === 'import' || lectureSource === 'other') && <input
                 key={mode}
                 aria-label={
                   mode === "import" ? "Question bank file" : "Lecture file"
                 }
                 type="file"
+                disabled={busy}
                 accept={
                   mode === "import"
                     ? ".json,.csv,.aiken,.txt"
                     : ".txt,.md,.pdf,.docx,.pptx"
                 }
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-              />
+              />}
               <button
                 type="button"
-                disabled={busy}
+                disabled={busy || (mode === 'lecture' && (!Number.isInteger(draftLimit) || draftLimit < 1 || draftLimit > 20))}
                 onClick={load}
                 className={button}
               >
@@ -422,6 +477,13 @@ export function QuizStudio({
             {notice}
           </p>
         )}
+        {generationReport && <section aria-label="Generation source analysis" className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 text-sm text-slate-700">
+          <h3 className="font-bold text-[#070235]">Source analysis</h3>
+          {generationReport.source?.type === 'module-attachment' && <p className="mt-2 break-all">Module attachment used: <strong>{generationReport.source.fileName}</strong></p>}
+          <p className="mt-2">{generationReport.factsFound} usable facts · {generationReport.duplicatesRemoved} duplicates removed · {generationReport.skippedLines} lines without a usable fact</p>
+          <p className="mt-1">Generated mix: {generationReport.questionTypes.definition} description matches, {generationReport.questionTypes.identification} term identifications, {generationReport.questionTypes.cloze} fill-in-the-blank questions.</p>
+          <ul className="mt-3 list-disc space-y-1 pl-5">{generationReport.warnings.map(warning => <li key={warning}>{warning}</li>)}</ul>
+        </section>}
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-[#070235]">
             Question preview{" "}

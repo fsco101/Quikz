@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("workspace navigation supports keyboard course selection and a compact mobile learning path", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/#/login");
   await page.screenshot({ path: "test-results/design-auth-desktop.png", fullPage: true, animations: 'disabled' });
   await page.getByRole("button", { name: "Student Demo", exact: true }).click();
   await page.getByRole("button", { name: "Sign In to Quikz", exact: true }).click();
@@ -57,7 +57,7 @@ test("workspace navigation supports keyboard course selection and a compact mobi
 });
 
 test("faculty workspace and account screens retain their responsive page structure", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/#/login");
   await page.getByRole("button", { name: "Faculty Demo", exact: true }).click();
   await page.getByRole("button", { name: "Sign In to Quikz", exact: true }).click();
   const navigation = page.getByRole("navigation", { name: "Main navigation" });
