@@ -1,3 +1,4 @@
+import { ValidatedForm } from "../ui/ValidatedForm.js";
 import React, { useState } from 'react';
 import { api } from '../../services/api.js';
 
@@ -50,7 +51,7 @@ export const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({
         <div className="flex items-center justify-between pb-4 border-b border-[#c8c5d0]/50 mb-5">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-[#6063ee]/10 text-[#4648d4] flex items-center justify-center">
-              <span className="material-symbols-outlined text-[20px]">library_add</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[20px]">library_add</span>
             </div>
             <div>
               <h3 className="text-base font-bold text-[#070235]">Create Academic Subject</h3>
@@ -58,21 +59,22 @@ export const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({
             </div>
           </div>
           <button
+            aria-label="Close form"
             onClick={onClose}
             className="w-8 h-8 rounded-lg hover:bg-[#eff4ff] text-[#47464f] flex items-center justify-center transition-colors"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
         {errorMsg && (
           <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]">error</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">error</span>
             <span>{errorMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <ValidatedForm onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
             <label className="block font-bold text-[#070235] mb-1">
               Subject Name <span className="text-red-500">*</span>
@@ -80,6 +82,7 @@ export const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({
             <input
               type="text"
               required
+              aria-label="Subject name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Data Structures & Algorithms"
@@ -95,6 +98,7 @@ export const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({
               <input
                 type="text"
                 required
+                aria-label="Subject code"
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder="CS102"
@@ -107,6 +111,8 @@ export const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({
                 Term / Semester <span className="text-red-500">*</span>
               </label>
               <select
+                aria-label="Subject term"
+                required
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-[#c8c5d0] bg-white focus:outline-none focus:border-[#4648d4]"
@@ -122,6 +128,8 @@ export const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({
                 Year Level <span className="text-red-500">*</span>
               </label>
               <select
+                aria-label="Subject year level"
+                required
                 value={yearLevel}
                 onChange={(e) => setYearLevel(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-[#c8c5d0] bg-white focus:outline-none focus:border-[#4648d4]"
@@ -137,6 +145,7 @@ export const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({
           <div>
             <label className="block font-bold text-[#070235] mb-1">Description / Syllabus Overview</label>
             <textarea
+              aria-label="Subject description"
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -158,11 +167,11 @@ export const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({
               disabled={loading}
               className="px-5 py-2.5 rounded-xl bg-[#070235] hover:bg-[#1e1b4b] text-white font-bold transition-all shadow-md flex items-center gap-1.5 disabled:opacity-50"
             >
-              <span className="material-symbols-outlined text-[16px]">add_circle</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[16px]">add_circle</span>
               <span>{loading ? 'Creating...' : 'Create Subject'}</span>
             </button>
           </div>
-        </form>
+        </ValidatedForm>
       </div>
     </div>
   );

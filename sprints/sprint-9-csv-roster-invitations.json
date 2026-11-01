@@ -103,5 +103,17 @@
     "Imported names are file labels and do not update profiles. CSV row numbers count records rather than physical lines inside quoted fields.",
     "Partial failures keep successful invitations; previewing again safely skips existing connections and requests.",
     "Verification uses Chromium and isolated local MongoDB, not a live Atlas deployment."
-  ]
+  ],
+  "formValidationFollowUp": {
+    "date": "2026-11-01",
+    "status": "completed",
+    "details": "Roster file errors associated with their input; existing CSV file and row validation retained.",
+    "githubIssueNumbers": [
+      34
+    ],
+    "githubVerifiedAt": "2026-11-01",
+    "githubState": "CLOSED",
+    "githubStateReason": "COMPLETED",
+    "validationEvidence": "sprints/sprint-audit.json:formValidationFollowUp"
+  }
 }

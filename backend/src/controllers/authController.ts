@@ -4,7 +4,8 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 import { AuthRequest } from '../middleware/auth.js';
 
-import { userDTO } from '../services/users.js';
+import { profileFields, userDTO, validatePassword } from '../services/users.js';
+import { InputError } from '../services/questionBank.js';
 import { JWT_SECRET } from '../config/auth.js';
 
 export const register = async (req: Request, res: Response) => {
@@ -38,14 +39,11 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Select a valid role, year level, and section.' });
     }
 
-    if (typeof password !== 'string' || password.length < 6) {
-      return res.status(400).json({
-        message: 'Password must be at least 6 characters in length.'
-      });
-    }
+    validatePassword(password);
+    const fields = profileFields({ username, email, fullName, surname });
 
     const existingUser = await User.findOne({
-      $or: [{ email: email.toLowerCase() }, { username }]
+      $or: [{ email: fields.email }, { username: fields.username }]
     });
 
     if (existingUser) {
@@ -58,12 +56,9 @@ export const register = async (req: Request, res: Response) => {
     const passwordHash = await bcrypt.hash(password, salt);
 
     const newUser = new User({
-      username,
-      email: email.toLowerCase(),
+      ...fields,
       passwordHash,
       role: role === 'faculty' ? 'faculty' : 'student',
-      fullName,
-      surname,
       yearLevel: yearLevel || '1st Year',
       section: section || 'Section A',
       termsAccepted: true,
@@ -90,6 +85,7 @@ export const register = async (req: Request, res: Response) => {
       user: userDTO(newUser)
     });
   } catch (err: any) {
+    if (err instanceof InputError) return res.status(err.status).json({ message: err.message });
     res.status(err.name === 'ValidationError' ? 400 : err.code === 11000 ? 409 : 500).json({ message: 'Registration failed', error: err.message });
   }
 };

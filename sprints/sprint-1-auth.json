@@ -74,5 +74,18 @@
     "date": "2026-10-22",
     "status": "implemented",
     "details": "User-requested owner-only edits, admin-only health/user management, editable self profiles and shared avatars supersede historical immutable-quiz and faculty-operator acceptance text. Existing GitHub issue titles and statuses remain historical records. See sprint-audit.json accountAndOwnershipUpdate for current rules and validation."
+  },
+  "formValidationFollowUp": {
+    "date": "2026-11-01",
+    "status": "completed",
+    "details": "Shared login/signup checks, normalized registration and API account validation.",
+    "githubIssueNumbers": [
+      1,
+      2
+    ],
+    "githubVerifiedAt": "2026-11-01",
+    "githubState": "CLOSED",
+    "githubStateReason": "COMPLETED",
+    "validationEvidence": "sprints/sprint-audit.json:formValidationFollowUp"
   }
 }

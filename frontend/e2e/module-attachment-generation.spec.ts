@@ -42,7 +42,7 @@ test('faculty generates from the saved module file, switches sources, and publis
   const sent = await generatedRequest;
   expect(sent.headers()['content-type']).toContain('application/json');
   expect(sent.postDataJSON()).toEqual({ questionLimit: 3, questionStyle: 'terms', moduleVersion: 0 });
-  await expect(page.getByRole('status')).toContainText('Loaded 3 questions.');
+  await expect(page.getByRole('status').filter({ hasText: 'Loaded' })).toContainText('Loaded 3 questions.');
   await expect(page.getByRole('region', { name: 'Generation source analysis' })).toContainText(`Module attachment used: ${fileName}`);
   await expect(page.getByLabel('Question 1 explanation', { exact: true })).toHaveValue(new RegExp(fileName));
   expect((await (await request.get(`${api}/modules/${module._id}`, { headers })).json()).module.quizId).toBeUndefined();
@@ -58,13 +58,13 @@ test('faculty generates from the saved module file, switches sources, and publis
   const pastedRequest = page.waitForRequest(req => req.url().endsWith('/quizzes/generate'));
   await page.getByRole('button', { name: 'Generate preview', exact: true }).click();
   expect((await pastedRequest).headers()['content-type']).toContain('multipart/form-data');
-  await expect(page.getByRole('status')).toContainText('Loaded 1 questions.');
+  await expect(page.getByRole('status').filter({ hasText: 'Loaded' })).toContainText('Loaded 1 questions.');
   await expect(page.getByRole('region', { name: 'Generation source analysis' })).not.toContainText('Module attachment used');
 
   await page.getByRole('radio', { name: 'Use module attachment', exact: true }).check();
   await page.getByLabel('Draft question limit', { exact: true }).fill('3');
   await page.getByRole('button', { name: 'Generate preview', exact: true }).click();
-  await expect(page.getByRole('status')).toContainText('Loaded 3 questions.');
+  await expect(page.getByRole('status').filter({ hasText: 'Loaded' })).toContainText('Loaded 3 questions.');
   await page.screenshot({ path: 'test-results/module-source-desktop.png', fullPage: true });
   await page.getByRole('button', { name: 'Publish module quiz', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Edit quiz', exact: true })).toBeVisible();

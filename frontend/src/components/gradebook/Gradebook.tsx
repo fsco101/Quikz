@@ -70,12 +70,15 @@ export function Gradebook() {
     Object.entries(filters).filter(([, v]) => v !== ""),
   ).toString();
   const query = `${filterQuery}&page=${page}`;
+  const invalidScore = [filters.minScore, filters.maxScore].some(value => value !== "" && (!Number.isFinite(Number(value)) || Number(value) < 0 || Number(value) > 100));
+  const filterError = invalidScore ? "Score filters must be between 0 and 100." : filters.minScore !== "" && filters.maxScore !== "" && Number(filters.minScore) > Number(filters.maxScore) ? "Minimum score cannot exceed maximum score." : "";
   useEffect(() => {
     setPage(1);
   }, [filterQuery]);
   const update = (key: keyof typeof filters, value: string) =>
     setFilters((f) => ({ ...f, [key]: value }));
   useEffect(() => {
+    if (filterError) { setLoading(false); return; }
     const controller = new AbortController();
     setLoading(true);
     setError("");
@@ -97,8 +100,9 @@ export function Gradebook() {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [query]);
+  }, [query, filterError]);
   const download = async (format: string) => {
+    if (filterError) return;
     setExporting(format);
     setError("");
     try {
@@ -124,7 +128,7 @@ export function Gradebook() {
       <PageHeading eyebrow="A clearer picture" title={user?.role === "faculty" ? "Master gradebook" : "My quiz results"}
         description={user?.role === "faculty" ? "Results from your connected students in courses you own. Disconnecting removes their records from your reports and exports." : "Your quiz attempts, scores and exports. Only results belonging to your signed-in account appear here."}
         actions={<>{["pdf", "xlsx"].map((format) => <button key={format} onClick={() => download(format)}
-          disabled={loading || !report?.summary.attempts || !!exporting} className={`ui-button ${format === "xlsx" ? "ui-button-primary" : "ui-button-secondary"}`}>
+          disabled={!!filterError || loading || !report?.summary.attempts || !!exporting} className={`ui-button ${format === "xlsx" ? "ui-button-primary" : "ui-button-secondary"}`}>
           <Download size={16} aria-hidden="true" />{exporting === format ? "Preparing…" : `Export ${format === "xlsx" ? "Excel" : "PDF"}`}
         </button>)}</>} />
       <section
@@ -151,6 +155,7 @@ export function Gradebook() {
           Search
           <input
             aria-label="Search results"
+            maxLength={120}
             placeholder="Name, student ID, or quiz title"
             className={`${field} mt-1`}
             value={filters.search}
@@ -202,6 +207,9 @@ export function Gradebook() {
           Minimum score %
           <input
             aria-label="Minimum score"
+            aria-invalid={!!filterError}
+            aria-describedby={filterError ? "gradebook-filter-error" : undefined}
+            step="any"
             className={`${field} mt-1`}
             type="number"
             min="0"
@@ -214,6 +222,9 @@ export function Gradebook() {
           Maximum score %
           <input
             aria-label="Maximum score"
+            aria-invalid={!!filterError}
+            aria-describedby={filterError ? "gradebook-filter-error" : undefined}
+            step="any"
             className={`${field} mt-1`}
             type="number"
             min="0"
@@ -244,6 +255,7 @@ export function Gradebook() {
           </select>
         </label>
       </section>
+      {filterError && <p id="gradebook-filter-error" role="alert" className="form-validation-errors">{filterError}</p>}
       {error && (
         <p
           role="alert"
@@ -257,7 +269,7 @@ export function Gradebook() {
           Updating results…
         </p>
       )}
-      {report && (
+      {report && !filterError && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[

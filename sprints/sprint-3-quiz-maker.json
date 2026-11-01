@@ -316,5 +316,32 @@
       "An attachment missing from the server must be uploaded again; unsupported files must be converted or another source selected.",
       "Generation is a preview; faculty review and explicit publication remain required."
     ]
+  },
+  "formValidationFollowUp": {
+    "date": "2026-11-01",
+    "status": "completed",
+    "details": "Quiz numeric and distinct-answer checks, available-bank count bounds and independent preview validation.",
+    "githubIssueNumbers": [
+      8,
+      9,
+      14,
+      15
+    ],
+    "githubVerifiedAt": "2026-11-01",
+    "githubState": "CLOSED",
+    "githubStateReason": "COMPLETED",
+    "validationEvidence": "sprints/sprint-audit.json:formValidationFollowUp"
+  },
+  "autosaveFollowUp": {
+    "date": "2026-11-01",
+    "name": "Persistent module and quiz draft autosave for Vercel and Render",
+    "status": "completed",
+    "githubIssueNumbers": [
+      9
+    ],
+    "githubVerifiedAt": "2026-11-01",
+    "githubState": "CLOSED",
+    "githubStateReason": "COMPLETED",
+    "validationEvidence": "sprints/sprint-audit.json:autosaveFollowUp"
   }
 }

@@ -127,5 +127,17 @@
     "Public and Both overlap for reading because public learners include connected students; neither grants roster or result access.",
     "Disconnection cannot recall a previously downloaded file. Historical student results are retained.",
     "Tests use isolated local MongoDB and Chromium, not a live Atlas cluster or other browser engines."
-  ]
+  ],
+  "formValidationFollowUp": {
+    "date": "2026-11-01",
+    "status": "completed",
+    "details": "Email invitation format/required checks with accessible field feedback.",
+    "githubIssueNumbers": [
+      29
+    ],
+    "githubVerifiedAt": "2026-11-01",
+    "githubState": "CLOSED",
+    "githubStateReason": "COMPLETED",
+    "validationEvidence": "sprints/sprint-audit.json:formValidationFollowUp"
+  }
 }

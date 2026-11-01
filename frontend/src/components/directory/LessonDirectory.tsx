@@ -91,6 +91,7 @@ export function LessonDirectory({
           Keyword
           <input
             aria-label="Search lessons"
+            maxLength={120}
             className={field}
             placeholder="Topic, concept, or course code"
             value={filters.search}

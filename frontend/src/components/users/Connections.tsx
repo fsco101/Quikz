@@ -1,3 +1,4 @@
+import { ValidatedForm } from "../ui/ValidatedForm.js";
 import { FormEvent, useEffect, useState } from "react";
 import { Check, Link2, Mail, Search, Users, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.js";
@@ -59,11 +60,11 @@ export function Connections() {
     <section className="ui-panel connection-invite" aria-labelledby="invite-heading">
       <div><span className="connection-icon"><Mail size={21} aria-hidden="true" /></span><h2 id="invite-heading">{faculty ? "Invite a student" : "Connect with a professor"}</h2>
         <p>Enter their Quikz account email. They must accept the request in Connections before access is granted.</p></div>
-      <form onSubmit={send} className="connection-invite-form">
+      <ValidatedForm onSubmit={send} className="connection-invite-form">
         <label htmlFor="connection-email">{faculty ? "Student email" : "Professor email"}</label>
         <div><input id="connection-email" type="email" autoComplete="off" maxLength={254} required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={faculty ? "student@school.edu" : "professor@school.edu"} />
           <button className="ui-button ui-button-primary" disabled={!!busy}><Link2 size={16} aria-hidden="true" />{busy === "send" ? "Sending…" : "Send request"}</button></div>
-      </form>
+      </ValidatedForm>
     </section>
     {faculty && <RosterInvitations onImported={(sent) => {
       if (sent) changeView("outgoing");

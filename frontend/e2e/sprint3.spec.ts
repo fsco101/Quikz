@@ -8,7 +8,8 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("dialog", (dialog) => dialog.accept());
   await page.goto("/#/login");
-  await page.getByRole("button", { name: "Faculty Demo" }).click();
+  await page.getByLabel("Username or Email", { exact: true }).fill("faculty@quikz.edu");
+  await page.getByLabel("Password", { exact: true }).fill("Faculty@123");
   await page.getByRole("button", { name: "Sign In to Quikz" }).click();
   const unique = `BIO${Date.now()}`;
   await page.getByRole("button", { name: /Create New Subject/ }).click();
@@ -37,9 +38,9 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
     page.getByRole("heading", { name: "Quiz Studio", exact: true }),
   ).toBeVisible();
   await page.getByLabel("Time per question").fill("0");
-  await expect(
-    page.getByRole("button", { name: "Publish module quiz" }),
-  ).toBeDisabled();
+  await page.getByLabel("Quiz title", { exact: true }).focus();
+  await expect(page.getByLabel("Time per question")).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByRole("alert")).toContainText("Enter a value of at least 1");
   await page.getByLabel("Time per question").fill("2");
   await page.getByLabel("Time unit", { exact: true }).selectOption("minutes");
   await page.getByLabel("Passing percentage").fill("80");
@@ -98,7 +99,8 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
     page.getByText("End quiz published.", { exact: false }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Sign Out" }).click();
-  await page.getByRole("button", { name: "Student Demo" }).click();
+  await page.getByLabel("Username or Email", { exact: true }).fill("student@quikz.edu");
+  await page.getByLabel("Password", { exact: true }).fill("Student@123");
   await page.getByRole("button", { name: "Sign In to Quikz" }).click();
   await page.getByText(unique, { exact: true }).click();
   await page.getByRole("button", { name: /Start \/ resume end quiz/ }).click();
@@ -257,7 +259,8 @@ test("advances timed questions and submits saved answers when the final question
     ).status(),
   ).toBe(201);
   await page.goto("/#/login");
-  await page.getByRole("button", { name: "Student Demo" }).click();
+  await page.getByLabel("Username or Email", { exact: true }).fill("student@quikz.edu");
+  await page.getByLabel("Password", { exact: true }).fill("Student@123");
   await page.getByRole("button", { name: "Sign In to Quikz" }).click();
   await page.getByText(unique, { exact: true }).click();
   await page.getByRole("button", { name: /Start \/ resume end quiz/ }).click();

@@ -160,5 +160,58 @@
       "The disk-backed Blueprint uses a paid single-instance Render service. Shared object storage is needed before horizontal scaling.",
       "Development-tool audit advisories remain outside the deployed production runtime; no claim of a complete security audit is made."
     ]
+  },
+  "accountAvatarFollowUp": {
+    "date": "2026-11-01",
+    "name": "Remove login demo shortcuts and prepare Cloudinary avatar uploads",
+    "status": "completed",
+    "implementation": [
+      "Login and signup no longer display demo account buttons, embedded credential fillers, or demo email placeholders. Browser suites sign in through the regular form.",
+      "Authenticated avatar uploads retain PNG/JPEG/WebP validation, 5 MB and 25 megapixel limits, and sanitized 256x256 WebP output.",
+      "Set all three backend CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET variables to enable signed Cloudinary uploads. With all blank, MongoDB storage remains available. Partial configuration returns 503.",
+      "Existing shared avatar API URLs serve legacy MongoDB images or redirect to HTTPS Cloudinary images. Replacement/removal cleans up cloud assets with invalidation; failed saves clean up the new asset. Cleanup failures are logged for operator follow-up.",
+      "Cloud storage metadata stays out of account responses and cannot be set through profile edits."
+    ],
+    "validation": {
+      "backend": "26 tests passed: accounts.test.ts and deployment.test.ts, including mocked Cloudinary upload/replacement/removal, provider failure, incomplete configuration and failed database save cleanup.",
+      "browser": "15 scenarios passed across accounts, design, landing-auth, sprint3 and sprints4-5; desktop login screenshot reviewed.",
+      "builds": "Backend and frontend production builds passed.",
+      "liveCloudinary": "Not exercised; provider calls were mocked. Backend credentials are required for a live upload.",
+      "diffCheck": "git diff --check passed"
+    },
+    "githubVerification": {
+      "verifiedAt": "2026-11-01",
+      "closedIssueNumbers": [
+        22
+      ],
+      "state": "CLOSED",
+      "stateReason": "COMPLETED",
+      "newlyClosedIssueNumbers": [],
+      "note": "Related Sprint 5 and Sprint 7 issues were already closed as completed and reverified on GitHub."
+    }
+  },
+  "formValidationFollowUp": {
+    "date": "2026-11-01",
+    "status": "completed",
+    "details": "Directory keyword length bounded to the API search limit.",
+    "githubIssueNumbers": [
+      21
+    ],
+    "githubVerifiedAt": "2026-11-01",
+    "githubState": "CLOSED",
+    "githubStateReason": "COMPLETED",
+    "validationEvidence": "sprints/sprint-audit.json:formValidationFollowUp"
+  },
+  "autosaveFollowUp": {
+    "date": "2026-11-01",
+    "name": "Persistent module and quiz draft autosave for Vercel and Render",
+    "status": "completed",
+    "githubIssueNumbers": [
+      22
+    ],
+    "githubVerifiedAt": "2026-11-01",
+    "githubState": "CLOSED",
+    "githubStateReason": "COMPLETED",
+    "validationEvidence": "sprints/sprint-audit.json:autosaveFollowUp"
   }
 }

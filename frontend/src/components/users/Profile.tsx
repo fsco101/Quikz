@@ -1,3 +1,4 @@
+import { ValidatedForm } from "../ui/ValidatedForm.js";
 import { PageHeading } from "../ui/PageHeading.js";
 ﻿import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext.js";
@@ -57,7 +58,22 @@ export function Profile() {
           {notice}
         </p>
       )}
-      <section className="profile-avatar-panel ui-panel space-y-4">
+      <ValidatedForm key={user?.avatarUrl || "no-avatar"} className="profile-avatar-panel ui-panel space-y-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const input = event.currentTarget.querySelector<HTMLInputElement>('input[type="file"]');
+          void perform(async () => {
+            const data = new FormData();
+            data.append("avatar", file!);
+            const result = await api.request<{ user: User }>(
+              "/users/me/avatar", { method: "POST", body: data },
+            );
+            updateUser(result.user);
+            setFile(null);
+            if (input) input.value = "";
+            setNotice("Avatar updated. Others can now see it.");
+          });
+        }}>
         <h2 className="text-xl font-bold">Profile avatar</h2>
         <div className="flex flex-wrap items-center gap-4">
           <Avatar
@@ -78,6 +94,8 @@ export function Profile() {
             className="mt-2 block max-w-full"
             type="file"
             accept="image/png,image/jpeg,image/webp"
+            required
+            data-max-bytes={5 * 1024 * 1024}
             onChange={(e) => setFile(e.target.files?.[0] || null)}
           />
         </label>
@@ -85,24 +103,12 @@ export function Profile() {
           <button
             disabled={!file || busy}
             className={button}
-            onClick={() =>
-              void perform(async () => {
-                const data = new FormData();
-                data.append("avatar", file!);
-                const result = await api.request<{ user: User }>(
-                  "/users/me/avatar",
-                  { method: "POST", body: data },
-                );
-                updateUser(result.user);
-                setFile(null);
-                setNotice("Avatar updated. Others can now see it.");
-              })
-            }
           >
             Upload avatar
           </button>
           {user?.avatarUrl && (
             <button
+              type="button"
               disabled={busy}
               className="rounded-xl border px-4 py-2"
               onClick={() =>
@@ -120,8 +126,8 @@ export function Profile() {
             </button>
           )}
         </div>
-      </section>
-      <form
+      </ValidatedForm>
+      <ValidatedForm
         className="ui-panel profile-details grid gap-5 sm:grid-cols-2"
         onSubmit={(e) => {
           e.preventDefault();
@@ -150,6 +156,7 @@ export function Profile() {
               className={field}
               aria-label={label}
               type={key === "email" ? "email" : "text"}
+              data-validate={key === "username" ? "username" : undefined}
               value={draft[key]}
               required
               maxLength={key === "email" ? 254 : key === "username" ? 40 : 120}
@@ -210,8 +217,8 @@ export function Profile() {
             Save profile
           </button>
         </div>
-      </form>
-      <form
+      </ValidatedForm>
+      <ValidatedForm
         className="profile-avatar-panel ui-panel space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
@@ -261,7 +268,7 @@ export function Profile() {
         <button disabled={busy} className={button}>
           Change password and sign out
         </button>
-      </form>
+      </ValidatedForm>
     </div>
   );
 }

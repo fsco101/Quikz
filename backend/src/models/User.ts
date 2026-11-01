@@ -9,6 +9,8 @@ export interface IUser extends Document {
   authVersion: number;
   bio?: string;
   avatarData?: Buffer;
+  avatarCloudUrl?: string;
+  avatarPublicId?: string;
   avatarUpdatedAt?: Date;
   fullName: string;
   surname: string;
@@ -49,6 +51,8 @@ const UserSchema = new Schema<IUser>({
   authVersion: { type: Number, default: 0 },
   bio: { type: String, default: '', maxlength: 500 },
   avatarData: { type: Buffer, select: false },
+  avatarCloudUrl: { type: String, select: false },
+  avatarPublicId: { type: String, select: false },
   avatarUpdatedAt: Date,
   fullName: {
     type: String,
