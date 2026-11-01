@@ -26,7 +26,7 @@ export const AuthPage: React.FC<{ mode: AuthMode; onModeChange: (mode: AuthMode)
   const [fullName, setFullName] = useState('');
   const [surname, setSurname] = useState('');
   const [yearLevel, setYearLevel] = useState('3rd Year');
-  const [section, setSection] = useState('Section A');
+  const [section, setSection] = useState('BSIT-S-1A');
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   // UI state
@@ -137,7 +137,7 @@ export const AuthPage: React.FC<{ mode: AuthMode; onModeChange: (mode: AuthMode)
             {confirmPassword && <p id="password-match" className={`auth-password-hint auth-match ${confirmPassword === password ? 'is-met' : ''}`} role="status">{confirmPassword === password ? <><Check size={13} /> Passwords match.</> : 'Your passwords do not match yet.'}</p>}
             {role === "student" && <div className="auth-field-row">
               <label>Year Level<select value={yearLevel} onChange={(e) => setYearLevel(e.target.value)}>{["1st Year", "2nd Year", "3rd Year", "4th Year"].map((year) => <option key={year}>{year}</option>)}</select></label>
-              <label>Section<select value={section} onChange={(e) => setSection(e.target.value)}>{["Section A", "Section B", "Section C", "Section D"].map((value) => <option key={value}>{value}</option>)}</select></label>
+              <label>Section<select value={section} onChange={(e) => setSection(e.target.value)}>{["BSIT-S-1A", "BSIT-S-1B", "BSIT-S-2A", "BSIT-S-2B", "BSIT-S-3A", "BSIT-S-3B", "BSIT-S-4A", "BSIT-NS-4A"].map((value) => <option key={value}>{value}</option>)}</select></label>
             </div>}
             <div className={`auth-consent ${termsAccepted ? "consent-accepted" : ""}`}><ShieldCheck size={22} aria-hidden="true" /><div><strong>Academic Honor Code & Policy</strong><p>{termsAccepted ? "Accepted. You're ready to continue." : "Please review the terms before joining."}</p></div><button type="button" onClick={() => setIsTermsModalOpen(true)}>{termsAccepted ? "Review Terms" : "Read & Accept"}</button></div>
             <button type="submit" disabled={!termsAccepted || loading} className="ui-button ui-button-primary auth-submit">{loading ? "Creating Profile..." : "Complete Account Registration"}<ArrowRight size={17} aria-hidden="true" /></button>

@@ -18,7 +18,7 @@ export function Profile() {
     email: user!.email,
     bio: user!.bio || "",
     yearLevel: user!.yearLevel || "1st Year",
-    section: user!.section || "Section A",
+    section: user!.section || "BSIT-S-1A",
   });
   const [file, setFile] = useState<File | null>(null);
   const [passwords, setPasswords] = useState({
@@ -203,7 +203,7 @@ export function Profile() {
                 value={draft.section}
                 onChange={(e) => change("section", e.target.value)}
               >
-                {["Section A", "Section B", "Section C", "Section D"].map(
+                {["BSIT-S-1A", "BSIT-S-1B", "BSIT-S-2A", "BSIT-S-2B", "BSIT-S-3A", "BSIT-S-3B", "BSIT-S-4A", "BSIT-NS-4A"].map(
                   (section) => (
                     <option key={section}>{section}</option>
                   ),

@@ -1,6 +1,7 @@
 ﻿import bcrypt from "bcryptjs";
 import { User } from "../models/User.js";
 import { InputError } from "./questionBank.js";
+import { SECTIONS } from "./gradebook.js";
 export const userDTO = (u: any) => ({
   id: String(u._id),
   username: u.username,
@@ -43,7 +44,7 @@ export function profileFields(body: any) {
     );
   for (const [key, allowed] of [
     ["yearLevel", ["1st Year", "2nd Year", "3rd Year", "4th Year"]],
-    ["section", ["Section A", "Section B", "Section C", "Section D"]],
+    ["section", SECTIONS],
   ] as const) {
     if (body[key] !== undefined) {
       if (!(allowed as readonly unknown[]).includes(body[key]))

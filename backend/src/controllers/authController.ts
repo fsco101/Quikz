@@ -7,6 +7,7 @@ import { AuthRequest } from '../middleware/auth.js';
 import { profileFields, userDTO, validatePassword } from '../services/users.js';
 import { InputError } from '../services/questionBank.js';
 import { JWT_SECRET } from '../config/auth.js';
+import { SECTIONS } from '../services/gradebook.js';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -35,7 +36,7 @@ export const register = async (req: Request, res: Response) => {
       });
     }
 
-    if (!['faculty', 'student'].includes(role) || (role === 'student' && (!['1st Year', '2nd Year', '3rd Year', '4th Year'].includes(yearLevel) || !['Section A', 'Section B', 'Section C', 'Section D'].includes(section)))) {
+    if (!['faculty', 'student'].includes(role) || (role === 'student' && (!['1st Year', '2nd Year', '3rd Year', '4th Year'].includes(yearLevel) || !SECTIONS.includes(section)))) {
       return res.status(400).json({ message: 'Select a valid role, year level, and section.' });
     }
 
@@ -60,7 +61,7 @@ export const register = async (req: Request, res: Response) => {
       passwordHash,
       role: role === 'faculty' ? 'faculty' : 'student',
       yearLevel: yearLevel || '1st Year',
-      section: section || 'Section A',
+      section: section || SECTIONS[0],
       termsAccepted: true,
       termsAcceptedAt: new Date()
     });
