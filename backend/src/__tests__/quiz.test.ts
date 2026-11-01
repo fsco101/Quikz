@@ -1,4 +1,4 @@
-﻿import {
+import {
   afterAll,
   beforeAll,
   beforeEach,
@@ -93,7 +93,7 @@ describe("Sprint 3 — Quiz studio, execution, integrity and progression", () =>
           role,
           termsAccepted: true,
           yearLevel: "2nd Year",
-          section: "Section B",
+          section: "BSIT-S-2B",
         });
       expect(res.status).toBe(201);
       if (role === "faculty") {

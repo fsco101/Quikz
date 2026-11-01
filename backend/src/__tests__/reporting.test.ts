@@ -43,7 +43,7 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
           fullName: `Report ${name}`,
           surname: name,
           yearLevel: "2nd Year",
-          section: "Section A",
+          section: "BSIT-S-1A",
           termsAccepted: true,
         });
       expect(response.status).toBe(201);
@@ -104,7 +104,7 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
         studentName: "Alex Alpha",
         studentSurname: "Alpha",
         studentYearLevel: "2nd Year",
-        studentSection: "Section A",
+        studentSection: "BSIT-S-1A",
         score: 3,
         totalQuestions: 4,
         percentage: 75,
@@ -118,7 +118,7 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
         studentName: "Alex Alpha",
         studentSurname: "Alpha",
         studentYearLevel: "2nd Year",
-        studentSection: "Section A",
+        studentSection: "BSIT-S-1A",
         score: 4,
         totalQuestions: 4,
         percentage: 100,
@@ -132,7 +132,7 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
         studentName: "Zoe Zulu",
         studentSurname: "Zulu",
         studentYearLevel: "3rd Year",
-        studentSection: "Section B",
+        studentSection: "BSIT-S-2B",
         score: 2,
         totalQuestions: 4,
         percentage: 50,
@@ -146,7 +146,7 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
         studentName: "Private Student",
         studentSurname: "Private",
         studentYearLevel: "4th Year",
-        studentSection: "Section D",
+        studentSection: "BSIT-S-4A",
         score: 4,
         totalQuestions: 4,
         percentage: 100,
@@ -183,8 +183,8 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
   it("limits faculty to their own subjects and keeps cohorts separate", async () => {
     const res = await request(app).get("/api/gradebook").set(auth(faculty));
     expect(res.body.groups.map((g: any) => g.key)).toEqual([
-      "2nd Year - Section A",
-      "3rd Year - Section B",
+      "2nd Year - BSIT-S-1A",
+      "3rd Year - BSIT-S-2B",
     ]);
     expect(res.body.summary.attempts).toBe(3);
     expect(res.body.summary.average).toBe(75);
@@ -217,7 +217,7 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
   it("combines cohort, search, score, status filters and stable multi-column sorting", async () => {
     const res = await request(app)
       .get(
-        "/api/gradebook?yearLevel=2nd%20Year&section=Section%20A&minScore=75&maxScore=100&status=passed&search=Alpha&sort=surname",
+        "/api/gradebook?yearLevel=2nd%20Year&section=BSIT-S-1A&minScore=75&maxScore=100&status=passed&search=Alpha&sort=surname",
       )
       .set(auth(faculty));
     expect(res.body.groups).toHaveLength(1);
@@ -271,22 +271,22 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
     await workbook.xlsx.load(response.body);
     expect(workbook.worksheets.map((s) => s.name)).toEqual([
       "Summary",
-      "2nd Year - Section A",
-      "3rd Year - Section B",
+      "2nd Year - BSIT-S-1A",
+      "3rd Year - BSIT-S-2B",
     ]);
     expect(
-      workbook.getWorksheet("2nd Year - Section A")!.getCell("B5").value,
+      workbook.getWorksheet("2nd Year - BSIT-S-1A")!.getCell("B5").value,
     ).toBe("Alex Alpha");
     expect(
-      workbook.getWorksheet("2nd Year - Section A")!.getCell("J5").numFmt,
+      workbook.getWorksheet("2nd Year - BSIT-S-1A")!.getCell("J5").numFmt,
     ).toBe("0.00%");
     expect(
-      workbook.getWorksheet("3rd Year - Section B")!.getCell("B5").value,
+      workbook.getWorksheet("3rd Year - BSIT-S-2B")!.getCell("B5").value,
     ).toBe("Zoe Zulu");
     expect(
-      workbook.getWorksheet("3rd Year - Section B")!.getCell("K5").value,
+      workbook.getWorksheet("3rd Year - BSIT-S-2B")!.getCell("K5").value,
     ).toBe("Needs review");
-    expect(workbook.getWorksheet("3rd Year - Section B")!.views[0].state).toBe(
+    expect(workbook.getWorksheet("3rd Year - BSIT-S-2B")!.views[0].state).toBe(
       "frozen",
     );
     await mkdir("../.analysis/reports", { recursive: true });
@@ -303,7 +303,7 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
       const xlsx = await binary("/api/gradebook/export/xlsx", faculty);
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(xlsx.body);
-      const sheet = workbook.getWorksheet("2nd Year - Section A")!;
+      const sheet = workbook.getWorksheet("2nd Year - BSIT-S-1A")!;
       expect(sheet.getCell("O4").value).toBe("Passing %");
       expect([sheet.getCell("O5").value, sheet.getCell("O6").value]).toContain(
         0.6,
@@ -331,11 +331,11 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
     await workbook.xlsx.load(response.body);
     expect(workbook.worksheets.map((s) => s.name)).toEqual([
       "Summary",
-      "2nd Year - Section A",
+      "2nd Year - BSIT-S-1A",
     ]);
-    expect(workbook.getWorksheet("2nd Year - Section A")!.rowCount).toBe(5);
+    expect(workbook.getWorksheet("2nd Year - BSIT-S-1A")!.rowCount).toBe(5);
     expect(
-      workbook.getWorksheet("2nd Year - Section A")!.getCell("J5").value,
+      workbook.getWorksheet("2nd Year - BSIT-S-1A")!.getCell("J5").value,
     ).toBe(1);
   });
   it("exports a formal, cohort-separated PDF with repeated branding and verification blocks", async () => {
@@ -383,7 +383,7 @@ describe("Sprint 4 — scoped gradebooks and cohort-separated exports", () => {
         studentName: `Long Report Student ${String(i).padStart(2, "0")}`,
         studentSurname: `Surname${String(i).padStart(2, "0")}`,
         studentYearLevel: "2nd Year",
-        studentSection: "Section A",
+        studentSection: "BSIT-S-1A",
         score: 3,
         totalQuestions: 4,
         percentage: 75,

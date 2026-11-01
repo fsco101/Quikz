@@ -37,7 +37,7 @@ describe('Faculty generation previews', () => {
       const response = await request(app).post('/api/auth/register').send({
         username: `generation_${role}`, email: `${role}@generation.test`, password: 'Generation123!',
         role: role === 'peer' ? 'faculty' : role, fullName: `Generation ${role}`, surname: 'Test', termsAccepted: true,
-        yearLevel: '1st Year', section: 'Section A',
+        yearLevel: '1st Year', section: 'BSIT-S-1A',
       });
       expect(response.status).toBe(201);
       if (role === 'faculty') faculty = response.body.token;

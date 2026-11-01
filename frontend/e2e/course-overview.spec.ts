@@ -37,7 +37,7 @@ test("student sees earned progress and continues directly to the next unlocked l
   const register = await request.post(`${root}/auth/register`, { data: {
     username: `student${Date.now()}`, email: `student${Date.now()}@path.edu`, password: "Password123!",
     fullName: "Learning Student", surname: "Student", role: "student", termsAccepted: true,
-    yearLevel: "1st Year", section: "Section A",
+    yearLevel: "1st Year", section: "BSIT-S-1A",
   } });
   expect(register.status()).toBe(201);
   const { token } = await register.json();

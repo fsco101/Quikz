@@ -1,3 +1,4 @@
+import { SECTIONS } from "../../constants/sections.js";
 import { ValidatedForm } from "../ui/ValidatedForm.js";
 import { Plus } from "lucide-react";
 import { PageHeading } from "../ui/PageHeading.js";
@@ -13,7 +14,7 @@ const blank = {
   email: "",
   role: "student",
   yearLevel: "1st Year",
-  section: "BSIT-S-1A",
+  section: SECTIONS[0],
   active: true,
   password: "",
   termsAccepted: false,
@@ -192,7 +193,7 @@ export function UserManagement() {
                   value={draft.section}
                   onChange={(e) => change("section", e.target.value)}
                 >
-                  {["BSIT-S-1A", "BSIT-S-1B", "BSIT-S-2A", "BSIT-S-2B", "BSIT-S-3A", "BSIT-S-3B", "BSIT-S-4A", "BSIT-NS-4A"].map(
+                  {SECTIONS.map(
                     (section) => (
                       <option key={section}>{section}</option>
                     ),

@@ -21,7 +21,7 @@ describe("Sprint 6 — verified course progress and faculty assessment readiness
       const response = await request(app).post("/api/auth/register").send({
         username: name, email: `${name}@overview.edu`, password: "Password123!",
         fullName: `Overview ${name}`, surname: name, role, termsAccepted: true,
-        yearLevel: "1st Year", section: "Section A",
+        yearLevel: "1st Year", section: "BSIT-S-1A",
       });
       expect(response.status).toBe(201);
       accounts[name] = { token: response.body.token, id: response.body.user.id };

@@ -6,7 +6,7 @@ test("professor previews a class CSV, sends only eligible invitations and studen
   const code = `CSV${Date.now()}`;
   const accounts: Record<string, any> = {};
   for (const [name, role] of [["professor", "faculty"], ["alpha", "student"], ["beta", "student"]]) {
-    const response = await request.post(`${root}/auth/register`, { data: { username: `${name}${code}`, email: `${name}${code}@roster.edu`, password: "Password123!", fullName: `${name} ${code}`, surname: name, role, yearLevel: "1st Year", section: "Section A", termsAccepted: true } });
+    const response = await request.post(`${root}/auth/register`, { data: { username: `${name}${code}`, email: `${name}${code}@roster.edu`, password: "Password123!", fullName: `${name} ${code}`, surname: name, role, yearLevel: "1st Year", section: "BSIT-S-1A", termsAccepted: true } });
     expect(response.status()).toBe(201); accounts[name] = await response.json();
   }
   const headers = (name: string) => ({ Authorization: `Bearer ${accounts[name].token}` });
