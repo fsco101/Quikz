@@ -30,6 +30,7 @@ import connectionRoutes from "./routes/connectionRoutes.js";
 import { FacultyConnection } from "./models/FacultyConnection.js";
 import { corsOptions, CorsOriginError } from "./config/cors.js";
 import { disconnectDB } from "./config/db.js";
+import { migrateAcademicTerms } from './services/academicTerms.js';
 
 dotenv.config();
 
@@ -115,6 +116,7 @@ app.get("/api/health", (req, res) => {
 
 export const startServer = async () => {
   await connectDB();
+  await migrateAcademicTerms();
   await bootstrapAdmin();
   await Promise.all([
     QuizAttempt.init(),

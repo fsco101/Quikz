@@ -343,5 +343,43 @@
     "githubState": "CLOSED",
     "githubStateReason": "COMPLETED",
     "validationEvidence": "sprints/sprint-audit.json:autosaveFollowUp"
+  },
+  "quizAndLessonUsabilityFollowUp": {
+    "date": "2026-11-03",
+    "name": "Quiz clock, visible honor policy, quiz builder controls, third semester and faculty My Lessons",
+    "status": "completed",
+    "affectedSprints": [
+      1,
+      2,
+      3,
+      5,
+      7
+    ],
+    "githubIssueNumbers": [
+      1,
+      4,
+      5,
+      8,
+      9,
+      10,
+      21,
+      27
+    ],
+    "githubVerification": "Verified on GitHub: all referenced issues are CLOSED with stateReason COMPLETED; no new closures were needed.",
+    "implementation": [
+      "Switchable Web Audio clock tick during active quiz countdowns, unlocked by user interaction and cleaned up on exit.",
+      "Larger, contrasting Academic Honor Code and Policy action with visible keyboard focus.",
+      "Quiz Studio question readiness navigator, duplicate and reorder controls, and undo removal; existing draft autosave is preserved.",
+      "3rd Semester option, normalization of new Summer input, and idempotent startup migration for existing subjects.",
+      "Faculty-only My Lessons directory with server-side ownership filtering, connected-only materials, filters, pagination and access to the existing module editor."
+    ],
+    "validation": [
+      "Backend production build passed",
+      "Frontend production build passed",
+      "186 backend tests passed",
+      "3 Playwright quiz workflow tests passed",
+      "git diff --check passed"
+    ],
+    "deploymentNote": "Changes are local. Existing Summer terms migrate when the updated backend starts."
   }
 }

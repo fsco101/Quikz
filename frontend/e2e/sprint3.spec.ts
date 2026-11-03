@@ -7,6 +7,11 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("dialog", (dialog) => dialog.accept());
+  await page.addInitScript(() => {
+    const original = AudioContext.prototype.createOscillator;
+    (window as any).clockTicks = 0;
+    AudioContext.prototype.createOscillator = function () { (window as any).clockTicks++; return original.call(this); };
+  });
   await page.goto("/#/login");
   await page.getByLabel("Username or Email", { exact: true }).fill("faculty@quikz.edu");
   await page.getByLabel("Password", { exact: true }).fill("Faculty@123");
@@ -17,6 +22,7 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
     .getByPlaceholder("e.g. Data Structures & Algorithms")
     .fill("Biology assessment course");
   await page.getByPlaceholder("CS102").fill(unique);
+  await page.getByLabel('Subject term', { exact: true }).selectOption('3rd Semester');
   await page
     .getByRole("button", { name: "Create Subject", exact: false })
     .last()
@@ -89,6 +95,15 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
   await expect(page.getByLabel("Question 1 text")).toHaveValue(
     "Biology check 1?",
   );
+  await page.getByRole('button', { name: 'Duplicate question 1', exact: true }).click();
+  await expect(page.getByLabel('Question 2 text', { exact: true })).toHaveValue('Biology check 1?');
+  await page.getByRole('button', { name: 'Move question 2 down', exact: true }).click();
+  await expect(page.getByLabel('Question 2 text', { exact: true })).toHaveValue('Biology check 2?');
+  await page.getByRole('button', { name: 'Remove question 3', exact: true }).click();
+  await page.getByRole('button', { name: 'Undo remove question', exact: true }).click();
+  await expect(page.getByLabel('Question 3 text', { exact: true })).toHaveValue('Biology check 1?');
+  await page.getByRole('button', { name: 'Remove question 3', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Question navigator' })).toContainText('4 of 4 questions ready');
   await page.screenshot({
     path: "test-results/quiz-studio.png",
     fullPage: true,
@@ -98,6 +113,11 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
   await expect(
     page.getByText("End quiz published.", { exact: false }),
   ).toBeVisible();
+  await page.getByRole('button', { name: 'My Lessons', exact: true }).click();
+  await page.getByLabel('Search lessons', { exact: true }).fill(unique);
+  await expect(page.getByText('2 lessons found', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Manage lesson', exact: true }).first().click();
+  await expect(page.getByRole('button', { name: 'Edit module', exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Sign Out" }).click();
   await page.getByLabel("Username or Email", { exact: true }).fill("student@quikz.edu");
   await page.getByLabel("Password", { exact: true }).fill("Student@123");
@@ -111,6 +131,13 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
     .getByRole("button", { name: "Start / resume quiz", exact: true })
     .click();
   const firstAttempt = (await (await started).json()).attempt;
+  await expect.poll(() => page.evaluate(() => (window as any).clockTicks)).toBeGreaterThan(0);
+  await page.getByRole('button', { name: 'Clock sound: On' }).click();
+  const ticks = await page.evaluate(() => (window as any).clockTicks);
+  await page.waitForTimeout(1200);
+  expect(await page.evaluate(() => (window as any).clockTicks)).toBe(ticks);
+  await page.getByRole('button', { name: 'Clock sound: Off' }).click();
+  await expect.poll(() => page.evaluate(() => (window as any).clockTicks)).toBeGreaterThan(ticks);
   await page.getByRole("button", { name: /Correct concept/ }).click();
   await expect(page.getByText("Answers saved", { exact: false })).toBeVisible();
   // Refresh and re-enter to prove that the server deadline and saved answer survive.

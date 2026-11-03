@@ -26,6 +26,7 @@ const SubjectSchema = new Schema<ISubject>({
   },
   term: {
     type: String,
+    set: (value: string) => typeof value === 'string' && /^summer(?: term)?$/i.test(value.trim()) ? '3rd Semester' : value,
     required: [true, 'Term / Semester is required'],
     trim: true
   },

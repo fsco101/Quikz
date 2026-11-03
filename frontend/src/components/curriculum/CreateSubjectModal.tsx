@@ -119,7 +119,7 @@ export const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({
               >
                 <option value="1st Semester">1st Semester</option>
                 <option value="2nd Semester">2nd Semester</option>
-                <option value="Summer Term">Summer Term</option>
+                <option value="3rd Semester">3rd Semester</option>
               </select>
             </div>
 

@@ -9,6 +9,7 @@ import { Subject } from "../models/Subject.js";
 import { Module } from "../models/Module.js";
 import { AuditEvent } from "../models/AuditEvent.js";
 import { databaseHealth, telemetry } from "../services/telemetry.js";
+import { migrateAcademicTerms } from '../services/academicTerms.js';
 
 describe("Sprint 5 — public lesson discovery, audit and actual database health", () => {
   let admin: string,
@@ -101,6 +102,35 @@ describe("Sprint 5 — public lesson discovery, audit and actual database health
     });
   });
   afterAll(disconnectDB);
+  it('isolates My Lessons, including connected materials and legacy ownership, from peers and guests', async () => {
+    const own = await Module.create({ subjectId, createdBy: facultyId, title: 'Private own lesson', summary: 'Owner only', orderIndex: 15, audience: 'connected' });
+    const peer = await Module.create({ subjectId, createdBy: otherId, title: 'Peer-authored lesson', summary: 'Peer content', orderIndex: 16, audience: 'connected' });
+    try {
+      expect((await request(app).get('/api/directory/mine')).status).toBe(401);
+      for (const token of [student, admin]) expect((await request(app).get('/api/directory/mine').set(auth(token))).status).toBe(403);
+      const mine = await request(app).get('/api/directory/mine?search=Private%20own').set(auth(faculty));
+      expect(mine.status).toBe(200);
+      expect(mine.headers['cache-control']).toBe('no-store');
+      expect(mine.body.lessons.map((m: any) => m._id)).toEqual([String(own._id)]);
+      expect(JSON.stringify(mine.body.syllabuses)).not.toContain('Peer-authored');
+      expect((await request(app).get('/api/directory/mine').set(auth(faculty))).body.total).toBe(15);
+      expect((await request(app).get('/api/directory/mine?search=Biology').set(auth(other))).body.total).toBe(0);
+      expect((await request(app).get(`/api/directory/mine?facultyId=${otherId}`).set(auth(faculty))).body.total).toBe(0);
+      expect((await request(app).get('/api/directory?search=Private%20own')).body.total).toBe(0);
+    } finally { await Module.deleteMany({ _id: { $in: [own._id, peer._id] } }); }
+  });
+  it('migrates stored Summer terms idempotently and normalizes new legacy input', async () => {
+    await Subject.collection.updateOne({ _id: new mongoose.Types.ObjectId(subjectId) }, { $set: { term: 'Summer Term' } });
+    try {
+      expect((await migrateAcademicTerms()).modifiedCount).toBe(1);
+      expect((await migrateAcademicTerms()).modifiedCount).toBe(0);
+      expect((await Subject.findById(subjectId))!.term).toBe('3rd Semester');
+      const directory = await request(app).get('/api/directory?term=3rd%20Semester');
+      expect(directory.body.total).toBe(14);
+      expect(directory.body.filters.terms).not.toContain('Summer Term');
+      expect(new Subject({ term: 'Summer Term' }).term).toBe('3rd Semester');
+    } finally { await Subject.updateOne({ _id: subjectId }, { $set: { term: '1st Semester' } }); }
+  });
   it("provides paginated public metadata and a syllabus without exposing full notes, files or quiz keys", async () => {
     const res = await request(app).get("/api/directory");
     expect(res.status).toBe(200);

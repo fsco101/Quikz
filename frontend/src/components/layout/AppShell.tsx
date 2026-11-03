@@ -11,6 +11,7 @@ export function AppShell({ user, view, onNavigate, onLogout, children }: {
     { key: "learning", label: "Learning path", icon: BookOpen },
     ...(user.role === "admin" ? [] : [{ key: "gradebook", label: user.role === "faculty" ? "Master gradebook" : "My results", icon: BarChart3 }]),
     { key: "directory", label: "Lesson directory", icon: Library },
+    ...(user.role === "faculty" ? [{ key: "my-lessons", label: "My Lessons", icon: BookOpen }] : []),
     ...(user.role === "admin" ? [] : [{ key: "connections", label: "Connections", icon: Link2 }]),
     { key: "people", label: "People", icon: Users },
     { key: "profile", label: "My profile", icon: UserCircle },
