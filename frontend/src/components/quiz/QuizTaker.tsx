@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { api } from "../../services/api.js";
 import { useAuth } from "../../context/AuthContext.js";
 import { Attempt, Quiz, Submission } from "../../types/quiz.js";
+import { useQuizClock } from '../../hooks/useQuizClock.js';
 export function QuizTaker({
   quizId,
   onClose,
@@ -20,6 +21,7 @@ export function QuizTaker({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState("");
+  const clock = useQuizClock(!!attempt && !result && !busy, remaining);
   const token = useRef("");
   const answersRef = useRef<number[]>([]);
   const deadline = useRef(0);
@@ -53,6 +55,7 @@ export function QuizTaker({
     setError("");
   };
   const start = async () => {
+    if (clock.enabled) clock.unlock();
     setBusy(true);
     setError("");
     try {
@@ -289,6 +292,10 @@ export function QuizTaker({
             </button>
           )}
         </header>
+        {!result && <button type="button" onClick={clock.toggle} aria-pressed={clock.enabled}
+          className="rounded-xl border border-white/40 px-4 py-2 text-sm font-semibold">
+          Clock sound: {clock.enabled ? 'On' : 'Off'}
+        </button>}
         {error && (
           <p
             role="alert"

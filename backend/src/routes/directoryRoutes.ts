@@ -5,9 +5,13 @@ import { Subject } from "../models/Subject.js";
 import { queryText, YEARS } from "../services/gradebook.js";
 import { InputError } from "../services/questionBank.js";
 import { publicModules, hiddenSubjectIds } from "../services/connections.js";
+import { authenticateToken, requireRole, AuthRequest } from "../middleware/auth.js";
 const router = Router();
-router.get("/", async (req, res, next) => {
+router.get('/mine', authenticateToken, requireRole('faculty'));
+router.get(["/", "/mine"], async (req: AuthRequest, res, next) => {
   try {
+    const mine = req.path.replace(/\/$/, '') === '/mine';
+    if (mine) res.setHeader('Cache-Control', 'no-store');
     const search = queryText(req.query.search, "search");
     const yearLevel = queryText(req.query.yearLevel, "year level");
     const term = queryText(req.query.term, "term");
@@ -26,7 +30,7 @@ router.get("/", async (req, res, next) => {
       throw new InputError("Invalid directory ID.");
     if (contentType && !["text", "file", "presentation"].includes(contentType))
       throw new InputError("Invalid content type.");
-    const all = await Subject.find({ _id: { $nin: await hiddenSubjectIds() } })
+    const all = await Subject.find(mine ? { facultyId: req.user!.id } : { _id: { $nin: await hiddenSubjectIds() } })
       .select("name code term yearLevel facultyId facultyName description")
       .sort({ code: 1 })
       .lean();
@@ -37,7 +41,9 @@ router.get("/", async (req, res, next) => {
         (!facultyId || String(s.facultyId) === facultyId) &&
         (!subjectId || String(s._id) === subjectId),
     );
-    const match: any = { ...publicModules, subjectId: { $in: selected.map((s) => s._id) } };
+    const ownership = mine ? { $or: [{ createdBy: new mongoose.Types.ObjectId(req.user!.id) }, { createdBy: null }] } : publicModules;
+    const baseMatch = { ...ownership, subjectId: { $in: selected.map((s) => s._id) } };
+    const match: any = { $and: [baseMatch] };
     if (contentType) match.contentType = contentType;
     const subjectMap = new Map(selected.map((s) => [String(s._id), s]));
     // Literal matching prevents query operators or pathological regular expressions.
@@ -60,14 +66,14 @@ router.get("/", async (req, res, next) => {
     const [total, modules] = await Promise.all([
       Module.countDocuments(match),
       Module.find(match)
-        .select("subjectId title summary contentType orderIndex")
+        .select("subjectId title summary contentType orderIndex audience")
         .sort({ subjectId: 1, orderIndex: 1, _id: 1 })
         .skip((page - 1) * 12)
         .limit(12)
         .lean(),
     ]);
     const syllabuses = await Module.aggregate([
-      { $match: { ...publicModules, subjectId: { $in: selected.map((s) => s._id) } } },
+      { $match: baseMatch },
       { $sort: { orderIndex: 1 } },
       {
         $group: {

@@ -13,6 +13,9 @@ const blank = (): Question => ({
   correctIndex: 0,
   explanation: "",
 });
+const questionReady = (q: Question) => !!q.questionText.trim() && q.options.length === 4 &&
+  q.options.every(o => !!o.trim()) && new Set(q.options.map(o => o.trim().toLowerCase())).size === 4 &&
+  Number.isInteger(q.correctIndex) && q.correctIndex! >= 0 && q.correctIndex! < 4;
 const field =
   "w-full rounded-xl border border-[#c8c5d0] bg-white px-3 py-2 text-sm focus:border-[#6063ee] focus:outline-none";
 const button =
@@ -61,6 +64,12 @@ export function QuizStudio({
   const [ready, setReady] = useState(!module.quizId);
   const [missingAttachment, setMissingAttachment] = useState("");
   const [formKey, setFormKey] = useState(0);
+  const [removed, setRemoved] = useState<{ question: Question; index: number } | null>(null);
+  const moveQuestion = (index: number, direction: number) => setQuestions(current => {
+    const next = [...current];
+    [next[index], next[index + direction]] = [next[index + direction], next[index]];
+    return next;
+  });
   const draft = useLocalDraft<QuizDraft>({
     ownerId: user?.id,
     scope: `quiz:${module._id}`,
@@ -543,20 +552,37 @@ export function QuizStudio({
             + Add question
           </button>
         </div>
+        <section aria-label="Question navigator" className="rounded-2xl border bg-white p-5 space-y-3">
+          <p className="font-semibold">{questions.filter(questionReady).length} of {questions.length} questions ready</p>
+          <p className="text-sm text-slate-600">Jump to a question to review it. Green questions have a prompt, four distinct options, and a correct answer.</p>
+          <div className="flex flex-wrap gap-2">{questions.map((q, i) => <button key={i} type="button"
+            aria-label={`Go to question ${i + 1}${questionReady(q) ? ', ready' : ', incomplete'}`}
+            className={`rounded-lg border px-3 py-2 text-sm font-bold ${questionReady(q) ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-900'}`}
+            onClick={() => { const target = document.getElementById(`studio-question-${i}`); target?.scrollIntoView({ block: 'start' }); target?.querySelector('textarea')?.focus({ preventScroll: true }); }}>{i + 1}</button>)}</div>
+          {removed && <button type="button" className="text-sm font-bold text-indigo-700 underline" disabled={busy || questions.length >= 100}
+            onClick={() => { setQuestions(current => { const next = [...current]; next.splice(Math.min(removed.index, next.length), 0, removed.question); return next; }); setRemoved(null); }}>Undo remove question</button>}
+        </section>
         {questions.map((q, i) => (
           <section
             key={i}
+            id={`studio-question-${i}`}
             className="rounded-2xl border bg-white p-5 space-y-4"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="font-bold">Question {i + 1}</h3>
+              <div className="flex flex-wrap gap-3 text-sm">
+                <button type="button" disabled={busy || i === 0} className="disabled:opacity-40" aria-label={`Move question ${i + 1} up`} onClick={() => moveQuestion(i, -1)}>Move up</button>
+                <button type="button" disabled={busy || i === questions.length - 1} className="disabled:opacity-40" aria-label={`Move question ${i + 1} down`} onClick={() => moveQuestion(i, 1)}>Move down</button>
+                <button type="button" disabled={busy || questions.length >= 100} className="disabled:opacity-40" aria-label={`Duplicate question ${i + 1}`} onClick={() => setQuestions(current => [...current.slice(0, i + 1), { ...q, options: [...q.options] }, ...current.slice(i + 1)])}>Duplicate</button>
+              </div>
               <button
                 aria-label={`Remove question ${i + 1}`}
                 type="button"
                 disabled={busy}
-                onClick={() =>
-                  setQuestions((qs) => qs.filter((_, index) => index !== i))
-                }
+                onClick={() => {
+                  setRemoved({ question: q, index: i });
+                  setQuestions((qs) => qs.filter((_, index) => index !== i));
+                }}
                 className="text-sm text-red-600"
               >
                 Remove

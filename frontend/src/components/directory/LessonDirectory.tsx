@@ -10,6 +10,7 @@ type Lesson = {
   summary: string;
   contentType: string;
   orderIndex: number;
+  audience?: string;
   subject: Subject;
 };
 type Directory = {
@@ -33,7 +34,9 @@ type Directory = {
 export function LessonDirectory({
   onOpenLesson,
   onSignIn,
+  mine = false,
 }: {
+  mine?: boolean;
   onOpenLesson?: (subject: Subject, moduleId: string) => void;
   onSignIn?: () => void;
 }) {
@@ -58,7 +61,7 @@ export function LessonDirectory({
     setLoading(true);
     const timer = setTimeout(() => {
       void api
-        .request<Directory>(`/directory?${query}`, {
+        .request<Directory>(`/directory${mine ? '/mine' : ''}?${query}`, {
           signal: controller.signal,
         })
         .then((result) => {
@@ -79,13 +82,13 @@ export function LessonDirectory({
       clearTimeout(timer);
       controller.abort();
     };
-  }, [query]);
+  }, [query, mine]);
   const field =
     "mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm";
   return (
     <div className="space-y-6">
-      <PageHeading eyebrow="The learning library" title="Lesson directory"
-        description="Follow your curiosity. Explore topics, discover new perspectives, and find your next lesson." />
+      <PageHeading eyebrow={mine ? "Faculty workspace" : "The learning library"} title={mine ? "My Lessons" : "Lesson directory"}
+        description={mine ? "Find and manage your own lessons and modules, including materials shared only with your connected students. Open a lesson to edit its content or quiz." : "Follow your curiosity. Explore topics, discover new perspectives, and find your next lesson."} />
       <section className="ui-panel report-filters grid sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <label className="text-xs font-bold">
           Keyword
@@ -133,7 +136,7 @@ export function LessonDirectory({
             ))}
           </select>
         </label>
-        <label className="text-xs font-bold">
+        {!mine && <label className="text-xs font-bold">
           Instructor
           <select
             aria-label="Directory instructor"
@@ -148,7 +151,7 @@ export function LessonDirectory({
               </option>
             ))}
           </select>
-        </label>
+        </label>}
         <label className="text-xs font-bold">
           Format
           <select
@@ -193,6 +196,7 @@ export function LessonDirectory({
                   </span>
                   <span className="capitalize text-slate-500">
                     {lesson.contentType}
+                  {mine && ` · ${lesson.audience === 'connected' ? 'Connected students' : lesson.audience === 'public' ? 'Public' : 'Both audiences'}`}
                   </span>
                 </div>
                 <div className="lesson-card-icon" aria-hidden="true">{lesson.contentType === "presentation" ? <Presentation size={24} /> : lesson.contentType === "file" ? <FileText size={24} /> : <BookOpen size={24} />}</div>
@@ -216,14 +220,14 @@ export function LessonDirectory({
                       : onSignIn?.()
                   }
                 >
-                  {onOpenLesson ? "Open learning path" : "Sign in to study"}<ArrowUpRight size={16} aria-hidden="true" />
+                  {mine ? "Manage lesson" : onOpenLesson ? "Open learning path" : "Sign in to study"}<ArrowUpRight size={16} aria-hidden="true" />
                 </button>
               </article>
             ))}
           </div>
           {!data.lessons.length && !loading && (
             <p className="rounded-2xl border border-dashed p-10 text-center text-slate-500">
-              No lessons match these filters.
+              {mine ? "No lessons match these filters. Create a module from your subject's learning path to see it here." : "No lessons match these filters."}
             </p>
           )}
           <nav aria-label="Directory pages" className="pagination-row">

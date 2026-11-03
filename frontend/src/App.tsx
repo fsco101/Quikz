@@ -21,6 +21,7 @@ const MainApp: React.FC = () => {
   const [publicPage, setPublicPage] = useState(() => window.location.hash.slice(2) || "home");
   const [view, setView] = useState("learning");
   const [initialModuleId, setInitialModuleId] = useState<string | undefined>();
+  const [lessonOrigin, setLessonOrigin] = useState('learning');
 
   useEffect(() => {
     const syncPage = () => {
@@ -143,6 +144,7 @@ const MainApp: React.FC = () => {
       onNavigate={(next) => {
         setView(next);
         if (next === "learning") {
+          setLessonOrigin('learning');
           setSelectedSubject(null);
           setInitialModuleId(undefined);
         }
@@ -167,9 +169,12 @@ const MainApp: React.FC = () => {
           <Gradebook key={user.id} />
         ) : view === "system" && user.role === "admin" ? (
           <SystemHealth />
-        ) : view === "directory" ? (
+        ) : view === "directory" || (view === "my-lessons" && user.role === "faculty") ? (
           <LessonDirectory
+            key={`${user.id}:${view}`}
+            mine={view === "my-lessons"}
             onOpenLesson={(subject, moduleId) => {
+              setLessonOrigin(view);
               setSelectedSubject(subject);
               setInitialModuleId(moduleId);
               setView("learning");
@@ -179,11 +184,12 @@ const MainApp: React.FC = () => {
           <ModuleReader
             subject={selectedSubject}
             initialModuleId={initialModuleId}
-            onBack={() => setSelectedSubject(null)}
+            onBack={() => { setSelectedSubject(null); setInitialModuleId(undefined); setView(lessonOrigin); }}
           />
         ) : (
           <SubjectList
             onSelectSubject={(subject, moduleId) => {
+              setLessonOrigin('learning');
               setSelectedSubject(subject);
               setInitialModuleId(moduleId);
             }}
