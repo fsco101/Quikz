@@ -151,5 +151,38 @@
       "git diff --check passed"
     ],
     "deploymentNote": "Changes are local. Existing Summer terms migrate when the updated backend starts."
+  },
+  "myLessonsSubjectManagementFollowUp": {
+    "date": "2026-11-03",
+    "name": "Subject-first faculty My Lessons and subject management",
+    "status": "completed",
+    "affectedSprints": [
+      2,
+      5,
+      7
+    ],
+    "githubIssueNumbers": [
+      4,
+      5,
+      21,
+      27
+    ],
+    "githubVerification": "Verified on GitHub: issues #4, #5, #21 and #27 remain CLOSED with stateReason COMPLETED. No new closures required.",
+    "implementation": [
+      "My Lessons displays only subjects owned by the authenticated faculty member, including empty subjects.",
+      "Create New Subject reuses the Learning Path form. Edit Subject updates name, code, semester, year level and description.",
+      "Server-side ownership and field validation protect subject updates; duplicate codes return a conflict.",
+      "Manage Modules opens the existing module and quiz tools inside the selected subject, with a return to My Lessons action.",
+      "Subject form state resets between create/edit sessions and uses a scrollable mobile layout."
+    ],
+    "validation": [
+      "Backend and frontend production builds passed",
+      "187 backend tests passed",
+      "3 quiz workflow browser tests passed",
+      "Expanded faculty workflow passed with subject creation/editing, module editing and mobile form checks",
+      "Desktop and mobile screenshots visually reviewed",
+      "git diff --check passed"
+    ],
+    "deploymentNote": "Implemented locally; not deployed."
   }
 }

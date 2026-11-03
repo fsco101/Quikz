@@ -13,9 +13,10 @@ interface ModuleReaderProps {
   initialModuleId?: string;
   subject: Subject;
   onBack: () => void;
+  backLabel?: string;
 }
 
-export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, initialModuleId }) => {
+export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, initialModuleId, backLabel = 'Back to course catalog' }) => {
   const { user } = useAuth();
   const [modules, setModules] = useState<ModuleItem[]>([]);
   const [progress, setProgress] = useState<CurriculumProgress>({ totalModules: 0, completedCount: 0 });
@@ -85,7 +86,7 @@ export const ModuleReader: React.FC<ModuleReaderProps> = ({ subject, onBack, ini
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            aria-label="Back to course catalog"
+            aria-label={backLabel}
             className="w-9 h-9 rounded-xl border border-[#c8c5d0] hover:bg-[#eff4ff] text-[#47464f] flex items-center justify-center transition-colors shrink-0"
           >
             <ArrowLeft size={18} aria-hidden="true" />
