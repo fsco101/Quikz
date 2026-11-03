@@ -102,6 +102,36 @@ describe("Sprint 5 — public lesson discovery, audit and actual database health
     });
   });
   afterAll(disconnectDB);
+  it('lists owned subjects including empty ones and permits only their owner to edit details', async () => {
+    const created = await request(app).post('/api/subjects').set(auth(faculty)).send({
+      name: 'New empty subject', code: 'OWNED101', term: '1st Semester', yearLevel: '1st Year', description: 'Original overview',
+    });
+    expect(created.status).toBe(201);
+    const id = created.body.subject._id;
+    const endpoint = `/api/subjects/${id}`;
+    try {
+      expect((await request(app).get('/api/subjects/mine')).status).toBe(401);
+      for (const token of [student, admin]) {
+        expect((await request(app).get('/api/subjects/mine').set(auth(token))).status).toBe(403);
+        expect((await request(app).patch(endpoint).set(auth(token)).send({ name: 'Unauthorized' })).status).toBe(403);
+      }
+      const mine = await request(app).get('/api/subjects/mine').set(auth(faculty));
+      expect(mine.status).toBe(200);
+      expect(mine.headers['cache-control']).toBe('no-store');
+      expect(mine.body.subjects.some((s: any) => s._id === id)).toBe(true);
+      expect(mine.body.subjects.every((s: any) => s.facultyId === facultyId)).toBe(true);
+      expect((await request(app).get('/api/subjects/mine').set(auth(other))).body.subjects.some((s: any) => s._id === id)).toBe(false);
+      expect((await request(app).patch(endpoint).send({ name: 'Unauthorized' })).status).toBe(401);
+      expect((await request(app).patch(endpoint).set(auth(other)).send({ name: 'Unauthorized' })).status).toBe(404);
+      for (const body of [{ facultyId: otherId }, { name: ' ' }, { description: {} }, { yearLevel: '5th Year' }, {}])
+        expect((await request(app).patch(endpoint).set(auth(faculty)).send(body)).status).toBe(400);
+      expect((await request(app).patch(endpoint).set(auth(faculty)).send({ code: ' biosearch ' })).status).toBe(409);
+      const updated = await request(app).patch(endpoint).set(auth(faculty)).send({ name: 'Updated subject', code: ' owned102 ', term: '3rd Semester', yearLevel: '2nd Year', description: '' });
+      expect(updated.status).toBe(200);
+      expect(updated.body.subject).toMatchObject({ _id: id, facultyId, name: 'Updated subject', code: 'OWNED102', term: '3rd Semester', yearLevel: '2nd Year', description: '' });
+      expect((await request(app).get('/api/subjects/mine').set(auth(faculty))).body.subjects.find((s: any) => s._id === id).name).toBe('Updated subject');
+    } finally { await Subject.deleteOne({ _id: id }); }
+  });
   it('isolates My Lessons, including connected materials and legacy ownership, from peers and guests', async () => {
     const own = await Module.create({ subjectId, createdBy: facultyId, title: 'Private own lesson', summary: 'Owner only', orderIndex: 15, audience: 'connected' });
     const peer = await Module.create({ subjectId, createdBy: otherId, title: 'Peer-authored lesson', summary: 'Peer content', orderIndex: 16, audience: 'connected' });

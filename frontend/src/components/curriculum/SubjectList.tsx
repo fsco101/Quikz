@@ -8,9 +8,10 @@ import { CreateSubjectModal } from "./CreateSubjectModal.js";
 
 interface SubjectListProps {
   onSelectSubject: (subject: Subject, moduleId?: string) => void;
+  mine?: boolean;
 }
 
-export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => {
+export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject, mine = false }) => {
   const { user } = useAuth();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [overview, setOverview] = useState<CourseOverview[] | null>(null);
@@ -18,6 +19,7 @@ export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => 
   const [error, setError] = useState("");
   const [overviewError, setOverviewError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSubject, setEditingSubject] = useState<Subject | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterYear, setFilterYear] = useState("All");
   const [courseStatus, setCourseStatus] = useState("all");
@@ -29,7 +31,7 @@ export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => 
     setError("");
     setOverviewError("");
     const [catalog, progress] = await Promise.allSettled([
-      api.getSubjects(signal),
+      mine ? api.request<{ subjects: Subject[] }>('/subjects/mine', { signal }) : api.getSubjects(signal),
       personalized ? api.getCourseOverview(signal) : Promise.resolve(null),
     ]);
     if (signal?.aborted) return;
@@ -45,7 +47,7 @@ export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => 
       setOverviewError("Course overview could not be loaded. You can still open your courses.");
     }
     setLoading(false);
-  }, [user?.id, user?.role]);
+  }, [user?.id, user?.role, mine]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -76,11 +78,11 @@ export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => 
       <header className="catalog-welcome">
         <div className="catalog-welcome-copy">
           <p className="eyebrow">{user ? "Welcome to your workspace" : "A world of understanding"}</p>
-          <h1>{student ? "Your next chapter starts here." : user?.role === "faculty" ? "Make every lesson count." : "Find your next chapter."}</h1>
-          <p>{student ? "Pick up where you left off. Every lesson brings you a little further."
+          <h1>{mine ? "My Lessons" : student ? "Your next chapter starts here." : user?.role === "faculty" ? "Make every lesson count." : "Find your next chapter."}</h1>
+          <p>{mine ? "Manage your subjects in one place. Update subject details, or open a subject to create and edit its modules and quizzes." : student ? "Pick up where you left off. Every lesson brings you a little further."
             : user?.role === "faculty" ? "Create thoughtful lessons, keep assessments on track, and help your students grow."
             : "Explore courses, discover new ideas, and build your understanding one lesson at a time."}</p>
-          {user?.role === "faculty" && <button onClick={() => setIsModalOpen(true)} className="ui-button ui-button-primary"><Plus size={17} aria-hidden="true" />Create New Subject</button>}
+          {user?.role === "faculty" && <button onClick={() => { setEditingSubject(undefined); setIsModalOpen(true); }} className="ui-button ui-button-primary"><Plus size={17} aria-hidden="true" />Create New Subject</button>}
         </div>
         <div className="learning-illustration" aria-hidden="true">
           <span className="illustration-orbit orbit-one" /><span className="illustration-orbit orbit-two" />
@@ -104,7 +106,7 @@ export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => 
       )}
 
       <section aria-label="Subject catalog" className="catalog-section">
-        <div className="section-heading"><div><p className="eyebrow">Explore & grow</p><h2>Academic Subject Catalog</h2></div>
+        <div className="section-heading"><div><p className="eyebrow">{mine ? 'Your teaching materials' : 'Explore & grow'}</p><h2>{mine ? 'My subjects' : 'Academic Subject Catalog'}</h2></div>
           {!loading && !error && <span className="count-label">{filteredSubjects.length} {filteredSubjects.length === 1 ? "course" : "courses"}</span>}
         </div>
         <div className="catalog-toolbar">
@@ -113,9 +115,9 @@ export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => 
             {["All", "1st Year", "2nd Year", "3rd Year", "4th Year"].map((yr) => <option key={yr} value={yr}>{yr === "All" ? "All year levels" : yr}</option>)}
           </select>
           {personalized && <select aria-label="Course status" value={courseStatus} onChange={(e) => setCourseStatus(e.target.value)} disabled={loading || !overview} className="ui-select">
-            <option value="all">All courses</option>
+            <option value="all">{mine ? 'All my subjects' : 'All courses'}</option>
             {student ? <><option value="in-progress">In progress</option><option value="not-started">Not started</option><option value="completed">Completed</option><option value="empty">No modules yet</option></>
-              : <><option value="mine">My courses</option><option value="needs-quizzes">Needs end quizzes</option><option value="ready">All end quizzes ready</option><option value="empty">My empty courses</option></>}
+              : <>{!mine && <option value="mine">My courses</option>}<option value="needs-quizzes">Needs end quizzes</option><option value="ready">All end quizzes ready</option><option value="empty">My empty courses</option></>}
           </select>}
         </div>
         {(error || overviewError) && <div role="alert" className="catalog-alert"><span>{error || overviewError}</span><button disabled={loading} className="ui-text-button" onClick={() => void fetchSubjects()}>Retry catalog <RefreshCw size={15} aria-hidden="true" /></button></div>}
@@ -133,6 +135,10 @@ export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => 
                   <div className="course-description"><p className="course-meta">{subject.yearLevel} <span>·</span> {subject.term}</p><h3>{subject.name}</h3><p className="course-summary">{subject.description || "Build your understanding through guided lessons and practical assessments."}</p></div>
                 </button>
                 <div className="course-instructor"><Avatar userId={subject.facultyId} name={subject.facultyName} size="h-7 w-7" /><span>{subject.facultyName}</span></div>
+                {mine && user?.role === 'faculty' && subject.facultyId === user.id && <div className="flex flex-wrap gap-2 px-5 py-3">
+                  <button className="ui-button ui-button-primary" onClick={() => onSelectSubject(subject)}>Manage modules</button>
+                  <button className="ui-button ui-button-secondary" onClick={() => { setEditingSubject(subject); setIsModalOpen(true); }}>Edit subject</button>
+                </div>}
                 {course ? <div className="course-progress">
                   <div className="course-progress-label"><span className={`status-pill ${course.status === "completed" || course.status === "ready" ? "status-success" : course.status === "needs-quizzes" ? "status-warning" : ""}`}>{status}</span>{student && course.totalModules > 0 && <strong>{percentage}%</strong>}</div>
                   {student ? <><progress aria-label={`${subject.code} completion`} max={100} value={percentage} /><p>{course.completedCount} of {course.totalModules} modules mastered</p><p className="course-next">{course.status === "completed" ? "Well done. Revisit any lesson, anytime." : course.status === "empty" ? "Your instructor is preparing this course." : `Up next: ${course.nextModule?.title}`}</p></>
@@ -143,7 +149,7 @@ export const SubjectList: React.FC<SubjectListProps> = ({ onSelectSubject }) => 
             })}
           </div>}
       </section>
-      <CreateSubjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onCreated={() => void fetchSubjects()} />
+      {isModalOpen && <CreateSubjectModal key={editingSubject?._id || 'new'} isOpen subject={editingSubject} onClose={() => setIsModalOpen(false)} onCreated={() => void fetchSubjects()} />}
     </div>
   );
 };

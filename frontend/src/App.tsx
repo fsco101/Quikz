@@ -143,8 +143,8 @@ const MainApp: React.FC = () => {
     <AppShell user={user} view={view}
       onNavigate={(next) => {
         setView(next);
-        if (next === "learning") {
-          setLessonOrigin('learning');
+        if (next === "learning" || next === "my-lessons") {
+          setLessonOrigin(next);
           setSelectedSubject(null);
           setInitialModuleId(undefined);
         }
@@ -169,10 +169,15 @@ const MainApp: React.FC = () => {
           <Gradebook key={user.id} />
         ) : view === "system" && user.role === "admin" ? (
           <SystemHealth />
-        ) : view === "directory" || (view === "my-lessons" && user.role === "faculty") ? (
+        ) : view === "my-lessons" && user.role === "faculty" && !selectedSubject ? (
+          <SubjectList key={`${user.id}:mine`} mine onSelectSubject={(subject, moduleId) => {
+            setLessonOrigin('my-lessons');
+            setSelectedSubject(subject);
+            setInitialModuleId(moduleId);
+          }} />
+        ) : view === "directory" ? (
           <LessonDirectory
             key={`${user.id}:${view}`}
-            mine={view === "my-lessons"}
             onOpenLesson={(subject, moduleId) => {
               setLessonOrigin(view);
               setSelectedSubject(subject);
@@ -182,7 +187,9 @@ const MainApp: React.FC = () => {
           />
         ) : selectedSubject ? (
           <ModuleReader
+            key={selectedSubject._id}
             subject={selectedSubject}
+            backLabel={lessonOrigin === 'my-lessons' ? 'Back to My Lessons' : undefined}
             initialModuleId={initialModuleId}
             onBack={() => { setSelectedSubject(null); setInitialModuleId(undefined); setView(lessonOrigin); }}
           />

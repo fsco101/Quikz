@@ -17,6 +17,8 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
   await page.getByLabel("Password", { exact: true }).fill("Faculty@123");
   await page.getByRole("button", { name: "Sign In to Quikz" }).click();
   const unique = `BIO${Date.now()}`;
+  await page.getByRole('button', { name: 'My Lessons', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'My Lessons', exact: true })).toBeVisible();
   await page.getByRole("button", { name: /Create New Subject/ }).click();
   await page
     .getByPlaceholder("e.g. Data Structures & Algorithms")
@@ -114,10 +116,26 @@ test("faculty publishes a validated quiz; student resumes, passes and unlocks th
     page.getByText("End quiz published.", { exact: false }),
   ).toBeVisible();
   await page.getByRole('button', { name: 'My Lessons', exact: true }).click();
-  await page.getByLabel('Search lessons', { exact: true }).fill(unique);
-  await expect(page.getByText('2 lessons found', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Manage lesson', exact: true }).first().click();
+  await page.getByLabel('Search subjects', { exact: true }).fill(unique);
+  await expect(page.getByRole('article', { name: `${unique} course`, exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Edit subject', exact: true }).click();
+  await expect(page.getByLabel('Subject name', { exact: true })).toHaveValue('Biology assessment course');
+  await page.getByLabel('Subject name', { exact: true }).fill('Updated biology subject');
+  await page.getByLabel('Subject description', { exact: true }).fill('Updated syllabus overview.');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: 'test-results/my-lessons-edit-mobile.png', fullPage: true });
+  await page.getByRole('button', { name: 'Save subject changes', exact: true }).click();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await expect(page.getByRole('heading', { name: 'Updated biology subject', exact: true })).toBeVisible();
+  await page.screenshot({ path: 'test-results/my-lessons-subjects.png', fullPage: true });
+  await page.getByRole('button', { name: 'Manage modules', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Edit module', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Edit module', exact: true }).click();
+  await page.getByLabel('Module summary', { exact: true }).fill('Updated summary from My Lessons.');
+  await page.getByRole('button', { name: 'Save module changes', exact: true }).click();
+  await expect(page.getByLabel('Module summary', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Back to My Lessons', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'My Lessons', exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Sign Out" }).click();
   await page.getByLabel("Username or Email", { exact: true }).fill("student@quikz.edu");
   await page.getByLabel("Password", { exact: true }).fill("Student@123");
