@@ -15,6 +15,7 @@ import { Profile } from "./components/users/Profile.js";
 import { People } from "./components/users/People.js";
 import { UserManagement } from "./components/users/UserManagement.js";
 import { Connections } from "./components/users/Connections.js";
+import { PaigeGuide } from "./components/mascot/PaigeGuide.js";
 const MainApp: React.FC = () => {
   const { user, logout, loading } = useAuth();
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
@@ -64,6 +65,11 @@ const MainApp: React.FC = () => {
       </div>
     );
   }
+
+  const paigeContext = !user
+    ? (["catalog", "lessons", "login", "signup"].includes(publicPage) ? publicPage : "home")
+    : selectedSubject && (view === "learning" || view === "my-lessons") ? "reading" : view;
+  const guide = <PaigeGuide context={paigeContext} role={user?.role} />;
 
   if (!user) {
     const signIn = () => {
@@ -123,23 +129,32 @@ const MainApp: React.FC = () => {
               </>
             )}
           </div>
+          {guide}
         </div>
       );
-    if (publicPage !== "login" && publicPage !== "signup") return <LandingPage
-      onLogin={() => navigatePublic("login")} onSignup={() => navigatePublic("signup")}
-      onBrowse={() => navigatePublic("catalog")} onBrowseLessons={() => navigatePublic("lessons")} />;
+    if (publicPage !== "login" && publicPage !== "signup") return <>
+      <LandingPage
+        onLogin={() => navigatePublic("login")} onSignup={() => navigatePublic("signup")}
+        onBrowse={() => navigatePublic("catalog")} onBrowseLessons={() => navigatePublic("lessons")} />
+      {guide}
+    </>;
     return (
-      <AuthPage
-        mode={publicPage === "signup" ? "register" : "login"}
-        onModeChange={(mode) => navigatePublic(mode === "register" ? "signup" : "login")}
-        onHome={() => navigatePublic("home")}
-        onBrowse={() => navigatePublic("catalog")}
-        onBrowseLessons={() => navigatePublic("lessons")}
-      />
+      <>
+        <AuthPage
+          mode={publicPage === "signup" ? "register" : "login"}
+          onModeChange={(mode) => navigatePublic(mode === "register" ? "signup" : "login")}
+          onHome={() => navigatePublic("home")}
+          onBrowse={() => navigatePublic("catalog")}
+          onBrowseLessons={() => navigatePublic("lessons")}
+        />
+        {guide}
+      </>
     );
   }
 
   return (
+    <>
+    {guide}
     <AppShell user={user} view={view}
       onNavigate={(next) => {
         setView(next);
@@ -203,6 +218,7 @@ const MainApp: React.FC = () => {
           />
         )}
     </AppShell>
+    </>
   );
 };
 
