@@ -44,7 +44,7 @@ describe("Sprint 2 - Curriculum & Sequential Module Progression Gating", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.subjects.length).toBeGreaterThan(0);
-    expect(res.body.subjects[0].code).toBe("CS101");
+    expect(res.body.subjects.map((s: { code: string }) => s.code)).toEqual(expect.arrayContaining(["CS101", "IT101", "IT201", "IT202", "IT203", "IT301"]));
   });
 
   it("prevents students from creating subjects", async () => {
