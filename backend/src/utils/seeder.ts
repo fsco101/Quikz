@@ -5,6 +5,7 @@ import { Module } from '../models/Module.js';
 import { Quiz } from '../models/Quiz.js';
 import { FacultyConnection } from '../models/FacultyConnection.js';
 import { generateQuestionsFromContent } from '../services/questionGenerator.js';
+import { seedItCurriculum } from './itCurriculumSeed.js';
 
 export const seedDatabase = async () => {
   try {
@@ -145,6 +146,8 @@ Under network partitions, a distributed system must choose between CP (consisten
         await module.save();
       }
     }
+
+    if (facultyUser) await seedItCurriculum(facultyUser);
   } catch (err: any) {
     console.error('Error seeding demo curriculum:', err.message);
   }
