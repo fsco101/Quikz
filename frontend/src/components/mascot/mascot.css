@@ -1,0 +1,79 @@
+/* Paige, the Quikz book mascot. Shared by every page. */
+:root { --paige-ease: cubic-bezier(.32,.72,0,1); }
+.book-mascot { display: block; width: 100%; height: auto; overflow: visible; }
+.mascot-shadow { fill: #2a1f5c; opacity: .12; transform-box: fill-box; transform-origin: center; animation: mascot-shadow 3.4s ease-in-out infinite; }
+.mascot-body { animation: mascot-bob 3.4s ease-in-out infinite; }
+.mascot-ribbon { fill: #ff8f7d; }
+.mascot-foot { fill: #34287a; }
+.mascot-back { fill: #4b3a9e; }
+.mascot-pages { fill: #fff8ea; stroke: #e9dcc0; stroke-width: 1.5; }
+.mascot-page-lines { stroke: #e6d6b4; stroke-width: 1.5; stroke-linecap: round; fill: none; }
+.mascot-cover { fill: #6651c9; }
+.mascot-spine { fill: #5440b0; }
+.mascot-band { stroke: #f5c96a; stroke-width: 3; stroke-linecap: round; fill: none; }
+.mascot-plate { fill: #f5c96a; }
+.mascot-plate-line { stroke: #c99a3c; stroke-width: 2.5; stroke-linecap: round; }
+.mascot-spark { fill: #f5c96a; transform-box: fill-box; transform-origin: center; animation: mascot-twinkle 2.6s ease-in-out infinite; }
+.mascot-brows path, .mascot-wink, .mascot-mouth path:not(.mascot-mouth-fill) { fill: none; stroke: #1e1838; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.mascot-brows path { stroke: #2c2356; stroke-width: 2.6; }
+.mascot-mouth-fill { fill: #1e1838 !important; stroke: #1e1838; stroke-width: 2; stroke-linejoin: round; }
+.mascot-mouth .mascot-tongue { stroke: #ff8fa0; stroke-width: 3.4; }
+.mascot-eye { transform-box: fill-box; transform-origin: center; animation: mascot-blink 5.2s infinite; }
+.mascot-eye-white { fill: #fff; }
+.mascot-pupil { fill: #1e1838; transform: translate(var(--look-x, 0), var(--look-y, 0)); transition: transform .25s ease-out; }
+.mascot-shine { fill: #fff; }
+.mascot-cheek { fill: #ff9fb0; opacity: .55; }
+.mascot-arm path { fill: none; stroke: #4b3a9e; stroke-width: 7; stroke-linecap: round; }
+.mascot-arm circle { fill: #4b3a9e; }
+.mascot-arm-right { transform-box: view-box; transform-origin: 120px 104px; }
+.mood-wave .mascot-arm-right { animation: mascot-wave 1.2s ease-in-out infinite; }
+.mood-cheer .mascot-body { animation: mascot-hop .9s var(--paige-ease) infinite; }
+.mood-oops .mascot-body { animation: mascot-tilt .7s ease-in-out 1, mascot-bob 3.4s ease-in-out .7s infinite; }
+@keyframes mascot-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes mascot-shadow { 0%, 100% { transform: scaleX(1); opacity: .12; } 50% { transform: scaleX(.86); opacity: .08; } }
+@keyframes mascot-blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(.1); } }
+@keyframes mascot-wave { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-16deg); } }
+@keyframes mascot-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } }
+@keyframes mascot-tilt { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-4deg); } 75% { transform: rotate(3deg); } }
+@keyframes mascot-twinkle { 0%, 100% { transform: scale(1) rotate(0); opacity: 1; } 50% { transform: scale(.6) rotate(45deg); opacity: .6; } }
+.mascot-bubble { position: relative; max-width: 210px; padding: 10px 14px; border: 1px solid #e8e4f0; border-radius: 14px 14px 14px 4px; background: #fff; box-shadow: 0 7px 22px #35254e0f; color: #4a3d5c; font-size: 11px; font-weight: 600; line-height: 1.55; animation: bubble-in .35s var(--paige-ease) both; }
+@keyframes bubble-in { from { opacity: 0; transform: translateY(6px) scale(.96); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .book-mascot *, .mascot-bubble { animation: none !important; transition: none !important; } }
+
+/* ---------- Paige guide: floating study buddy on every page ---------- */
+.paige-guide { position: fixed; right: 20px; bottom: 18px; z-index: 45; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; pointer-events: none; opacity: 0; visibility: hidden; transform: translateY(16px); transition: opacity .35s ease, transform .45s var(--paige-ease), visibility 0s linear .45s; }
+.paige-guide.is-in { opacity: 1; visibility: visible; transform: none; transition: opacity .35s ease, transform .45s var(--paige-ease), visibility 0s; }
+.paige-guide > * { pointer-events: auto; }
+.paige-toggle { position: relative; width: 64px; padding: 4px 2px 0; border-radius: 18px; background: transparent; filter: drop-shadow(0 6px 10px #2a1f5c26); }
+.paige-toggle:hover .book-mascot { transform: translateY(-3px) rotate(-3deg); }
+.paige-toggle .book-mascot { transition: transform .3s var(--paige-ease); }
+.paige-dot { position: absolute; top: 2px; right: 4px; width: 13px; height: 13px; border: 2px solid #fff; border-radius: 50%; background: #ff8f7d; animation: paige-pulse 1.6s ease-in-out infinite; }
+.paige-peek { pointer-events: none !important; max-width: 220px; margin-right: 8px; padding: 9px 13px; border: 1px solid #e8e4f0; border-radius: 14px 14px 4px 14px; background: #fff; box-shadow: 0 8px 24px #35254e1f; color: #4a3d5c; font-size: 12px; font-weight: 600; line-height: 1.5; animation: bubble-in .35s var(--paige-ease) both; }
+.paige-panel { width: min(320px, calc(100vw - 32px)); padding: 16px 16px 14px; border: 1px solid #e5e0ef; border-radius: 18px 18px 6px 18px; background: #fff; box-shadow: 0 2px 4px #2020370d, 0 22px 48px #2a1f5c2e; color: #2b2540; animation: bubble-in .35s var(--paige-ease) both; }
+.paige-panel-top { display: flex; align-items: center; gap: 8px; }
+.paige-kind { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 30px; background: #f1ecfb; color: #5a43a6; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.paige-kind.is-aha { background: #fdf1d6; color: #85601b; }
+.paige-count { margin-left: auto; color: #8f839b; font-size: 11px; font-weight: 600; }
+.paige-close { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; color: #7d7090; }
+.paige-close:hover { background: #f4f1f9; color: #3d3352; }
+.paige-text { margin: 12px 2px 14px; font-size: 13px; line-height: 1.7; color: #3d3352; animation: bubble-in .3s var(--paige-ease) both; }
+.paige-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.paige-next { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 8px 13px; border-radius: 10px; background: #6651c9; color: #fff; font-size: 12px; font-weight: 700; }
+.paige-next:hover { background: #523fae; }
+.paige-hide { min-height: 38px; padding: 0 4px; color: #7d7090; font-size: 11px; font-weight: 600; }
+.paige-hide:hover { color: #3d3352; text-decoration: underline; }
+.paige-tab { position: fixed; right: 0; bottom: 22px; z-index: 45; width: 40px; padding: 6px 4px 4px 7px; border: 1px solid #e5e0ef; border-right: 0; border-radius: 12px 0 0 12px; background: #fff; box-shadow: 0 6px 16px #2a1f5c1f; }
+.paige-tab:hover { width: 46px; }
+.paige-tab .book-mascot * { animation: none !important; }
+@keyframes paige-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+@media (max-width: 600px) {
+  .paige-guide { right: 12px; bottom: 12px; }
+  .paige-toggle { width: 52px; }
+  .paige-peek { max-width: 190px; font-size: 11px; }
+  .paige-panel { width: calc(100vw - 24px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .paige-guide, .paige-guide.is-in { transform: none; transition: none; }
+  .paige-dot, .paige-peek, .paige-panel, .paige-text { animation: none; }
+  .paige-toggle:hover .book-mascot { transform: none; }
+}
